@@ -14,13 +14,19 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-VENV_PATH=".venv"
+# Get the script directory and project root
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+VENV_PATH="$PROJECT_ROOT/.venv"
 OLLAMA_API_URL="http://localhost:11434"
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  Ollama Chatbot Test Suite${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
+
+# Change to project root
+cd "$PROJECT_ROOT"
 
 # Activate virtual environment
 source "$VENV_PATH/bin/activate"
@@ -98,7 +104,7 @@ fi
 # Test 5: File Structure
 #############################################
 echo -e "${YELLOW}Test 5: Project Structure${NC}"
-files=("requirements.txt" "launch_streamlit.sh" "launch_flask.sh" ".venv")
+files=("requirements.txt" "scripts/launch_streamlit.sh" "scripts/launch_flask.sh" ".venv")
 for file in "${files[@]}"; do
     if [ -e "$file" ]; then
         echo -e "${GREEN}  ✓ PASS: $file exists${NC}"
