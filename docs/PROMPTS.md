@@ -101,13 +101,13 @@ can you pull other models
 **AI Response:**
 Recommended pulling additional models to give more options:
 - **mistral** - Powerful 7B parameter model, great for general tasks
-- **phi** - Compact 2.7B parameter model, efficient and fast
+- **phi3** - Compact 3.8B parameter model, efficient and fast
 - **codellama** - Specialized for code generation and understanding
 
 Suggested commands:
 ```bash
 ollama pull mistral
-ollama pull phi
+ollama pull phi3
 ollama pull codellama
 ```
 
@@ -253,12 +253,12 @@ success
 
 ---
 
-### Interaction 2.7: Pull Mistral and Phi Models
+### Interaction 2.7: Pull Mistral and Phi3 Models
 
 **User Prompt:**
 ```
 ollama pull mistral
-ollama pull phi
+ollama pull phi3
 ```
 
 **AI Response:**
@@ -272,15 +272,15 @@ ollama pull mistral
 # success
 ```
 
-**Phi:**
+**Phi3:**
 ```bash
-ollama pull phi
+ollama pull phi3
 # pulling manifest
-# pulling 9cc0ff8c2d7b... 100% ▕████████████████▏ 1.6 GB
+# pulling 9cc0ff8c2d7b... 100% ▕████████████████▏ 2.2 GB
 # success
 ```
 
-**Outcome:** Successfully downloaded mistral (4.1GB) and phi (1.6GB)
+**Outcome:** Successfully downloaded mistral (4.1GB) and phi3 (2.2GB)
 
 ---
 
@@ -318,7 +318,7 @@ Listed all installed models:
 NAME                ID              SIZE      MODIFIED
 llama3.2:latest     a80c4f17acd5    2.0 GB    3 minutes ago
 mistral:latest      61e88e884507    4.1 GB    2 minutes ago
-phi:latest          9cc0ff8c2d7b    1.6 GB    1 minute ago
+phi3:latest         9cc0ff8c2d7b    2.2 GB    1 minute ago
 codellama:latest    8fdf8f752f6e    3.8 GB    30 seconds ago
 ```
 
@@ -405,7 +405,7 @@ Local AI Chatbot powered by Ollama - 100% Private, Cost-Free, and Fast
 - 🔒 100% Private - All data stays on your machine
 - 💰 Cost-Free - No API fees or subscriptions
 - ⚡ Fast - Direct local API calls
-- 🤖 Multiple Models - llama3.2, mistral, phi, codellama
+- 🤖 Multiple Models - llama3.2, mistral, phi3, codellama
 
 ## Tech Stack
 - Python 3.13
@@ -723,7 +723,7 @@ Acknowledged comprehensive requirements and created project plan:
         │  ┌───────────┐  │
         │  │ llama3.2  │  │
         │  │ mistral   │  │
-        │  │ phi       │  │
+        │  │ phi3      │  │
         │  │ codellama │  │
         │  └───────────┘  │
         └─────────────────┘
@@ -748,7 +748,7 @@ Acknowledged comprehensive requirements and created project plan:
 - Privacy badges
 
 **Settings:**
-- Model selection (llama3.2, mistral, phi, codellama)
+- Model selection (llama3.2, mistral, phi3, codellama)
 - Temperature (0.0-2.0)
 - Response length controls
 - Theme customization
@@ -2015,7 +2015,7 @@ with st.sidebar:
         'llama3.2': {'icon': '🦙', 'desc': 'General purpose, balanced', 'params': '3.2B'},
         'mistral': {'icon': '⚡', 'desc': 'Powerful & fast', 'params': '7B'},
         'codellama': {'icon': '💻', 'desc': 'Code specialist', 'params': '7B'},
-        'phi': {'icon': '🧠', 'desc': 'Compact & efficient', 'params': '2.7B'}
+        'phi3': {'icon': '🧠', 'desc': 'Compact & efficient', 'params': '3.8B'}
     }
 
     for key, info in model_info.items():
@@ -2881,7 +2881,7 @@ Created comprehensive PRD document:
 - Successfully pulled 4 models (11.5GB total):
   - llama3.2 (2.0GB) - General purpose
   - mistral (4.1GB) - Powerful & fast
-  - phi (1.6GB) - Compact & efficient
+  - phi3 (2.2GB) - Compact & efficient
   - codellama (3.8GB) - Code specialist
 
 **✅ GitHub Repository**
@@ -2946,7 +2946,7 @@ Created comprehensive PRD document:
           │  ┌───────────────┐  │
           │  │   llama3.2    │  │
           │  │   mistral     │  │
-          │  │   phi         │  │
+          │  │   phi3        │  │
           │  │   codellama   │  │
           │  └───────────────┘  │
           └─────────────────────┘

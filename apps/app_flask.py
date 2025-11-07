@@ -7,7 +7,7 @@ Features: 100% Private | Cost-Free | No Internet Required
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
-from flask import Flask, request, jsonify, Response, stream_with_context
+from flask import Flask, request, jsonify, Response, stream_with_context, render_template
 import ollama
 import json
 import logging
@@ -52,6 +52,11 @@ def handle_errors(f):
 
 @app.route('/')
 def index():
+    """Render the luxurious chatbot UI"""
+    return render_template('index.html')
+
+@app.route('/api')
+def api_info():
     """API information endpoint"""
     return jsonify({
         'name': 'Ollama Flask REST API',
@@ -64,7 +69,8 @@ def index():
             'Multiple Models - Choose your AI'
         ],
         'endpoints': {
-            'GET /': 'API information',
+            'GET /': 'Chatbot UI',
+            'GET /api': 'API information',
             'GET /health': 'Health check',
             'GET /models': 'List available models',
             'POST /chat': 'Chat with AI (streaming)',
@@ -80,7 +86,7 @@ def health():
     try:
         # Check Ollama connection
         models = ollama.list()
-        model_count = len(models.get('models', []))
+        model_count = len(models.models)
 
         return jsonify({
             'status': 'healthy',
@@ -102,15 +108,20 @@ def health():
 def get_models():
     """Get list of available Ollama models"""
     models_data = ollama.list()
-    models = models_data.get('models', [])
+    models = models_data.models
 
     model_list = []
     for model in models:
         model_list.append({
-            'name': model.get('name'),
-            'size': model.get('size'),
-            'modified_at': model.get('modified_at'),
-            'details': model.get('details', {})
+            'name': model.model,
+            'size': model.size,
+            'modified_at': model.modified_at.isoformat() if model.modified_at else None,
+            'details': {
+                'format': model.details.format if model.details else None,
+                'family': model.details.family if model.details else None,
+                'parameter_size': model.details.parameter_size if model.details else None,
+                'quantization_level': model.details.quantization_level if model.details else None
+            }
         })
 
     return jsonify({
@@ -257,10 +268,10 @@ def internal_error(error):
 
 if __name__ == '__main__':
     logger.info("="*50)
-    logger.info("🤖 Starting Ollama Flask API Server")
+    logger.info("🤖 Starting Ollama Flask Chatbot Server")
     logger.info("="*50)
-    logger.info("🌐 Server: http://localhost:5000")
-    logger.info("📚 API Docs: http://localhost:5000/")
+    logger.info("🌐 Chatbot UI: http://localhost:5000")
+    logger.info("📚 API Docs: http://localhost:5000/api")
     logger.info("🏥 Health: http://localhost:5000/health")
     logger.info("="*50)
 

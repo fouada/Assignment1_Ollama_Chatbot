@@ -1,0 +1,28 @@
+[theme]
+# Primary theme color (purple accent)
+primaryColor = "#667eea"
+
+# Background color (dark blue-black)
+backgroundColor = "#0f0f1e"
+
+# Secondary background color (slightly lighter dark)
+secondaryBackgroundColor = "#1a1a24"
+
+# Text color (light gray)
+textColor = "#e4e4e7"
+
+# Font family
+font = "sans serif"
+
+# Base theme (dark mode)
+base = "dark"
+
+[server]
+# Enable CORS
+enableCORS = false
+enableXsrfProtection = true
+
+[browser]
+# Gather usage stats
+gatherUsageStats = false
+

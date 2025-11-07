@@ -36,7 +36,7 @@
 - 💰 **Zero Cost** - No API fees, no subscriptions, completely free to use
 - ⚡ **Fast** - Direct local API calls with no network latency
 - 🎨 **Luxurious UI** - Modern, gradient-based interface similar to ChatGPT, Claude, and Gemini
-- 🤖 **Multi-Model** - Support for multiple LLM models (llama3.2, mistral, phi, codellama)
+- 🤖 **Multi-Model** - Support for multiple LLM models (llama3.2, mistral, phi3, codellama)
 - 🛡️ **No Internet Required** - Works completely offline after initial setup
 - 🔓 **No API Keys** - No external authentication or registration needed
 
@@ -55,7 +55,7 @@ This repository provides a **complete local AI chatbot solution** with two inter
 ### 1. **Streamlit Web Interface** (`apps/app_streamlit.py`)
 A luxurious, ChatGPT-like web application that provides:
 - Real-time streaming chat responses (word-by-word display)
-- Model selection dropdown (choose between llama3.2, mistral, phi, codellama)
+- Model selection dropdown (choose between llama3.2, mistral, phi3, codellama)
 - Temperature control slider (0.0-2.0) for adjusting AI creativity
 - Chat history management with session persistence
 - Connection status monitoring
@@ -77,13 +77,18 @@ A comprehensive REST API for programmatic access with 5 endpoints:
 **Use Case:** Integration with other applications, automation, scripting, testing
 
 ### 3. **Automation Scripts** (`scripts/`)
-Professional launcher scripts that handle:
-- Environment validation
-- Ollama connectivity checks
-- Virtual environment activation
-- Package verification
-- Automated application launching
-- Comprehensive testing suite
+Professional launcher and shutdown scripts that handle:
+- **Launch Scripts:**
+  - `launch_ollama.sh` - Start Ollama server with validation
+  - `launch_streamlit.sh` - Start Streamlit web UI
+  - `launch_flask.sh` - Start Flask REST API
+- **Shutdown Scripts:**
+  - `shutdown_all.sh` - Stop all services (Streamlit, Flask, Ollama)
+  - `shutdown_streamlit.sh` - Stop only Streamlit
+  - `shutdown_flask.sh` - Stop only Flask API
+- **Testing:**
+  - `run_tests.sh` - Comprehensive validation suite
+- Environment validation, connectivity checks, and package verification
 
 ---
 
@@ -141,7 +146,7 @@ The following models are recommended (choose at least one):
 |-------|------|------------|----------|--------------|
 | **llama3.2** | 2.0 GB | 3.2B | General purpose, balanced | `ollama pull llama3.2` |
 | **mistral** | 4.1 GB | 7B | Powerful, fast responses | `ollama pull mistral` |
-| **phi** | 1.6 GB | 2.7B | Compact, efficient | `ollama pull phi` |
+| **phi3** | 2.2 GB | 3.8B | Compact, efficient | `ollama pull phi3` |
 | **codellama** | 3.8 GB | 7B | Code generation | `ollama pull codellama` |
 
 **Total Recommended Size:** ~11.5 GB (all 4 models)
@@ -203,10 +208,14 @@ uv --version  # Should show uv 0.9.7 or higher
 ### Step 3: Start Ollama Server
 
 ```bash
-# Start Ollama as a service (runs in background)
+# Option A: Use the launcher script (recommended - includes validation)
+cd scripts
+./launch_ollama.sh
+
+# Option B: Start as a service (runs in background)
 brew services start ollama
 
-# OR start Ollama manually (runs in foreground)
+# Option C: Start manually (runs in foreground)
 ollama serve
 ```
 
@@ -227,8 +236,8 @@ ollama pull llama3.2
 # Optional: Powerful model (4.1 GB)
 ollama pull mistral
 
-# Optional: Compact model (1.6 GB)
-ollama pull phi
+# Optional: Compact model (2.2 GB)
+ollama pull phi3
 
 # Optional: Code specialist (3.8 GB)
 ollama pull codellama
@@ -338,6 +347,28 @@ Test 5: Ollama API Response
 
 ## 🎮 How to Operate
 
+**⚠️ Important: Start Ollama First!**
+
+Before launching Streamlit or Flask, ensure Ollama server is running:
+
+```bash
+cd scripts
+
+# Option A: Use the launcher script (recommended)
+./launch_ollama.sh
+
+# Option B: Start manually
+brew services start ollama
+```
+
+The `launch_ollama.sh` script will:
+- Check if Ollama is already running
+- Start Ollama as a service
+- Verify it's responding
+- List available models
+
+---
+
 ### Option 1: Streamlit Web Interface (Recommended for Interactive Use)
 
 #### Launching the Application
@@ -409,7 +440,7 @@ You can now view your Streamlit app in your browser.
    - Choose from available models:
      - 🦙 llama3.2 - General purpose
      - ⚡ mistral - Powerful & fast
-     - 🧠 phi - Compact & efficient
+     - 🧠 phi3 - Compact & efficient
      - 💻 codellama - Code specialist
 
 3. **Adjust Temperature** (Sidebar)
@@ -430,8 +461,9 @@ You can now view your Streamlit app in your browser.
    - All data stays in browser session
 
 6. **Stop the Application**
-   - Press `Ctrl+C` in terminal
-   - Application stops gracefully
+   - Press `Ctrl+C` in terminal to stop Streamlit
+   - Or use shutdown script: `./shutdown_streamlit.sh`
+   - To stop all services at once: `./shutdown_all.sh`
 
 ---
 
@@ -651,6 +683,83 @@ for chunk in response:
 
 ---
 
+### Option 4: Managing Services with Scripts
+
+#### Starting Services
+
+**Start Ollama Server:**
+```bash
+cd scripts
+./launch_ollama.sh
+```
+- Checks if Ollama is already running
+- Starts Ollama as a macOS service
+- Verifies server is responding
+- Lists available models
+
+**Start Streamlit or Flask:**
+```bash
+./launch_streamlit.sh  # Web UI on port 8501
+./launch_flask.sh      # REST API on port 5000
+```
+
+#### Stopping Services
+
+**Stop Everything at Once (Recommended):**
+```bash
+cd scripts
+./shutdown_all.sh
+```
+This single command stops:
+- Streamlit web UI
+- Flask REST API
+- Ollama server
+
+**Expected Output:**
+```
+========================================
+  Ollama Chatbot - Shutdown All
+========================================
+
+[1/3] Stopping Streamlit...
+✓ Streamlit stopped
+[2/3] Stopping Flask...
+✓ Flask stopped
+[3/3] Stopping Ollama server...
+✓ Ollama service stopped
+
+========================================
+  ✅ All services stopped successfully!
+========================================
+
+Summary:
+  • Streamlit: Stopped
+  • Flask API: Stopped
+  • Ollama Server: Stopped
+
+To restart services:
+  Streamlit: ./launch_streamlit.sh
+  Flask API: ./launch_flask.sh
+  Ollama:    brew services start ollama
+```
+
+**Stop Individual Services:**
+```bash
+# Stop only Streamlit
+./shutdown_streamlit.sh
+
+# Stop only Flask API
+./shutdown_flask.sh
+```
+
+**Why Use Shutdown Scripts?**
+- ✅ **Graceful Shutdown** - Properly closes all processes
+- ✅ **Cleans Up Resources** - Frees ports and memory
+- ✅ **Prevents Orphan Processes** - No background processes left running
+- ✅ **Single Command** - Stop everything with `./shutdown_all.sh`
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -661,8 +770,12 @@ Assignment1_Ollama_Chatbot/
 │   └── app_flask.py              # Flask REST API (272 lines)
 │
 ├── scripts/                       # Automation scripts
+│   ├── launch_ollama.sh          # Ollama server launcher
 │   ├── launch_streamlit.sh       # Streamlit launcher with validation
 │   ├── launch_flask.sh           # Flask launcher with validation
+│   ├── shutdown_all.sh           # Stop all services (Streamlit, Flask, Ollama)
+│   ├── shutdown_streamlit.sh     # Stop Streamlit only
+│   ├── shutdown_flask.sh         # Stop Flask only
 │   └── run_tests.sh              # Comprehensive test suite
 │
 ├── tests/                         # Unit tests (future)
@@ -687,8 +800,12 @@ Assignment1_Ollama_Chatbot/
 |------|-------|---------|------|
 | **app_streamlit.py** | 385 | Web UI application | User interface for interactive chat |
 | **app_flask.py** | 272 | REST API server | Programmatic access to AI capabilities |
+| **launch_ollama.sh** | 142 | Ollama launcher | Start and validate Ollama server |
 | **launch_streamlit.sh** | 121 | Streamlit launcher | Automated setup and validation for Streamlit |
 | **launch_flask.sh** | 120 | Flask launcher | Automated setup and validation for Flask |
+| **shutdown_all.sh** | 86 | Master shutdown | Stop all services at once |
+| **shutdown_streamlit.sh** | 58 | Streamlit shutdown | Stop Streamlit application |
+| **shutdown_flask.sh** | 58 | Flask shutdown | Stop Flask API server |
 | **run_tests.sh** | 117 | Test suite | Comprehensive validation of system |
 | **requirements.txt** | 13 | Dependency list | Python package specifications |
 | **PRD.md** | 903 | Product requirements | Complete product specification |
@@ -920,7 +1037,7 @@ brew services restart ollama
 tail -f ~/Library/Logs/Homebrew/ollama/stdout
 
 # Try smaller model if memory issue
-ollama pull phi  # Only 1.6GB
+ollama pull phi3  # Only 2.2GB
 ```
 
 ---
@@ -1412,11 +1529,11 @@ Ollama error: out of memory
 **User action:**
 ```bash
 # Use smaller model
-# In Streamlit: Select "phi" (1.6GB) instead of "mistral" (4.1GB)
+# In Streamlit: Select "phi3" (2.2GB) instead of "mistral" (4.1GB)
 
 # In API request:
 curl -X POST http://localhost:5000/chat \
-  -d '{"message": "Hello", "model": "phi"}'
+  -d '{"message": "Hello", "model": "phi3"}'
 
 # OR close other applications to free RAM
 ```
@@ -1690,7 +1807,7 @@ brew services restart ollama
 
 # Solution 4: Try different model
 curl -X POST http://localhost:5000/chat \
-  -d '{"message":"test","model":"phi"}'
+  -d '{"message":"test","model":"phi3"}'
 ```
 
 ---
@@ -1717,7 +1834,7 @@ top -l 1 | grep CPU
 **Solutions:**
 ```bash
 # Solution 1: Use smaller model
-# Switch from mistral (4.1GB) to phi (1.6GB)
+# Switch from mistral (4.1GB) to phi3 (2.2GB)
 
 # Solution 2: Close other applications
 # Free up RAM and CPU
@@ -2005,6 +2122,9 @@ cd scripts
 # 8. Open browser
 # Streamlit: http://localhost:8501
 # Flask API: http://localhost:5000
+
+# 9. Stop all services when done
+./shutdown_all.sh      # Stops Streamlit, Flask, and Ollama
 ```
 
 ---

@@ -499,7 +499,7 @@ Acceptance Criteria:
 ┌────────▼────────────────────────────────┐
 │      Model Layer                        │
 ├─────────────────────────────────────────┤
-│  llama3.2 │ mistral │ phi │ codellama  │
+│  llama3.2 │ mistral │ phi3 │ codellama  │
 └─────────────────────────────────────────┘
 ```
 
@@ -511,9 +511,13 @@ Assignment1_Ollama_Chatbot/
 │   ├── app_streamlit.py    # Streamlit chat interface
 │   └── app_flask.py        # Flask REST API
 ├── scripts/
-│   ├── launch_streamlit.sh # Streamlit launcher
-│   ├── launch_flask.sh     # Flask launcher
-│   └── run_tests.sh        # Test suite
+│   ├── launch_ollama.sh       # Ollama server launcher
+│   ├── launch_streamlit.sh    # Streamlit launcher
+│   ├── launch_flask.sh        # Flask launcher
+│   ├── shutdown_all.sh        # Stop all services
+│   ├── shutdown_streamlit.sh  # Stop Streamlit
+│   ├── shutdown_flask.sh      # Stop Flask
+│   └── run_tests.sh           # Test suite
 ├── tests/
 │   └── (future unit tests)
 ├── docs/
