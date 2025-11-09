@@ -567,8 +567,12 @@ class TestIntegration:
 class TestAdvancedScenarios:
     """Advanced production-ready test scenarios"""
 
-    def test_multiple_sequential_requests(self, flask_client):
+    @patch("app_flask.ollama.list")
+    def test_multiple_sequential_requests(
+        self, mock_list, flask_client, mock_ollama_list
+    ):
         """Test handling of multiple sequential requests"""
+        mock_list.return_value = mock_ollama_list
         # Test rapid sequential requests work correctly
         for i in range(5):
             response = flask_client.get("/health")
@@ -576,8 +580,10 @@ class TestAdvancedScenarios:
             data = response.get_json()
             assert "status" in data
 
-    def test_very_long_message(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_very_long_message(self, mock_chat, flask_client, mock_ollama_chat):
         """Test with very long input message"""
+        mock_chat.return_value = mock_ollama_chat
         long_message = "test " * 2000  # 10,000 characters
         response = flask_client.post(
             "/chat",
@@ -587,8 +593,12 @@ class TestAdvancedScenarios:
         # Should either succeed or reject gracefully
         assert response.status_code in [200, 400]
 
-    def test_special_characters_in_message(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_special_characters_in_message(
+        self, mock_chat, flask_client, mock_ollama_chat
+    ):
         """Test with special characters"""
+        mock_chat.return_value = mock_ollama_chat
         special_msg = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?"
         response = flask_client.post(
             "/chat",
@@ -597,8 +607,10 @@ class TestAdvancedScenarios:
         )
         assert response.status_code in [200, 400]
 
-    def test_unicode_characters(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_unicode_characters(self, mock_chat, flask_client, mock_ollama_chat):
         """Test with Unicode characters"""
+        mock_chat.return_value = mock_ollama_chat
         unicode_msg = "你好 مرحبا Здравствуйте 🤖"
         response = flask_client.post(
             "/chat",
@@ -607,14 +619,20 @@ class TestAdvancedScenarios:
         )
         assert response.status_code in [200, 400]
 
-    def test_rapid_successive_requests(self, flask_client):
+    @patch("app_flask.ollama.list")
+    def test_rapid_successive_requests(self, mock_list, flask_client, mock_ollama_list):
         """Test rapid successive requests (no rate limiting)"""
+        mock_list.return_value = mock_ollama_list
         for _ in range(10):
             response = flask_client.get("/health")
             assert response.status_code == 200
 
-    def test_response_time_health_check(self, flask_client):
+    @patch("app_flask.ollama.list")
+    def test_response_time_health_check(
+        self, mock_list, flask_client, mock_ollama_list
+    ):
         """Test health check response time is reasonable"""
+        mock_list.return_value = mock_ollama_list
         import time
 
         start = time.time()
@@ -703,8 +721,10 @@ class TestEdgeCases:
 class TestSecurityAndValidation:
     """Security and input validation tests"""
 
-    def test_sql_injection_attempt(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_sql_injection_attempt(self, mock_chat, flask_client, mock_ollama_chat):
         """Test resilience against SQL injection attempts"""
+        mock_chat.return_value = mock_ollama_chat
         sql_injection = "'; DROP TABLE users; --"
         response = flask_client.post(
             "/chat",
@@ -714,8 +734,10 @@ class TestSecurityAndValidation:
         # Should handle safely
         assert response.status_code in [200, 400]
 
-    def test_xss_attempt(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_xss_attempt(self, mock_chat, flask_client, mock_ollama_chat):
         """Test resilience against XSS attempts"""
+        mock_chat.return_value = mock_ollama_chat
         xss_payload = "<script>alert('xss')</script>"
         response = flask_client.post(
             "/chat",
@@ -725,8 +747,10 @@ class TestSecurityAndValidation:
         # Should handle safely
         assert response.status_code in [200, 400]
 
-    def test_command_injection_attempt(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_command_injection_attempt(self, mock_chat, flask_client, mock_ollama_chat):
         """Test resilience against command injection"""
+        mock_chat.return_value = mock_ollama_chat
         command_injection = "; ls -la"
         response = flask_client.post(
             "/chat",
@@ -736,8 +760,10 @@ class TestSecurityAndValidation:
         # Should handle safely
         assert response.status_code in [200, 400]
 
-    def test_path_traversal_in_model(self, flask_client):
+    @patch("app_flask.ollama.chat")
+    def test_path_traversal_in_model(self, mock_chat, flask_client, mock_ollama_chat):
         """Test resilience against path traversal"""
+        mock_chat.return_value = mock_ollama_chat
         path_traversal = "../../etc/passwd"
         response = flask_client.post(
             "/chat",
