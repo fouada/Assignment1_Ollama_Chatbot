@@ -1,7 +1,7 @@
 # Ollama Chatbot - Production Dockerfile
 # Multi-stage build for optimized production image
 
-FROM python:3.13-slim as builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /build
 
@@ -45,7 +45,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copy application files
 COPY apps/ ./apps/
 COPY scripts/ ./scripts/
-COPY README.md CHANGELOG.md CONTRIBUTING.md ./
+COPY README.md ./
 COPY docs/ ./docs/
 
 # Create logs directory
