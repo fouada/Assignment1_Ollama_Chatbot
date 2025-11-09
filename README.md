@@ -782,8 +782,7 @@ Assignment1_Ollama_Chatbot/
 │   └── (test files to be added)
 │
 ├── docs/                          # Documentation
-│   ├── PRD.md                    # Product Requirements Document
-│   └── PROMPTS.md                # Complete development log
+│   └── PRD.md                    # Product Requirements Document
 │
 ├── .venv/                         # Virtual environment (auto-generated)
 │   └── (Python packages)
@@ -808,8 +807,7 @@ Assignment1_Ollama_Chatbot/
 | **shutdown_flask.sh** | 58 | Flask shutdown | Stop Flask API server |
 | **run_tests.sh** | 117 | Test suite | Comprehensive validation of system |
 | **requirements.txt** | 13 | Dependency list | Python package specifications |
-| **PRD.md** | 903 | Product requirements | Complete product specification |
-| **PROMPTS.md** | 3050 | Development log | Full conversation history |
+| **PRD.md** | 1000+ | Product requirements | Complete product specification with key user prompts |
 | **README.md** | 1400+ | Main documentation | This comprehensive guide |
 
 ---
@@ -1960,13 +1958,12 @@ Comprehensive documentation is available in the `docs/` directory:
 
 | Document | Description | Link |
 |----------|-------------|------|
-| **PRD.md** | Complete product requirements, goals, user stories, specifications | [docs/PRD.md](docs/PRD.md) |
-| **PROMPTS.md** | Full development conversation log with all prompts and responses | [docs/PROMPTS.md](docs/PROMPTS.md) |
+| **PRD.md** | Complete product requirements, goals, user stories, specifications, and key user prompts (Section 14) | [docs/PRD.md](docs/PRD.md) |
 | **README.md** | This file - main project documentation | [README.md](README.md) |
 
 **Quick Links:**
 - 📚 **API Reference:** See [PRD.md - Section 5.2](docs/PRD.md#52-flask-rest-api) for API documentation
-- 📝 **Development Log:** See [PROMPTS.md](docs/PROMPTS.md) for complete conversation history
+- 📝 **Key User Requirements:** See [PRD.md - Section 14](docs/PRD.md#14-key-user-requirements-original-prompts) for critical prompts that shaped the project
 
 ---
 
@@ -2045,7 +2042,7 @@ This project is licensed under the **MIT License**.
 ```
 MIT License
 
-Copyright (c) 2025 Fouad Azem
+Copyright (c) 2025 Fouad Azem, Tal Goldengorn
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -2084,7 +2081,9 @@ SOFTWARE.
 
 - **GitHub Repository:** https://github.com/fouada/Assignment1_Ollama_Chatbot
 - **Issues:** https://github.com/fouada/Assignment1_Ollama_Chatbot/issues
-- **Author:** Fouad Azem
+- **Authors:**
+  - Fouad Azem (ID: 040830861)
+  - Tal Goldengorn (ID: 207042573)
 
 ---
 

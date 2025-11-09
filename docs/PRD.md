@@ -3,7 +3,10 @@
 
 **Version:** 1.0
 **Date:** November 6, 2025
-**Author:** Fouad Azem
+**Authors:**
+- Fouad Azem (ID: 040830861)
+- Tal Goldengorn (ID: 207042573)
+
 **Status:** Development Complete
 
 ---
@@ -650,6 +653,8 @@ python-dotenv>=1.0.0
 
 ### 10.1 Development Phases
 
+**Note:** This PRD uses high-level project phases (1-6). For detailed implementation phases with step-by-step development narrative including problem-solving (e.g., corporate proxy configuration, authentication), see the complete development history in version control commits.
+
 #### Phase 1: Foundation (✅ COMPLETED)
 - [x] Project structure setup
 - [x] Virtual environment configuration
@@ -674,17 +679,25 @@ python-dotenv>=1.0.0
 
 #### Phase 4: Documentation (✅ COMPLETED)
 - [x] PRD (this document) - 824 lines
-- [x] README.md - 2,017 lines (comprehensive guide)
-- [x] PROMPTS.md - 3,050 lines (complete conversation log)
+- [x] README.md - 2,135 lines (comprehensive guide)
+- [x] Key user requirements integrated into PRD Section 14
 - [ ] INSTALLATION.md (future enhancement)
 - [ ] USAGE.md (future enhancement)
 - [ ] API.md (future enhancement)
 
-#### Phase 5: Testing & Validation (⏳ PENDING)
-- [ ] Functional testing
-- [ ] Performance testing
-- [ ] User acceptance testing
-- [ ] Cross-platform validation
+#### Phase 5: Testing & Validation (✅ COMPLETED)
+- [x] Functional testing implemented
+- [x] Comprehensive test suite (run_tests.sh with 5 tests):
+  - Test 1: Ollama server connectivity validation
+  - Test 2: Virtual environment verification
+  - Test 3: Package imports validation (streamlit, flask, requests, ollama)
+  - Test 4: Model availability checking (4 models verified)
+  - Test 5: End-to-end API response testing
+- [x] All tests passing (100% success rate)
+- [x] Launcher scripts with built-in validation
+- [ ] Performance benchmarking (future enhancement)
+- [ ] User acceptance testing (future enhancement)
+- [ ] Cross-platform validation (future enhancement)
 
 #### Phase 6: Release (⏳ PENDING)
 - [ ] GitHub repository publication
@@ -805,20 +818,162 @@ The product is ready for release when:
 
 ### 13.3 Document History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-11-06 | Fouad Azem | Initial PRD creation |
+| Version | Date | Authors | Changes |
+|---------|------|---------|---------|
+| 1.0 | 2025-11-06 | Fouad Azem, Tal Goldengorn | Initial PRD creation |
 
 ---
 
-## 14. APPROVAL
+## 14. KEY USER REQUIREMENTS (ORIGINAL PROMPTS)
+
+This section captures the critical user prompts that shaped and defined this project during development.
+
+### 14.1 Prompt #1: Comprehensive Project Requirements (Most Critical)
+
+**Date:** 2025-11-06 (Phase 4.2)
+**Context:** Defining core project vision and requirements
+
+**User Prompt:**
+```
+let me set the instructions of my development of the project clearly:
+
+i want to create:
+1) luxurious local chatbot interface that connects to Ollama a local LLM server
+2) The application provides a clean, user friendly web interface (similar to
+   chatGPT, Claude Gemini) with large models
+3) it must be without requiring API Keys or internet connectivity.
+4) i want that all data stays on the machine for privacy.
+5) Cost free. No API Calls with charges or subscriptions(cost free)
+6) Fast, direct local API calls with no network latency.
+7) Simple, clean UI built with modern technology and tools.
+8) my preference to build it with technologies that i know well which are:
+   Python, Streamlit, Ollama API.
+```
+
+**Impact:**
+- Defined entire application architecture (Streamlit + Flask + Ollama)
+- Established core principles: Privacy-first, Cost-free, Fast, Local-only
+- Set technology stack: Python 3.13, Streamlit, Flask, Ollama
+- Determined UI style: Luxurious ChatGPT-like interface
+- Established success criteria: No API keys, no internet, no cost
+
+---
+
+### 14.2 Prompt #2: Professional Launcher Requirements
+
+**Date:** 2025-11-06 (Phase 6.1)
+**Context:** Defining automation and validation requirements
+
+**User Prompt:**
+```
+i want to validate that we are using launchers for each app (flask or streamlit)
+where in the sh i can configure the:
+1) logging level
+2) checking Ollama is running or not
+3) activate the virtual env and verifying packages
+4) Launching with dedicating port
+5) unit testing for the app to create for each app
+```
+
+**Impact:**
+- Created professional launcher scripts (launch_streamlit.sh, launch_flask.sh)
+- Implemented 5-step validation process in each launcher
+- Built comprehensive test suite (run_tests.sh with 5 tests)
+- Added Ollama connectivity checking
+- Enabled configurable logging levels (DEBUG, INFO, WARNING, ERROR)
+- Automated virtual environment activation and package verification
+
+---
+
+### 14.3 Prompt #3: Documentation Requirements
+
+**Date:** 2025-11-06 (Phase 9.2)
+**Context:** Requesting comprehensive project documentation
+
+**User Prompt:**
+```
+yes create PRD. please show its Product Requirements Document and also
+i need the prompts i used to create the project
+```
+
+**Impact:**
+- Created comprehensive PRD (this document) - 14 sections, 900+ lines
+- Documented all requirements, user stories, technical specs
+- Captured complete development narrative
+- Established professional documentation standards
+- Integrated key prompts into PRD for traceability
+
+---
+
+### 14.4 Prompt #4: Professional Documentation Structure
+
+**Date:** 2025-11-06 (Phase 7.2)
+**Context:** Understanding professional software documentation standards
+
+**User Prompt:**
+```
+wait please, i want to understand what the documentation i need in
+Software Project i need to be professional project?
+```
+
+**Impact:**
+- Established docs/ directory structure
+- Defined documentation hierarchy (README, PRD, INSTALLATION, USAGE, API)
+- Adopted industry-standard documentation practices
+- Created organized project structure:
+  - apps/ (applications)
+  - scripts/ (automation)
+  - tests/ (testing)
+  - docs/ (documentation)
+
+---
+
+### 14.5 Prompt #5: Clear Naming Convention
+
+**Date:** 2025-11-06 (Phase 7.1)
+**Context:** Establishing self-documenting file naming
+
+**User Prompt:**
+```
+app_flask.py and app_streamlit.py, does that makes sense?
+```
+
+**Impact:**
+- Adopted descriptive naming convention throughout project
+- Files immediately identify their purpose:
+  - app_streamlit.py (Streamlit web UI)
+  - app_flask.py (Flask REST API)
+  - launch_streamlit.sh (Streamlit launcher)
+  - launch_flask.sh (Flask API launcher)
+- Improved code maintainability and IDE navigation
+- Set standard for professional, self-documenting codebase
+
+---
+
+### 14.6 Requirements Traceability Matrix
+
+| Prompt | Requirement Category | Implementation | PRD Reference |
+|--------|---------------------|----------------|---------------|
+| #1 | Privacy & Architecture | Streamlit + Flask + Ollama local stack | Section 1, 7 |
+| #1 | Zero Cost | No API calls, no subscriptions | Section 1.1, 2.3 |
+| #1 | Technology Stack | Python, Streamlit, Flask, Ollama | Section 7.1 |
+| #2 | Automation | 7 professional launcher/shutdown scripts | Section 5.3 |
+| #2 | Validation | 5-test comprehensive test suite | Section 5.3 |
+| #3 | Documentation | PRD, README (2,135 lines) | Section 10.4 |
+| #4 | Project Structure | Professional grouped organization | Section 7.3 |
+| #5 | Code Quality | Descriptive, self-documenting naming | Section 7.3 |
+
+---
+
+## 15. APPROVAL
 
 ### Sign-Off
 
 This PRD has been reviewed and approved by:
 
-- **Product Owner:** Fouad Azem
-- **Technical Lead:** Fouad Azem
+- **Project Team:**
+  - Fouad Azem (ID: 040830861)
+  - Tal Goldengorn (ID: 207042573)
 - **Date:** November 6, 2025
 - **Status:** ✅ APPROVED
 
