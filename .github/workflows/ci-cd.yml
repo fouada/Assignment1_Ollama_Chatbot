@@ -33,18 +33,18 @@ jobs:
 
       - name: 📚 Install dependencies
         run: |
-          uv venv
-          uv pip install -r requirements.txt
-          uv pip install -r requirements-dev.txt
+          python -m uv venv
+          python -m uv pip install -r requirements.txt
+          python -m uv pip install -r requirements-dev.txt
 
       - name: 🔍 Lint with flake8
         run: |
-          uv run flake8 apps/ --count --select=E9,F63,F7,F82 --show-source --statistics
-          uv run flake8 apps/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          python -m uv run flake8 apps/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m uv run flake8 apps/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: 🧪 Run tests with pytest
         run: |
-          uv run pytest tests/ -v --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95
+          python -m uv run pytest tests/ -v --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95
 
       - name: 📊 Upload coverage to Codecov
         uses: codecov/codecov-action@v4
