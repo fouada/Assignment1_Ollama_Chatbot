@@ -6,13 +6,12 @@ Features: 100% Private | Cost-Free | No Internet Required
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
-import streamlit as st
-import ollama
-from datetime import datetime
-import json
 import logging
-import os
+from datetime import datetime
 from pathlib import Path
+
+import ollama
+import streamlit as st
 
 # ============================================
 # LOGGING CONFIGURATION
@@ -25,18 +24,18 @@ log_dir.mkdir(exist_ok=True)
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler(log_dir / 'streamlit_app.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler(log_dir / "streamlit_app.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
 # Log application startup
-logger.info("="*50)
+logger.info("=" * 50)
 logger.info("🤖 Ollama Chatbot - Streamlit Interface Starting")
-logger.info("="*50)
+logger.info("=" * 50)
 
 # ============================================
 # PAGE CONFIGURATION
@@ -46,18 +45,17 @@ st.set_page_config(
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={
-        'About': "🤖 Ollama Chatbot - 100% Private, Cost-Free AI Chat"
-    }
+    menu_items={"About": "🤖 Ollama Chatbot - 100% Private, Cost-Free AI Chat"},
 )
 
 # ============================================
 # CUSTOM CSS - LUXURIOUS PREMIUM DESIGN
 # ============================================
-st.markdown("""
+st.markdown(
+    """
 <style>
     /* Import Premium Font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap'); /* noqa */
 
     /* Force Dark Theme at Root Level */
     html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
@@ -519,11 +517,14 @@ st.markdown("""
         background: rgba(102, 126, 234, 0.7);
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # ============================================
 # HELPER FUNCTIONS
 # ============================================
+
 
 def check_ollama_connection():
     """Check if Ollama server is running"""
@@ -538,8 +539,11 @@ def check_ollama_connection():
         logger.error(f"✗ Ollama connection timeout: {str(e)}")
         return False
     except Exception as e:
-        logger.error(f"✗ Ollama connection failed - Unexpected error: {str(e)}", exc_info=True)
+        logger.error(
+            f"✗ Ollama connection failed - Unexpected error: {str(e)}", exc_info=True
+        )
         return False
+
 
 def get_available_models():
     """Fetch available Ollama models"""
@@ -562,25 +566,30 @@ def get_available_models():
         st.error(f"❌ {error_msg}")
         return []
 
+
 def generate_response(prompt, model, temperature=0.7):
     """Generate response using Ollama with streaming"""
-    logger.info(f"🤖 Generating response - Model: {model}, Temperature: {temperature}, Prompt length: {len(prompt)}")
+    logger.info(
+        f"🤖 Generating response - Model: {model}, Temperature: {temperature}, Prompt length: {len(prompt)}"
+    )
 
     try:
         response = ollama.chat(
             model=model,
-            messages=[{'role': 'user', 'content': prompt}],
+            messages=[{"role": "user", "content": prompt}],
             stream=True,
-            options={'temperature': temperature}
+            options={"temperature": temperature},
         )
 
         token_count = 0
         for chunk in response:
-            if 'message' in chunk and 'content' in chunk['message']:
+            if "message" in chunk and "content" in chunk["message"]:
                 token_count += 1
-                yield chunk['message']['content']
+                yield chunk["message"]["content"]
 
-        logger.info(f"✓ Response generation completed - Tokens generated: {token_count}")
+        logger.info(
+            f"✓ Response generation completed - Tokens generated: {token_count}"
+        )
 
     except ConnectionError as e:
         error_msg = f"Cannot connect to Ollama server: {str(e)}"
@@ -595,17 +604,18 @@ def generate_response(prompt, model, temperature=0.7):
         logger.error(f"✗ {error_msg}", exc_info=True)
         yield f"❌ Error: {error_msg}"
 
+
 # ============================================
 # SESSION STATE INITIALIZATION
 # ============================================
 
-if 'messages' not in st.session_state:
+if "messages" not in st.session_state:
     st.session_state.messages = []
 
-if 'selected_model' not in st.session_state:
+if "selected_model" not in st.session_state:
     st.session_state.selected_model = None
 
-if 'total_messages' not in st.session_state:
+if "total_messages" not in st.session_state:
     st.session_state.total_messages = 0
 
 # ============================================
@@ -622,11 +632,15 @@ with st.sidebar:  # pragma: no cover
     ollama_connected = check_ollama_connection()
 
     if ollama_connected:
-        st.markdown('<span class="status-online"></span> **Ollama Connected**', unsafe_allow_html=True)
+        st.markdown(
+            '<span class="status-online"></span> **Ollama Connected**',
+            unsafe_allow_html=True,
+        )
         st.success("✅ Ready to chat!")
     else:
         st.error("❌ Ollama Not Running")
-        st.markdown("""
+        st.markdown(
+            """
         **Start Ollama:**
         ```bash
         brew services start ollama
@@ -635,7 +649,8 @@ with st.sidebar:  # pragma: no cover
         ```bash
         ollama serve
         ```
-        """)
+        """
+        )
         st.stop()
 
     st.markdown("---")
@@ -653,16 +668,20 @@ with st.sidebar:  # pragma: no cover
         "Choose your AI model:",
         available_models,
         index=0,
-        help="Select which AI model to use for conversations"
+        help="Select which AI model to use for conversations",
     )
     st.session_state.selected_model = selected_model
 
     # Model Info
     model_info = {
-        'llama3.2': {'icon': '🦙', 'desc': 'General purpose, balanced', 'params': '3.2B'},
-        'mistral': {'icon': '⚡', 'desc': 'Powerful & fast', 'params': '7B'},
-        'codellama': {'icon': '💻', 'desc': 'Code specialist', 'params': '7B'},
-        'phi3': {'icon': '🧠', 'desc': 'Compact & efficient', 'params': '3.8B'}
+        "llama3.2": {
+            "icon": "🦙",
+            "desc": "General purpose, balanced",
+            "params": "3.2B",
+        },
+        "mistral": {"icon": "⚡", "desc": "Powerful & fast", "params": "7B"},
+        "codellama": {"icon": "💻", "desc": "Code specialist", "params": "7B"},
+        "phi3": {"icon": "🧠", "desc": "Compact & efficient", "params": "3.8B"},
     }
 
     for key, info in model_info.items():
@@ -680,10 +699,14 @@ with st.sidebar:  # pragma: no cover
         max_value=2.0,
         value=0.7,
         step=0.1,
-        help="Lower = More focused and deterministic\nHigher = More creative and random"
+        help="Lower = More focused and deterministic\nHigher = More creative and random",
     )
 
-    temp_label = "🎯 Focused" if temperature < 0.5 else "⚖️ Balanced" if temperature < 1.0 else "🎨 Creative"
+    temp_label = (
+        "🎯 Focused"
+        if temperature < 0.5
+        else "⚖️ Balanced" if temperature < 1.0 else "🎨 Creative"
+    )
     st.caption(temp_label)
 
     st.markdown("---")
@@ -691,7 +714,7 @@ with st.sidebar:  # pragma: no cover
     # Statistics
     st.markdown("### 📊 Session Stats")
     st.metric("Messages", st.session_state.total_messages)
-    st.metric("Model", selected_model.split(':')[0])
+    st.metric("Model", selected_model.split(":")[0])
 
     st.markdown("---")
 
@@ -705,13 +728,16 @@ with st.sidebar:  # pragma: no cover
 
     # Privacy Features
     st.markdown("### 🔒 Privacy Features")
-    st.markdown("""
+    st.markdown(
+        """
     <div class="feature-badge">✅ 100% Local</div>
     <div class="feature-badge">✅ No API Keys</div>
     <div class="feature-badge">✅ Cost-Free</div>
     <div class="feature-badge">✅ Private Data</div>
     <div class="feature-badge">✅ Fast Response</div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown("---")
     st.caption("Built with Python + Streamlit + Ollama")
@@ -728,7 +754,8 @@ st.markdown("---")
 
 # Welcome Message (First Time)
 if len(st.session_state.messages) == 0:
-    st.markdown("""
+    st.markdown(
+        """
     <div class="welcome-card">
         <h2>👋 Welcome to Your Private AI Chat!</h2>
         <p style="font-size: 1.1em; margin: 15px 0;">
@@ -747,7 +774,9 @@ if len(st.session_state.messages) == 0:
             💡 <strong>Tip:</strong> Select a model from the sidebar and start chatting below!
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 else:  # pragma: no cover
     # Display Chat History
     for message in st.session_state.messages:
@@ -755,7 +784,9 @@ else:  # pragma: no cover
             st.markdown(message["content"])
 
 # Chat Input
-if prompt := st.chat_input("💭 Type your message here...", key="chat_input"):  # pragma: no cover
+if prompt := st.chat_input(
+    "💭 Type your message here...", key="chat_input"
+):  # pragma: no cover
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.total_messages += 1
@@ -781,9 +812,14 @@ if prompt := st.chat_input("💭 Type your message here...", key="chat_input"): 
 
 # Footer
 st.markdown("---")
-st.markdown("""
+st.markdown(
+    """
 <div style="text-align: center; padding: 20px;">
-    <p style="color: #7dd3fc !important; margin: 10px 0;">🔒 Your conversations are completely private and stored only in your browser session</p>
+    <p style="color: #7dd3fc !important; margin: 10px 0;">
+        🔒 Your conversations are completely private and stored only in your browser session
+    </p>
     <p style="color: #7dd3fc !important; margin: 10px 0;">💡 Powered by Ollama | Built with ❤️ using Streamlit</p>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)

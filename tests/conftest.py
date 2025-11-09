@@ -1,10 +1,12 @@
 """
 Pytest configuration and shared fixtures
 """
-import pytest
+
 import sys
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
+
+import pytest
 
 # Add apps directory to path
 project_root = Path(__file__).parent.parent
@@ -32,11 +34,8 @@ def mock_ollama_list():
 def mock_ollama_chat():
     """Mock ollama.chat() response"""
     return {
-        'message': {
-            'role': 'assistant',
-            'content': 'This is a test response'
-        },
-        'done': True
+        "message": {"role": "assistant", "content": "This is a test response"},
+        "done": True,
     }
 
 
@@ -44,11 +43,11 @@ def mock_ollama_chat():
 def mock_ollama_chat_stream():
     """Mock streaming ollama.chat() response"""
     chunks = [
-        {'message': {'content': 'This '}, 'done': False},
-        {'message': {'content': 'is '}, 'done': False},
-        {'message': {'content': 'a '}, 'done': False},
-        {'message': {'content': 'test'}, 'done': False},
-        {'message': {'content': ''}, 'done': True}
+        {"message": {"content": "This "}, "done": False},
+        {"message": {"content": "is "}, "done": False},
+        {"message": {"content": "a "}, "done": False},
+        {"message": {"content": "test"}, "done": False},
+        {"message": {"content": ""}, "done": True},
     ]
     return iter(chunks)
 
@@ -56,31 +55,24 @@ def mock_ollama_chat_stream():
 @pytest.fixture
 def mock_ollama_generate():
     """Mock ollama.generate() response"""
-    return {
-        'response': 'Generated test response',
-        'done': True
-    }
+    return {"response": "Generated test response", "done": True}
 
 
 @pytest.fixture
 def sample_chat_request():
     """Sample chat request data"""
     return {
-        'message': 'Hello, AI!',
-        'model': 'llama3.2',
-        'temperature': 0.7,
-        'stream': False
+        "message": "Hello, AI!",
+        "model": "llama3.2",
+        "temperature": 0.7,
+        "stream": False,
     }
 
 
 @pytest.fixture
 def sample_generate_request():
     """Sample generate request data"""
-    return {
-        'prompt': 'def hello():',
-        'model': 'codellama',
-        'temperature': 0.3
-    }
+    return {"prompt": "def hello():", "model": "codellama", "temperature": 0.3}
 
 
 @pytest.fixture
@@ -88,7 +80,8 @@ def flask_client():
     """Flask test client"""
     # Import here to avoid circular imports
     from app_flask import app
-    app.config['TESTING'] = True
+
+    app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
 

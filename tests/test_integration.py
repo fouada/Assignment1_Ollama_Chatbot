@@ -10,10 +10,11 @@ Run with: pytest tests/test_integration.py -v
 Run with coverage: pytest tests/test_integration.py --cov=apps -v
 """
 
-import pytest
-import ollama
 import sys
 from pathlib import Path
+
+import ollama
+import pytest
 
 # Add apps directory to path for imports
 project_root = Path(__file__).parent.parent
@@ -23,6 +24,7 @@ sys.path.insert(0, str(project_root / "apps"))
 # ============================================
 # FIXTURES
 # ============================================
+
 
 @pytest.fixture(scope="module")
 def check_ollama_running():
@@ -34,7 +36,9 @@ def check_ollama_running():
         ollama.list()
         return True
     except Exception as e:
-        pytest.skip(f"Ollama not running. Start with: brew services start ollama\nError: {e}")
+        pytest.skip(
+            f"Ollama not running. Start with: brew services start ollama\nError: {e}"
+        )
 
 
 @pytest.fixture(scope="module")
@@ -60,6 +64,7 @@ def test_model(available_models):
 # INTEGRATION TESTS - REAL OLLAMA
 # ============================================
 
+
 @pytest.mark.integration
 class TestRealOllamaConnection:
     """Test real Ollama connection (no mocks)"""
@@ -75,7 +80,7 @@ class TestRealOllamaConnection:
         # This uses REAL ollama.list(), not a mock
         response = ollama.list()
         assert response is not None
-        assert hasattr(response, 'models')
+        assert hasattr(response, "models")
 
     def test_ollama_has_models_installed(self, available_models):
         """
@@ -100,7 +105,7 @@ class TestRealOllamaConnection:
         response = ollama.show(test_model)
         assert response is not None
         # Model info should have details
-        assert hasattr(response, 'modelfile') or 'modelfile' in str(response)
+        assert hasattr(response, "modelfile") or "modelfile" in str(response)
 
 
 @pytest.mark.integration
@@ -118,14 +123,12 @@ class TestRealOllamaGeneration:
         """
         # REAL API call - not mocked!
         response = ollama.generate(
-            model=test_model,
-            prompt="Say 'test' and nothing else",
-            stream=False
+            model=test_model, prompt="Say 'test' and nothing else", stream=False
         )
 
         assert response is not None
-        assert 'response' in response
-        assert len(response['response']) > 0
+        assert "response" in response
+        assert len(response["response"]) > 0
 
     def test_real_ollama_chat(self, test_model):
         """
@@ -139,16 +142,14 @@ class TestRealOllamaGeneration:
         # REAL API call - not mocked!
         response = ollama.chat(
             model=test_model,
-            messages=[
-                {'role': 'user', 'content': 'Reply with just the word OK'}
-            ],
-            stream=False
+            messages=[{"role": "user", "content": "Reply with just the word OK"}],
+            stream=False,
         )
 
         assert response is not None
-        assert 'message' in response
-        assert 'content' in response['message']
-        assert len(response['message']['content']) > 0
+        assert "message" in response
+        assert "content" in response["message"]
+        assert len(response["message"]["content"]) > 0
 
     def test_real_ollama_streaming(self, test_model):
         """
@@ -162,16 +163,14 @@ class TestRealOllamaGeneration:
         # REAL streaming API call
         chunks = []
         for chunk in ollama.generate(
-            model=test_model,
-            prompt="Count: 1 2 3",
-            stream=True
+            model=test_model, prompt="Count: 1 2 3", stream=True
         ):
             chunks.append(chunk)
             if len(chunks) >= 5:  # Get at least 5 chunks
                 break
 
         assert len(chunks) > 0
-        assert all('response' in chunk for chunk in chunks)
+        assert all("response" in chunk for chunk in chunks)
 
 
 @pytest.mark.integration
@@ -188,6 +187,7 @@ class TestRealFlaskIntegration:
         Coverage: Tests module initialization
         """
         import app_flask
+
         assert app_flask.app is not None
 
     def test_flask_ollama_integration(self, flask_client, test_model):
@@ -202,20 +202,20 @@ class TestRealFlaskIntegration:
         import json
 
         # REAL request to Flask which calls REAL Ollama
-        response = flask_client.post('/chat',
-                                    data=json.dumps({
-                                        'message': 'Say hello',
-                                        'model': test_model,
-                                        'stream': False
-                                    }),
-                                    content_type='application/json')
+        response = flask_client.post(
+            "/chat",
+            data=json.dumps(
+                {"message": "Say hello", "model": test_model, "stream": False}
+            ),
+            content_type="application/json",
+        )
 
         assert response.status_code == 200
         data = response.get_json()
-        assert 'response' in data
-        assert len(data['response']) > 0
+        assert "response" in data
+        assert len(data["response"]) > 0
         # Should be a real AI response, not mocked
-        assert isinstance(data['response'], str)
+        assert isinstance(data["response"], str)
 
     def test_flask_health_check_real(self, flask_client):
         """
@@ -226,13 +226,13 @@ class TestRealFlaskIntegration:
         Why: Monitors system health
         Coverage: Tests health check logic
         """
-        response = flask_client.get('/health')
+        response = flask_client.get("/health")
         data = response.get_json()
 
         # Should detect real Ollama connection
-        assert data['status'] == 'healthy'
-        assert data['ollama'] == 'connected'
-        assert data['models_available'] > 0
+        assert data["status"] == "healthy"
+        assert data["ollama"] == "connected"
+        assert data["models_available"] > 0
 
     def test_flask_models_endpoint_real(self, flask_client, available_models):
         """
@@ -243,15 +243,15 @@ class TestRealFlaskIntegration:
         Why: Users select from available models
         Coverage: Tests model listing logic
         """
-        response = flask_client.get('/models')
+        response = flask_client.get("/models")
         data = response.get_json()
 
         assert response.status_code == 200
-        assert data['count'] == len(available_models)
-        assert len(data['models']) == len(available_models)
+        assert data["count"] == len(available_models)
+        assert len(data["models"]) == len(available_models)
 
         # Verify real model names are returned
-        returned_names = [m['name'] for m in data['models']]
+        returned_names = [m["name"] for m in data["models"]]
         for model in available_models:
             assert model in returned_names
 
@@ -307,16 +307,14 @@ class TestRealStreamlitIntegration:
         # Uses REAL Ollama streaming, not mocked
         chunks = []
         for chunk in generate_response(
-            prompt="Say OK",  # Correct parameter name
-            model=test_model,
-            temperature=0.7
+            prompt="Say OK", model=test_model, temperature=0.7  # Correct parameter name
         ):
             chunks.append(chunk)
             if len(chunks) >= 3:  # Get a few chunks
                 break
 
         assert len(chunks) > 0
-        full_response = ''.join(chunks)
+        full_response = "".join(chunks)
         assert len(full_response) > 0
 
 
@@ -335,18 +333,18 @@ class TestRealErrorScenarios:
         """
         import json
 
-        response = flask_client.post('/chat',
-                                    data=json.dumps({
-                                        'message': 'Hello',
-                                        'model': 'nonexistent-model-xyz',
-                                        'stream': False
-                                    }),
-                                    content_type='application/json')
+        response = flask_client.post(
+            "/chat",
+            data=json.dumps(
+                {"message": "Hello", "model": "nonexistent-model-xyz", "stream": False}
+            ),
+            content_type="application/json",
+        )
 
         # Should return error, not crash
         assert response.status_code in [400, 500]
         data = response.get_json()
-        assert 'error' in data
+        assert "error" in data
 
     def test_very_long_prompt_real(self, flask_client, test_model):
         """
@@ -362,13 +360,13 @@ class TestRealErrorScenarios:
         # 1000 word prompt
         long_prompt = "test " * 1000
 
-        response = flask_client.post('/chat',
-                                    data=json.dumps({
-                                        'message': long_prompt,
-                                        'model': test_model,
-                                        'stream': False
-                                    }),
-                                    content_type='application/json')
+        response = flask_client.post(
+            "/chat",
+            data=json.dumps(
+                {"message": long_prompt, "model": test_model, "stream": False}
+            ),
+            content_type="application/json",
+        )
 
         # Should handle it (success or graceful error)
         assert response.status_code in [200, 400, 413, 500]
@@ -392,13 +390,11 @@ class TestRealPerformance:
 
         start = time.time()
 
-        response = flask_client.post('/chat',
-                                    data=json.dumps({
-                                        'message': 'Hi',
-                                        'model': test_model,
-                                        'stream': False
-                                    }),
-                                    content_type='application/json')
+        response = flask_client.post(
+            "/chat",
+            data=json.dumps({"message": "Hi", "model": test_model, "stream": False}),
+            content_type="application/json",
+        )
 
         elapsed = time.time() - start
 
@@ -419,21 +415,21 @@ class TestRealPerformance:
         import json
 
         # Send two requests
-        response1 = flask_client.post('/chat',
-                                     data=json.dumps({
-                                         'message': 'Request 1',
-                                         'model': test_model,
-                                         'stream': False
-                                     }),
-                                     content_type='application/json')
+        response1 = flask_client.post(
+            "/chat",
+            data=json.dumps(
+                {"message": "Request 1", "model": test_model, "stream": False}
+            ),
+            content_type="application/json",
+        )
 
-        response2 = flask_client.post('/chat',
-                                     data=json.dumps({
-                                         'message': 'Request 2',
-                                         'model': test_model,
-                                         'stream': False
-                                     }),
-                                     content_type='application/json')
+        response2 = flask_client.post(
+            "/chat",
+            data=json.dumps(
+                {"message": "Request 2", "model": test_model, "stream": False}
+            ),
+            content_type="application/json",
+        )
 
         # Both should succeed
         assert response1.status_code == 200
@@ -443,6 +439,7 @@ class TestRealPerformance:
 # ============================================
 # TEST SUMMARY
 # ============================================
+
 
 def test_integration_summary():
     """
