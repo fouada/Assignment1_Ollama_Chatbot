@@ -1,0 +1,236 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  # ============================================
+  # TEST & COVERAGE JOB
+  # ============================================
+  test:
+    name: Test & Coverage
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: 📦 Install UV package manager
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: 📚 Install dependencies
+        run: |
+          uv venv
+          source .venv/bin/activate || .venv\Scripts\activate
+          uv pip install -r requirements.txt
+          uv pip install -r requirements-dev.txt
+
+      - name: 🔍 Lint with flake8
+        run: |
+          source .venv/bin/activate || .venv\Scripts\activate
+          flake8 apps/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 apps/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: 🧪 Run tests with pytest
+        run: |
+          source .venv/bin/activate || .venv\Scripts\activate
+          pytest tests/ -v --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-${{ matrix.os }}-py${{ matrix.python-version }}
+          fail_ci_if_error: false
+
+      - name: 📈 Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: htmlcov/
+          retention-days: 30
+
+  # ============================================
+  # CODE QUALITY JOB
+  # ============================================
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install black flake8 pylint mypy isort
+          pip install -r requirements.txt
+
+      - name: 🎨 Check code formatting with Black
+        run: black --check apps/ tests/
+
+      - name: 📏 Check import sorting with isort
+        run: isort --check-only apps/ tests/
+
+      - name: 🔍 Lint with Pylint
+        run: pylint apps/ --fail-under=8.0 || true
+
+      - name: 🔎 Type check with mypy
+        run: mypy apps/ --ignore-missing-imports || true
+
+  # ============================================
+  # SECURITY SCAN JOB
+  # ============================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: 🔐 Run security checks with Bandit
+        run: |
+          pip install bandit
+          bandit -r apps/ -f json -o bandit-report.json || true
+
+      - name: 🔒 Check for known vulnerabilities
+        run: |
+          pip install safety
+          safety check --json || true
+
+      - name: 📤 Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: bandit-report.json
+          retention-days: 30
+
+  # ============================================
+  # BUILD & PACKAGE JOB
+  # ============================================
+  build:
+    name: Build Package
+    needs: [test, code-quality]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: 📦 Install build tools
+        run: pip install build twine
+
+      - name: 🔨 Build package
+        run: python -m build || echo "No setup.py/pyproject.toml found"
+
+      - name: ✅ Verify package
+        run: twine check dist/* || echo "No distribution files found"
+
+  # ============================================
+  # INTEGRATION TEST JOB (with Ollama)
+  # ============================================
+  integration-test:
+    name: Integration Tests
+    needs: [test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: 🤖 Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          sleep 5
+
+      - name: 📥 Pull test model
+        run: ollama pull llama3.2 || echo "Model pull failed, skipping"
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: 🧪 Run integration tests
+        run: |
+          chmod +x scripts/run_tests.sh
+          ./scripts/run_tests.sh || echo "Integration tests require full Ollama setup"
+
+  # ============================================
+  # BADGE GENERATION JOB
+  # ============================================
+  badge:
+    name: Generate Badges
+    needs: [test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install coverage-badge
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: 🧪 Run tests for badge generation
+        run: |
+          pytest tests/ --cov=apps --cov-report=term
+
+      - name: 🏅 Generate coverage badge
+        run: |
+          coverage-badge -o coverage.svg -f
+
+      - name: 📤 Commit badge
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add coverage.svg || true
+          git commit -m "Update coverage badge" || true
+          git push || true

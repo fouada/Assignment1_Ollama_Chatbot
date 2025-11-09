@@ -13,6 +13,8 @@ import json
 import logging
 from datetime import datetime
 from functools import wraps
+from pathlib import Path
+import os
 
 # ============================================
 # APP CONFIGURATION
@@ -21,10 +23,18 @@ from functools import wraps
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
-# Setup logging
+# Create logs directory if it doesn't exist
+log_dir = Path(__file__).parent.parent / "logs"
+log_dir.mkdir(exist_ok=True)
+
+# Setup logging with file and console handlers
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_dir / 'flask_app.log'),
+        logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -33,18 +43,92 @@ logger = logging.getLogger(__name__)
 # ============================================
 
 def handle_errors(f):
-    """Decorator for error handling"""
+    """Decorator for comprehensive error handling with specific exception types"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         try:
             return f(*args, **kwargs)
-        except Exception as e:
-            logger.error(f"Error in {f.__name__}: {str(e)}")
+        except ConnectionError as e:
+            logger.error(f"Connection error in {f.__name__}: {str(e)}", exc_info=True)
             return jsonify({
-                'error': str(e),
+                'error': 'Cannot connect to Ollama server. Is it running?',
+                'details': str(e),
+                'timestamp': datetime.now().isoformat(),
+                'suggestion': 'Start Ollama with: brew services start ollama'
+            }), 503
+        except ValueError as e:
+            logger.error(f"Validation error in {f.__name__}: {str(e)}")
+            return jsonify({
+                'error': 'Invalid request parameters',
+                'details': str(e),
+                'timestamp': datetime.now().isoformat()
+            }), 400
+        except TimeoutError as e:
+            logger.error(f"Timeout error in {f.__name__}: {str(e)}")
+            return jsonify({
+                'error': 'Request timeout',
+                'details': str(e),
+                'timestamp': datetime.now().isoformat()
+            }), 504
+        except Exception as e:
+            logger.error(f"Unexpected error in {f.__name__}: {str(e)}", exc_info=True)
+            return jsonify({
+                'error': 'Internal server error',
+                'details': str(e),
                 'timestamp': datetime.now().isoformat()
             }), 500
     return decorated_function
+
+
+def validate_chat_request(data):
+    """Validate chat request parameters"""
+    if not data:
+        raise ValueError("Request body is required")
+
+    if 'message' not in data:
+        raise ValueError("'message' field is required")
+
+    if not isinstance(data.get('message'), str):
+        raise ValueError("'message' must be a string")
+
+    if data.get('message', '').strip() == '':
+        raise ValueError("'message' cannot be empty")
+
+    if 'temperature' in data:
+        temp = data['temperature']
+        if not isinstance(temp, (int, float)):
+            raise ValueError("'temperature' must be a number")
+        if temp < 0 or temp > 2:
+            raise ValueError("'temperature' must be between 0 and 2")
+
+    if 'model' in data and not isinstance(data.get('model'), str):
+        raise ValueError("'model' must be a string")
+
+    return True
+
+
+def validate_generate_request(data):
+    """Validate generate request parameters"""
+    if not data:
+        raise ValueError("Request body is required")
+
+    if 'prompt' not in data:
+        raise ValueError("'prompt' field is required")
+
+    if not isinstance(data.get('prompt'), str):
+        raise ValueError("'prompt' must be a string")
+
+    if data.get('prompt', '').strip() == '':
+        raise ValueError("'prompt' cannot be empty")
+
+    if 'temperature' in data:
+        temp = data['temperature']
+        if not isinstance(temp, (int, float)):
+            raise ValueError("'temperature' must be a number")
+        if temp < 0 or temp > 2:
+            raise ValueError("'temperature' must be between 0 and 2")
+
+    return True
 
 # ============================================
 # ROUTES
@@ -146,15 +230,22 @@ def chat():
     """
     data = request.json
 
-    if not data or 'message' not in data:
-        return jsonify({'error': 'Missing "message" in request'}), 400
+    # Validate request
+    try:
+        validate_chat_request(data)
+    except ValueError as e:
+        logger.warning(f"Invalid chat request: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 400
 
     message = data.get('message')
     model = data.get('model', 'llama3.2')
     temperature = data.get('temperature', 0.7)
     stream = data.get('stream', True)
 
-    logger.info(f"Chat request - Model: {model}, Stream: {stream}")
+    logger.info(f"Chat request - Model: {model}, Stream: {stream}, Message length: {len(message)}")
 
     if stream:
         def generate():
@@ -215,14 +306,21 @@ def generate():
     """
     data = request.json
 
-    if not data or 'prompt' not in data:
-        return jsonify({'error': 'Missing "prompt" in request'}), 400
+    # Validate request
+    try:
+        validate_generate_request(data)
+    except ValueError as e:
+        logger.warning(f"Invalid generate request: {str(e)}")
+        return jsonify({
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 400
 
     prompt = data.get('prompt')
     model = data.get('model', 'llama3.2')
     temperature = data.get('temperature', 0.7)
 
-    logger.info(f"Generate request - Model: {model}")
+    logger.info(f"Generate request - Model: {model}, Prompt length: {len(prompt)}")
 
     response = ollama.generate(
         model=model,

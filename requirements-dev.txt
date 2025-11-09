@@ -1,0 +1,47 @@
+# Development and Testing Dependencies
+# Install with: uv pip install -r requirements-dev.txt
+#
+# These packages are only needed for development, testing, and code quality checks.
+# End users do not need to install these.
+
+# ============================================
+# TESTING FRAMEWORK
+# ============================================
+pytest>=8.0.0                 # Unit testing framework
+pytest-cov>=4.1.0             # Code coverage measurement
+pytest-mock>=3.12.1           # Mocking support for tests
+pytest-timeout>=2.2.0         # Timeout handling for tests
+pytest-xdist>=3.5.0           # Parallel test execution
+
+# ============================================
+# CODE QUALITY & LINTING
+# ============================================
+black>=24.0.0                 # Code formatter (PEP 8)
+flake8>=7.0.0                 # Style guide enforcement
+pylint>=3.0.0                 # Advanced code analysis
+mypy>=1.8.0                   # Static type checking
+isort>=5.13.0                 # Import statement sorting
+
+# ============================================
+# COVERAGE REPORTING
+# ============================================
+coverage[toml]>=7.4.0         # Coverage data collection
+coverage-badge>=1.1.0         # Generate coverage badges
+
+# ============================================
+# TESTING UTILITIES
+# ============================================
+responses>=0.24.0             # HTTP request mocking
+freezegun>=1.4.0              # Date/time mocking for tests
+
+# ============================================
+# DOCUMENTATION
+# ============================================
+sphinx>=7.2.0                 # Documentation generator
+sphinx-rtd-theme>=2.0.0       # ReadTheDocs theme
+
+# ============================================
+# CI/CD & AUTOMATION
+# ============================================
+tox>=4.12.0                   # Test environment automation
+pre-commit>=3.6.0             # Git hook management

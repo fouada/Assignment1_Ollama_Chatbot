@@ -10,6 +10,33 @@ import streamlit as st
 import ollama
 from datetime import datetime
 import json
+import logging
+import os
+from pathlib import Path
+
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+
+# Create logs directory if it doesn't exist
+log_dir = Path(__file__).parent.parent / "logs"
+log_dir.mkdir(exist_ok=True)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_dir / 'streamlit_app.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# Log application startup
+logger.info("="*50)
+logger.info("🤖 Ollama Chatbot - Streamlit Interface Starting")
+logger.info("="*50)
 
 # ============================================
 # PAGE CONFIGURATION
@@ -502,23 +529,43 @@ def check_ollama_connection():
     """Check if Ollama server is running"""
     try:
         ollama.list()
+        logger.info("✓ Ollama connection successful")
         return True
-    except Exception:
+    except ConnectionError as e:
+        logger.error(f"✗ Ollama connection failed - ConnectionError: {str(e)}")
+        return False
+    except TimeoutError as e:
+        logger.error(f"✗ Ollama connection timeout: {str(e)}")
+        return False
+    except Exception as e:
+        logger.error(f"✗ Ollama connection failed - Unexpected error: {str(e)}", exc_info=True)
         return False
 
 def get_available_models():
     """Fetch available Ollama models"""
     try:
+        logger.debug("Fetching available models from Ollama")
         models = ollama.list()
         # models is a ListResponse object with a .models attribute
         # Each model has a .model attribute (not .name)
-        return [model.model for model in models.models]
+        model_list = [model.model for model in models.models]
+        logger.info(f"✓ Successfully retrieved {len(model_list)} models: {model_list}")
+        return model_list
+    except ConnectionError as e:
+        error_msg = f"Cannot connect to Ollama server: {str(e)}"
+        logger.error(f"✗ {error_msg}")
+        st.error(f"❌ {error_msg}")
+        return []
     except Exception as e:
-        st.error(f"Error fetching models: {str(e)}")
+        error_msg = f"Error fetching models: {str(e)}"
+        logger.error(f"✗ {error_msg}", exc_info=True)
+        st.error(f"❌ {error_msg}")
         return []
 
 def generate_response(prompt, model, temperature=0.7):
     """Generate response using Ollama with streaming"""
+    logger.info(f"🤖 Generating response - Model: {model}, Temperature: {temperature}, Prompt length: {len(prompt)}")
+
     try:
         response = ollama.chat(
             model=model,
@@ -527,12 +574,26 @@ def generate_response(prompt, model, temperature=0.7):
             options={'temperature': temperature}
         )
 
+        token_count = 0
         for chunk in response:
             if 'message' in chunk and 'content' in chunk['message']:
+                token_count += 1
                 yield chunk['message']['content']
 
+        logger.info(f"✓ Response generation completed - Tokens generated: {token_count}")
+
+    except ConnectionError as e:
+        error_msg = f"Cannot connect to Ollama server: {str(e)}"
+        logger.error(f"✗ {error_msg}")
+        yield f"❌ Error: {error_msg}"
+    except ValueError as e:
+        error_msg = f"Invalid model or parameters: {str(e)}"
+        logger.error(f"✗ {error_msg}")
+        yield f"❌ Error: {error_msg}"
     except Exception as e:
-        yield f"Error: {str(e)}"
+        error_msg = f"Unexpected error during response generation: {str(e)}"
+        logger.error(f"✗ {error_msg}", exc_info=True)
+        yield f"❌ Error: {error_msg}"
 
 # ============================================
 # SESSION STATE INITIALIZATION

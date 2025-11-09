@@ -449,6 +449,256 @@ Acceptance Criteria:
 
 ---
 
+## 6A. QUALITY ASSURANCE & TESTING STANDARDS
+
+### 6A.1 Test Coverage Requirements
+
+#### Code Coverage Target
+- **Standard:** ≥95% line coverage
+- **Industry Benchmark:** 80% minimum, 95% excellence
+- **Measurement Tool:** pytest-cov
+- **Enforcement:** CI/CD pipeline blocks merge if coverage < 95%
+- **Components:**
+  - Flask API: ≥95% coverage
+  - Streamlit App: ≥95% coverage
+  - Helper Functions: 100% coverage
+
+#### Test Types Required
+1. **Unit Tests**
+   - All functions must have unit tests
+   - Mock external dependencies (Ollama API)
+   - Test both success and failure paths
+   - Minimum 100 tests per major component
+
+2. **Integration Tests**
+   - End-to-end workflow validation
+   - Real Ollama server connection tests
+   - Multi-component interaction tests
+
+3. **Edge Case Tests**
+   - Empty inputs
+   - Invalid types
+   - Boundary values (temperature 0, 2)
+   - Very long inputs (10,000+ characters)
+   - Special characters and Unicode
+   - Network timeouts
+   - Connection failures
+
+### 6A.2 Testing Framework Standards
+
+#### Required Tools
+- **pytest** ≥8.0 - Testing framework
+- **pytest-cov** ≥4.1 - Coverage measurement
+- **pytest-mock** ≥3.12 - Mocking support
+- **pytest-xdist** ≥3.5 - Parallel execution
+
+#### Test Organization
+```
+tests/
+├── conftest.py           # Shared fixtures
+├── test_flask_app.py     # Flask API tests
+└── test_streamlit_app.py # Streamlit tests
+```
+
+#### Test Naming Convention
+- File: `test_<module_name>.py`
+- Class: `Test<FeatureName>`
+- Function: `test_<functionality>_<scenario>()`
+- Example: `test_chat_endpoint_returns_error_when_message_empty()`
+
+### 6A.3 Code Quality Standards
+
+#### Linting & Formatting
+- **Black** - Code formatter (PEP 8 compliant)
+- **Flake8** - Style guide enforcement
+- **Pylint** - Static analysis (minimum score: 8.0/10)
+- **isort** - Import statement organization
+- **MyPy** - Static type checking
+
+#### Code Metrics
+- **Cyclomatic Complexity:** ≤10 per function
+- **Function Length:** ≤50 lines recommended
+- **File Length:** ≤500 lines recommended
+- **Nesting Depth:** ≤4 levels
+
+#### Documentation Requirements
+- **Docstrings:** Required for all public functions
+- **Type Hints:** Required for function parameters and returns
+- **Inline Comments:** Required for complex logic
+- **API Documentation:** OpenAPI/Swagger specification
+
+### 6A.4 Error Handling Standards
+
+#### Exception Handling Requirements
+- **Specific Exceptions:** Use specific exception types (ConnectionError, ValueError, TimeoutError)
+- **No Bare Except:** Avoid `except:` without exception type
+- **Logging:** All exceptions must be logged with stack traces
+- **User Messages:** Clear, actionable error messages
+- **HTTP Status Codes:** Proper codes (400, 404, 500, 503)
+
+#### Input Validation Standards
+- **Type Validation:** Runtime type checking for all inputs
+- **Range Validation:** Numerical bounds (e.g., temperature: 0-2)
+- **Null Handling:** Explicit checks for None/empty values
+- **Sanitization:** Prevent injection attacks
+
+#### Error Response Format (API)
+```json
+{
+  "error": "User-friendly message",
+  "details": "Technical details",
+  "timestamp": "ISO 8601 format",
+  "suggestion": "How to fix (optional)"
+}
+```
+
+### 6A.5 Logging Standards
+
+#### Log Level Usage
+- **DEBUG:** Detailed diagnostic (development only)
+- **INFO:** Normal operations, user actions (default)
+- **WARNING:** Unexpected but handled situations
+- **ERROR:** Errors that allow continued operation
+- **CRITICAL:** Severe errors requiring immediate attention
+
+#### Logging Requirements
+- **Format:** `%(asctime)s - %(name)s - %(levelname)s - %(message)s`
+- **Location:** Separate log files per application (`logs/`)
+- **Output:** Both file and console during development
+- **Content:**
+  - All user-initiated operations
+  - All exceptions with stack traces
+  - Performance timing for critical operations
+  - Entry/exit of major functions
+- **Restrictions:**
+  - No PII (Personally Identifiable Information)
+  - No secrets or API keys
+  - No full user messages (log length only)
+
+#### Log File Management
+- **Rotation:** Size-based (100MB per file)
+- **Retention:** 30 days minimum
+- **Location:** `logs/` directory (git-ignored)
+
+### 6A.6 Security Standards
+
+#### Static Analysis Requirements
+- **Bandit:** Security linting for Python code
+- **Safety:** Dependency vulnerability scanning
+- **CodeQL:** GitHub security scanning (weekly)
+- **OWASP:** Awareness of Top 10 vulnerabilities
+
+#### Secure Coding Practices
+- **Input Sanitization:** All user inputs must be sanitized
+- **No Hardcoded Secrets:** Use environment variables
+- **Dependency Auditing:** Regular updates and patches
+- **Least Privilege:** Minimal permissions required
+
+#### Security Testing
+- **Frequency:** Every commit via CI/CD
+- **Blocking:** Critical/High vulnerabilities block deployment
+- **Reporting:** Security scan results in CI/CD artifacts
+
+### 6A.7 CI/CD Pipeline Requirements
+
+#### Pipeline Trigger Events
+- Push to `main` or `develop` branches
+- Pull requests to `main` or `develop`
+- Manual workflow dispatch
+
+#### Required Pipeline Stages
+
+**Stage 1: Testing**
+- Run on: Ubuntu + macOS
+- Python versions: 3.10, 3.11, 3.12, 3.13
+- Execute: 750+ unit tests
+- Coverage: Must achieve ≥95%
+- Duration: <5 minutes
+
+**Stage 2: Code Quality**
+- Black formatting check
+- Flake8 linting
+- Pylint analysis (≥8.0 score)
+- isort import checking
+- MyPy type checking
+
+**Stage 3: Security**
+- Bandit security scan
+- Safety dependency audit
+- CodeQL analysis
+
+**Stage 4: Build**
+- Package building validation
+- Distribution checks
+
+**Stage 5: Integration**
+- Integration tests with Ollama
+- End-to-end workflow validation
+
+#### Failure Policies
+- **Test Failure:** ❌ Block merge
+- **Coverage < 95%:** ❌ Block merge
+- **Security Critical/High:** ❌ Block merge
+- **Linting Errors:** ⚠️ Warning (non-blocking)
+- **Type Errors:** ⚠️ Warning (non-blocking)
+
+### 6A.8 Performance Benchmarks
+
+#### Response Time Requirements
+- **First Token:** <2 seconds (99th percentile)
+- **Token Generation:** 20-50 tokens/second
+- **API Overhead:** <100ms
+- **Health Check:** <50ms
+
+#### Resource Limits
+- **Memory:** <512MB base footprint
+- **CPU:** <50% during idle
+- **Startup Time:** <3 seconds
+
+#### Performance Testing
+- **Tool:** pytest-benchmark
+- **Frequency:** Every release
+- **Regression Threshold:** <10% degradation allowed
+
+### 6A.9 Reliability Targets
+
+#### Availability
+- **Target:** 99.9% uptime (when Ollama running)
+- **MTBF:** >1000 hours between failures
+- **MTTR:** <5 minutes recovery time
+
+#### Error Rate Targets
+- **User Errors:** <1% of total requests
+- **System Errors:** <0.1% of total requests
+- **Crash Rate:** <0.01% of sessions
+
+#### Monitoring Requirements
+- Health endpoint monitoring
+- Error rate tracking
+- Performance metrics logging
+
+### 6A.10 Maintainability Requirements
+
+#### Code Maintainability
+- **Maintainability Index:** ≥65 (good)
+- **Technical Debt Ratio:** <5%
+- **Documentation Coverage:** 100% public APIs
+
+#### Dependency Management
+- **Update Frequency:** Weekly check for updates
+- **Security Patches:** Apply within 48 hours
+- **Version Pinning:** Major versions pinned in requirements.txt
+- **Deprecation Policy:** 6-month notice for breaking changes
+
+#### Version Control Standards
+- **Branching:** GitFlow (main, develop, feature)
+- **Commit Format:** Conventional commits
+- **Pull Requests:** Required for all changes
+- **Code Review:** Minimum 1 approval required
+- **CI Status:** All checks must pass before merge
+
+---
+
 ## 7. TECHNICAL SPECIFICATIONS
 
 ### 7.1 Technology Stack
@@ -522,17 +772,28 @@ Assignment1_Ollama_Chatbot/
 │   ├── shutdown_flask.sh      # Stop Flask
 │   └── run_tests.sh           # Test suite
 ├── tests/
-│   └── (future unit tests)
+│   ├── __init__.py
+│   ├── conftest.py           # Shared fixtures
+│   ├── test_flask_app.py     # Flask API tests
+│   └── test_streamlit_app.py # Streamlit tests
 ├── docs/
 │   ├── PRD.md             # This document
 │   ├── PROMPTS.md         # Development prompts log
 │   ├── INSTALLATION.md    # Setup guide
 │   ├── USAGE.md           # User guide
 │   └── API.md             # API documentation
-├── .venv/                 # Virtual environment
+├── logs/                  # Application logs (git-ignored)
+│   ├── flask_app.log
+│   └── streamlit_app.log
+├── .github/workflows/     # CI/CD pipeline
+│   ├── ci-cd.yml         # Main pipeline
+│   └── codeql.yml        # Security scanning
+├── .venv/                 # Virtual environment (git-ignored)
 ├── .gitignore            # Git exclusions
-├── requirements.txt      # Python dependencies
-└── README.md            # Main documentation
+├── requirements.txt      # Production dependencies
+├── requirements-dev.txt  # Development dependencies
+├── pytest.ini            # Pytest configuration
+└── README.md            # Operations manual
 ```
 
 ### 7.4 Data Flow
