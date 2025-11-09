@@ -15,8 +15,14 @@ from functools import wraps
 from pathlib import Path
 
 import ollama
-from flask import (Flask, Response, jsonify, render_template, request,
-                   stream_with_context)
+from flask import (
+    Flask,
+    Response,
+    jsonify,
+    render_template,
+    request,
+    stream_with_context,
+)
 
 # ============================================
 # APP CONFIGURATION
