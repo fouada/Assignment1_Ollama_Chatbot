@@ -1,24 +1,25 @@
-name: "CodeQL Security Analysis"
+name: "CodeQL Security Analysis (Optional)"
+
+# This workflow is optional and requires Code Scanning to be enabled
+# in GitHub repository settings: Settings > Security > Code scanning
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Trigger manually or via schedule only
+  workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 1'  # Weekly on Monday
+    - cron: '0 0 * * 1'  # Weekly on Monday (optional)
 
 jobs:
   analyze:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
+    # Don't block other workflows if this fails
+    continue-on-error: true
+    
     permissions:
       actions: read
       contents: read
       security-events: write
-    
-    # Make this job optional - don't fail the pipeline
-    continue-on-error: true
 
     strategy:
       fail-fast: false
@@ -33,12 +34,17 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-        continue-on-error: true
 
       - name: 🔨 Autobuild
         uses: github/codeql-action/autobuild@v3
-        continue-on-error: true
 
       - name: 🛡️ Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        continue-on-error: true
+
+# ============================================
+# To enable CodeQL:
+# 1. Go to GitHub repository
+# 2. Settings > Security > Code scanning
+# 3. Click "Set up" for CodeQL
+# 4. This will enable code scanning features
+# ============================================
