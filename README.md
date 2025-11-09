@@ -3662,3 +3662,4 @@ cd scripts
 **🎉 Enjoy your private, local AI chatbot!**
 
 **Remember:** All your data stays on your machine. No API keys, no subscriptions, no internet required. Just pure, private AI power at your fingertips.
+# Test CI/CD
