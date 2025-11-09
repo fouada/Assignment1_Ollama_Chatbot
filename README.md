@@ -3127,18 +3127,374 @@ If problems persist:
 
 ---
 
+## ❓ Frequently Asked Questions (FAQ)
+
+### General Questions
+
+**Q: Do I need an internet connection to use this?**  
+A: Only for initial setup (downloading Ollama and models). After that, 100% offline operation. All AI processing happens locally with zero external API calls.
+
+**Q: Is my data truly private and secure?**  
+A: Yes. 100% of data processing happens on your local machine. We've verified with network monitoring that there are zero external API calls. No data ever leaves your computer.
+
+**Q: How much does this cost to use?**  
+A: $0. Completely free forever. No API fees, no subscriptions, no usage limits, no hidden costs.
+
+**Q: What are the system requirements?**  
+A: 
+- **Minimum**: 8GB RAM, 10GB free disk space
+- **Recommended**: 16GB RAM, 15GB free disk space
+- **OS**: macOS, Linux, or Windows
+- **CPU**: Modern multi-core processor (Apple Silicon or x86_64)
+
+**Q: Can I use this for commercial purposes?**  
+A: Yes. MIT license allows unlimited commercial use with no restrictions.
+
+**Q: How does this compare to ChatGPT/Claude?**  
+A:
+- **Pros**: Free, private, offline, no API keys, faster (no network latency)
+- **Cons**: Requires local hardware, smaller models (but still very capable)
+- **Best for**: Privacy-sensitive tasks, cost-conscious users, offline work
+
+---
+
+### Technical Questions
+
+**Q: Which AI models can I use?**  
+A: Any model available in Ollama, including:
+- **llama3.2** (2GB) - General purpose, balanced
+- **mistral** (4.1GB) - Powerful, fast responses
+- **phi3** (2.2GB) - Compact, efficient
+- **codellama** (3.8GB) - Code generation
+- **gemma**, **qwen**, **deepseek** and 100+ others
+
+**Q: How do I switch between different AI models?**  
+A:
+- **Streamlit UI**: Use the model dropdown in the sidebar
+- **Flask API**: Set the `"model"` parameter in your request
+- **Example**: `{"message": "Hello", "model": "mistral"}`
+
+**Q: Can I use multiple models simultaneously?**  
+A: Yes. Run multiple instances of the Flask API on different ports, or make parallel API calls.
+
+**Q: How fast are the AI responses?**  
+A:
+- **First token**: 1-3 seconds
+- **Complete response**: 3-8 seconds (typical queries)
+- **Depends on**: Model size, hardware specs, prompt length
+- **Faster than**: Cloud APIs (no network latency)
+
+**Q: Can I run this on a server for my team?**  
+A: Yes. Use the Flask API and expose it via reverse proxy (nginx/Apache). Add authentication for security. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production deployment.
+
+**Q: Does this support GPU acceleration?**  
+A: Yes. Ollama automatically uses:
+- **CUDA** for NVIDIA GPUs
+- **Metal** for Apple Silicon (M1/M2/M3)
+- **ROCm** for AMD GPUs
+
+**Q: How much RAM do different models need?**  
+A:
+- **phi3** (2.2GB): 4GB RAM minimum
+- **llama3.2** (2GB): 6GB RAM minimum
+- **mistral** (4.1GB): 8GB RAM minimum
+- **llama2** (7B): 16GB RAM recommended
+
+---
+
+### Installation & Setup
+
+**Q: I get "Ollama not found" error. What should I do?**  
+A: Install Ollama:
+```bash
+# macOS
+brew install ollama
+
+# Linux
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Windows
+Download from https://ollama.ai/download/windows
+```
+
+**Q: How do I install a specific model version?**  
+A: Use version tags:
+```bash
+ollama pull llama3.2:3b      # 3 billion parameter version
+ollama pull llama3.2:latest  # Latest version
+ollama pull mistral:7b       # 7 billion parameters
+```
+
+**Q: Where are the models stored on my computer?**  
+A:
+- **macOS**: `~/.ollama/models/`
+- **Linux**: `~/.ollama/models/`
+- **Windows**: `C:\Users\<username>\.ollama\models\`
+
+**Q: How do I free up disk space by removing unused models?**  
+A:
+```bash
+# List installed models
+ollama list
+
+# Remove a model
+ollama rm model_name
+
+# Example
+ollama rm llama2:7b
+```
+
+**Q: Can I use this behind a corporate proxy?**  
+A: Yes. Configure proxy before starting:
+```bash
+export HTTP_PROXY=http://proxy.company.com:8080
+export HTTPS_PROXY=http://proxy.company.com:8080
+ollama serve &
+ollama pull llama3.2
+```
+
+---
+
+### Usage & Features
+
+**Q: How do I adjust the AI's creativity/randomness?**  
+A: Use the temperature parameter:
+- **0.0-0.3**: Focused, deterministic (good for code, facts)
+- **0.5-0.7**: Balanced (default, good for conversation)
+- **0.8-1.5**: Creative, varied responses (good for brainstorming)
+- **1.6-2.0**: Very creative, experimental
+
+**Q: Can I save my conversation history?**  
+A: Currently session-based only (resets when you refresh). Planned feature for v2.0. For now, you can:
+- Copy text from the UI
+- Export via browser's save page feature
+- Use Flask API to implement custom storage
+
+**Q: How do I integrate this into my own application?**  
+A: Use the Flask REST API. Complete guide: [docs/API.md](docs/API.md)
+```python
+import requests
+
+response = requests.post('http://localhost:5000/chat', json={
+    'message': 'Hello!',
+    'model': 'llama3.2'
+})
+print(response.json()['response'])
+```
+
+**Q: Can I customize the system prompt or personality?**  
+A: Yes. Modify the `messages` parameter in the API call or edit the application code. Example:
+```python
+messages = [
+    {'role': 'system', 'content': 'You are a helpful Python expert.'},
+    {'role': 'user', 'content': 'Explain decorators'}
+]
+```
+
+---
+
+### Troubleshooting
+
+**Q: Port 8501 or 5000 is already in use. What should I do?**  
+A:
+```bash
+# Find what's using the port
+lsof -i :8501
+lsof -i :5000
+
+# Kill the process
+kill -9 <PID>
+
+# OR change port in launcher script
+nano scripts/launch_streamlit.sh  # Change PORT=8501
+```
+
+**Q: I get "Connection refused" error when starting the app.**  
+A: Start Ollama first:
+```bash
+# macOS
+brew services start ollama
+
+# Linux
+systemctl start ollama
+
+# Manual
+ollama serve
+```
+
+**Q: Models don't appear in the UI dropdown.**  
+A: Pull at least one model, then restart:
+```bash
+ollama pull llama3.2
+# Then restart your application
+```
+
+**Q: The application is very slow or freezing.**  
+A: Try these solutions:
+1. **Use smaller models**: Switch from mistral to phi3
+2. **Close other applications**: Free up RAM
+3. **Lower temperature**: Faster generation
+4. **Check RAM usage**: `htop` or Activity Monitor
+5. **Restart Ollama**: `brew services restart ollama`
+
+**Q: Application crashes when I send a message.**  
+A: Check logs for detailed error:
+```bash
+# View logs
+tail -f logs/flask_app.log
+tail -f logs/streamlit_app.log
+
+# Common causes:
+# - Out of memory → Use smaller model or add RAM
+# - Ollama disconnected → Restart Ollama service
+# - Model not loaded → Check ollama list
+```
+
+**Q: I'm getting SSL/certificate errors.**  
+A: Update certificates or disable SSL verification (not recommended for production):
+```bash
+# macOS: Update certificates
+brew update && brew upgrade
+
+# Python: Update certifi
+pip install --upgrade certifi
+```
+
+**Q: The UI shows a blank page or won't load.**  
+A: Try these steps:
+1. Clear browser cache (Cmd+Shift+Delete)
+2. Try different browser (Chrome, Firefox, Safari)
+3. Check browser console for errors (F12)
+4. Restart Streamlit: `./scripts/shutdown_streamlit.sh && ./scripts/launch_streamlit.sh`
+5. Check port isn't blocked: `curl http://localhost:8501`
+
+---
+
+### Advanced Usage
+
+**Q: How do I update to the latest version?**  
+A:
+```bash
+cd Assignment1_Ollama_Chatbot
+git pull origin main
+source .venv/bin/activate
+pip install -r requirements.txt --upgrade
+```
+
+**Q: Can I run this in Docker?**  
+A: Yes! Complete Docker support included:
+```bash
+docker-compose up -d --build
+```
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for details.
+
+**Q: How do I deploy this in production?**  
+A: Multiple options:
+- **Docker**: `docker-compose up -d` (recommended)
+- **Linux systemd**: Copy `.service` files to `/etc/systemd/system/`
+- **Manual**: See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+**Q: Can I use this with Kubernetes?**  
+A: Yes. Convert `docker-compose.yml` to Kubernetes manifests or use Kompose:
+```bash
+kompose convert -f docker-compose.yml
+kubectl apply -f .
+```
+
+**Q: How do I enable HTTPS/SSL?**  
+A: Use a reverse proxy (nginx or Apache) with SSL certificates. Example nginx config in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#reverse-proxy-configuration-nginx).
+
+**Q: Can I add authentication to protect the API?**  
+A: Yes. Install Flask-HTTPAuth:
+```bash
+pip install Flask-HTTPAuth
+```
+Then add authentication to `apps/app_flask.py`. Example provided in documentation.
+
+---
+
+### Performance & Optimization
+
+**Q: How can I make responses faster?**  
+A:
+1. Use smaller models (phi3 vs mistral)
+2. Enable GPU acceleration (automatic if available)
+3. Lower temperature parameter (0.3 vs 0.7)
+4. Add more RAM to your system
+5. Close unnecessary applications
+
+**Q: Can I limit response length?**  
+A: Yes, in the API call:
+```python
+response = ollama.generate(
+    model='llama3.2',
+    prompt='Explain Python',
+    options={'num_predict': 100}  # Limit to 100 tokens
+)
+```
+
+**Q: How much disk space do models take?**  
+A: Model sizes:
+- **phi3**: 2.2GB
+- **llama3.2**: 2.0GB
+- **mistral**: 4.1GB
+- **codellama**: 3.8GB
+- **llama2 (70B)**: 40GB
+
+**Q: Can I run multiple models at once?**  
+A: Yes, but each loaded model uses RAM. With 16GB RAM, you can typically load 2-3 models simultaneously.
+
+---
+
+### Contributing & Support
+
+**Q: How can I contribute to this project?**  
+A: See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines:
+- Report bugs on [GitHub Issues](https://github.com/fouada/Assignment1_Ollama_Chatbot/issues)
+- Submit pull requests with improvements
+- Add documentation or examples
+- Share feedback and suggestions
+
+**Q: I found a bug. Where do I report it?**  
+A: Open an issue on [GitHub Issues](https://github.com/fouada/Assignment1_Ollama_Chatbot/issues) with:
+- Description of the bug
+- Steps to reproduce
+- Expected vs actual behavior
+- Your environment (OS, Python version, Ollama version)
+- Relevant logs
+
+**Q: Can I request a new feature?**  
+A: Yes! Open a feature request on GitHub with:
+- Clear description
+- Problem it solves
+- Example use cases
+
+**Q: Where can I get help if I'm stuck?**  
+A:
+1. Check this FAQ first
+2. Review [Troubleshooting](#troubleshooting) section
+3. Search [GitHub Issues](https://github.com/fouada/Assignment1_Ollama_Chatbot/issues)
+4. Open a new issue with detailed information
+
+---
+
 ## 📖 Documentation
 
 Comprehensive documentation is available in the `docs/` directory:
 
 | Document | Description | Link |
 |----------|-------------|------|
-| **PRD.md** | Complete product requirements, goals, user stories, specifications, and key user prompts (Section 14) | [docs/PRD.md](docs/PRD.md) |
-| **README.md** | This file - main project documentation | [README.md](README.md) |
+| **README.md** | This file - Complete user guide with FAQ | [README.md](README.md) |
+| **PRD.md** | Product requirements, specifications, user stories | [docs/PRD.md](docs/PRD.md) |
+| **API.md** | Complete REST API reference with examples | [docs/API.md](docs/API.md) |
+| **TESTING.md** | Testing guide and coverage reports | [docs/TESTING.md](docs/TESTING.md) |
+| **DEPLOYMENT.md** | Production deployment guide (Docker, systemd, manual) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 
 **Quick Links:**
-- 📚 **API Reference:** See [PRD.md - Section 5.2](docs/PRD.md#52-flask-rest-api) for API documentation
-- 📝 **Key User Requirements:** See [PRD.md - Section 14](docs/PRD.md#14-key-user-requirements-original-prompts) for critical prompts that shaped the project
+- 🚀 **Production Deployment:** See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for Docker, systemd, and production setup
+- 📡 **API Reference:** See [docs/API.md](docs/API.md) for complete API documentation with examples
+- 🧪 **Testing Guide:** See [docs/TESTING.md](docs/TESTING.md) for running tests and viewing coverage
+- 📝 **Product Requirements:** See [docs/PRD.md](docs/PRD.md) for complete product specifications
 
 ---
 

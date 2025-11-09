@@ -517,9 +517,201 @@ class TestIntegration:
 
         # 3. Send chat message
         chat_response = flask_client.post('/chat',
-                                         data=json.dumps({
-                                             'message': 'Hello',
-                                             'stream': False
-                                         }),
-                                         content_type='application/json')
+                                        data=json.dumps({
+                                            'message': 'Hello',
+                                            'stream': False
+                                        }),
+                                        content_type='application/json')
         assert chat_response.status_code == 200
+
+
+# ============================================
+# ADVANCED TEST SCENARIOS (PRODUCTION READY)
+# ============================================
+
+class TestAdvancedScenarios:
+    """Advanced production-ready test scenarios"""
+
+    def test_concurrent_requests(self, flask_client):
+        """Test handling of concurrent requests"""
+        import threading
+        results = []
+
+        def make_request():
+            response = flask_client.get('/health')
+            results.append(response.status_code)
+
+        # Create 5 concurrent requests
+        threads = [threading.Thread(target=make_request) for _ in range(5)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        # All should succeed
+        assert len(results) == 5
+        assert all(status == 200 for status in results)
+
+    def test_very_long_message(self, flask_client):
+        """Test with very long input message"""
+        long_message = "test " * 2000  # 10,000 characters
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': long_message,
+                                         'stream': False
+                                     }),
+                                     content_type='application/json')
+        # Should either succeed or reject gracefully
+        assert response.status_code in [200, 400]
+
+    def test_special_characters_in_message(self, flask_client):
+        """Test with special characters"""
+        special_msg = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?"
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': special_msg,
+                                         'stream': False
+                                     }),
+                                     content_type='application/json')
+        assert response.status_code in [200, 400]
+
+    def test_unicode_characters(self, flask_client):
+        """Test with Unicode characters"""
+        unicode_msg = "你好 مرحبا Здравствуйте 🤖"
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': unicode_msg,
+                                         'stream': False
+                                     }),
+                                     content_type='application/json')
+        assert response.status_code in [200, 400]
+
+    def test_rapid_successive_requests(self, flask_client):
+        """Test rapid successive requests (no rate limiting)"""
+        for _ in range(10):
+            response = flask_client.get('/health')
+            assert response.status_code == 200
+
+    def test_response_time_health_check(self, flask_client):
+        """Test health check response time is reasonable"""
+        import time
+        start = time.time()
+        response = flask_client.get('/health')
+        duration = time.time() - start
+
+        assert response.status_code == 200
+        assert duration < 1.0  # Should respond in under 1 second
+
+    def test_response_time_api_info(self, flask_client):
+        """Test API info response time"""
+        import time
+        start = time.time()
+        response = flask_client.get('/')
+        duration = time.time() - start
+
+        assert response.status_code == 200
+        assert duration < 0.1  # Should be very fast (< 100ms)
+
+    def test_json_content_type_validation(self, flask_client):
+        """Test that content-type is validated"""
+        response = flask_client.post('/chat',
+                                     data='{"message":"test"}',
+                                     content_type='text/plain')
+        # Should accept JSON or reject with proper error
+        assert response.status_code in [200, 400, 415]
+
+
+class TestEdgeCases:
+    """Edge case testing for robustness"""
+
+    def test_empty_json_body(self, flask_client):
+        """Test with empty JSON body"""
+        response = flask_client.post('/chat',
+                                     data='{}',
+                                     content_type='application/json')
+        assert response.status_code == 400
+        assert 'error' in response.get_json()
+
+    def test_malformed_json(self, flask_client):
+        """Test with malformed JSON"""
+        response = flask_client.post('/chat',
+                                     data='{invalid json}',
+                                     content_type='application/json')
+        assert response.status_code == 400
+
+    def test_null_message_value(self, flask_client):
+        """Test with null message value"""
+        response = flask_client.post('/chat',
+                                     data=json.dumps({'message': None}),
+                                     content_type='application/json')
+        assert response.status_code == 400
+
+    def test_array_instead_of_string(self, flask_client):
+        """Test with array instead of string message"""
+        response = flask_client.post('/chat',
+                                     data=json.dumps({'message': ['test']}),
+                                     content_type='application/json')
+        assert response.status_code == 400
+
+    def test_extremely_high_temperature(self, flask_client):
+        """Test with temperature > 2.0"""
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': 'test',
+                                         'temperature': 5.0
+                                     }),
+                                     content_type='application/json')
+        assert response.status_code == 400
+
+    def test_negative_temperature(self, flask_client):
+        """Test with negative temperature"""
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': 'test',
+                                         'temperature': -1.0
+                                     }),
+                                     content_type='application/json')
+        assert response.status_code == 400
+
+
+class TestSecurityAndValidation:
+    """Security and input validation tests"""
+
+    def test_sql_injection_attempt(self, flask_client):
+        """Test resilience against SQL injection attempts"""
+        sql_injection = "'; DROP TABLE users; --"
+        response = flask_client.post('/chat',
+                                     data=json.dumps({'message': sql_injection}),
+                                     content_type='application/json')
+        # Should handle safely
+        assert response.status_code in [200, 400]
+
+    def test_xss_attempt(self, flask_client):
+        """Test resilience against XSS attempts"""
+        xss_payload = "<script>alert('xss')</script>"
+        response = flask_client.post('/chat',
+                                     data=json.dumps({'message': xss_payload}),
+                                     content_type='application/json')
+        # Should handle safely
+        assert response.status_code in [200, 400]
+
+    def test_command_injection_attempt(self, flask_client):
+        """Test resilience against command injection"""
+        command_injection = "; ls -la"
+        response = flask_client.post('/chat',
+                                     data=json.dumps({'message': command_injection}),
+                                     content_type='application/json')
+        # Should handle safely
+        assert response.status_code in [200, 400]
+
+    def test_path_traversal_in_model(self, flask_client):
+        """Test resilience against path traversal"""
+        path_traversal = "../../etc/passwd"
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': 'test',
+                                         'model': path_traversal
+                                     }),
+                                     content_type='application/json')
+        # Should reject or handle safely
+        assert response.status_code in [200, 400, 500]

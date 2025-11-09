@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
@@ -51,6 +51,7 @@ jobs:
         run: |
           source .venv/bin/activate || .venv\Scripts\activate
           pytest tests/ -v --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95
+        shell: bash
 
       - name: 📊 Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -234,3 +235,31 @@ jobs:
           git add coverage.svg || true
           git commit -m "Update coverage badge" || true
           git push || true
+
+  # ============================================
+  # DOCKER BUILD & PUSH JOB
+  # ============================================
+  docker:
+    name: Build & Push Docker Image
+    needs: [test, code-quality]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔨 Build Docker image
+        run: |
+          docker build -t ollama-chatbot:latest .
+          echo "Docker image built successfully"
+
+      - name: 🧪 Test Docker image
+        run: |
+          docker run --rm -d --name test-container ollama-chatbot:latest
+          sleep 30
+          docker ps | grep test-container
+          docker stop test-container || true
