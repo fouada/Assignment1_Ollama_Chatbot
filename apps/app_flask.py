@@ -364,7 +364,7 @@ def internal_error(error):
 # MAIN
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     logger.info("="*50)
     logger.info("🤖 Starting Ollama Flask Chatbot Server")
     logger.info("="*50)

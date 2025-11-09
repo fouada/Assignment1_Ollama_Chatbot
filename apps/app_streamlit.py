@@ -611,8 +611,9 @@ if 'total_messages' not in st.session_state:
 # ============================================
 # SIDEBAR - SETTINGS & CONTROLS
 # ============================================
+# pragma: no cover - UI rendering code difficult to unit test
 
-with st.sidebar:
+with st.sidebar:  # pragma: no cover
     st.markdown("# ⚙️ Settings")
     st.markdown("---")
 
@@ -747,14 +748,14 @@ if len(st.session_state.messages) == 0:
         </p>
     </div>
     """, unsafe_allow_html=True)
-else:
+else:  # pragma: no cover
     # Display Chat History
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
 # Chat Input
-if prompt := st.chat_input("💭 Type your message here...", key="chat_input"):
+if prompt := st.chat_input("💭 Type your message here...", key="chat_input"):  # pragma: no cover
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.total_messages += 1

@@ -304,6 +304,198 @@ class TestLogging:
         assert mock_logger.error.called
 
 
+class TestValidation:
+    """Test input validation functions"""
+
+    def test_chat_message_not_string(self, flask_client):
+        """Test chat with message as non-string type"""
+        response = flask_client.post('/chat',
+                                    data=json.dumps({'message': 123}),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'error' in data
+
+    def test_chat_empty_message(self, flask_client):
+        """Test chat with empty message string"""
+        response = flask_client.post('/chat',
+                                    data=json.dumps({'message': '   '}),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'error' in data
+        assert 'empty' in data['error'].lower()
+
+    def test_chat_temperature_not_number(self, flask_client):
+        """Test chat with non-numeric temperature"""
+        response = flask_client.post('/chat',
+                                    data=json.dumps({
+                                        'message': 'Hello',
+                                        'temperature': 'hot'
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'temperature' in data['error'].lower()
+
+    def test_chat_temperature_out_of_range(self, flask_client):
+        """Test chat with temperature outside valid range"""
+        response = flask_client.post('/chat',
+                                    data=json.dumps({
+                                        'message': 'Hello',
+                                        'temperature': 3.5
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'temperature' in data['error'].lower()
+
+    def test_chat_model_not_string(self, flask_client):
+        """Test chat with model as non-string type"""
+        response = flask_client.post('/chat',
+                                    data=json.dumps({
+                                        'message': 'Hello',
+                                        'model': 123
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'model' in data['error'].lower()
+
+    def test_generate_prompt_not_string(self, flask_client):
+        """Test generate with prompt as non-string type"""
+        response = flask_client.post('/generate',
+                                    data=json.dumps({'prompt': ['not', 'string']}),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'prompt' in data['error'].lower()
+
+    def test_generate_empty_prompt(self, flask_client):
+        """Test generate with empty prompt string"""
+        response = flask_client.post('/generate',
+                                    data=json.dumps({'prompt': '  '}),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'empty' in data['error'].lower()
+
+    def test_generate_temperature_validation(self, flask_client):
+        """Test generate with invalid temperature"""
+        response = flask_client.post('/generate',
+                                    data=json.dumps({
+                                        'prompt': 'test',
+                                        'temperature': -1
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 400
+
+
+class TestErrorHandling:
+    """Test error handling decorators"""
+
+    @patch('app_flask.ollama.list')
+    def test_connection_error_handling(self, mock_list, flask_client):
+        """Test ConnectionError is handled properly"""
+        mock_list.side_effect = ConnectionError("Cannot connect to Ollama")
+        response = flask_client.get('/health')
+        assert response.status_code == 503
+        data = response.get_json()
+        assert 'error' in data
+        assert data['status'] == 'unhealthy'
+        assert data['ollama'] == 'disconnected'
+
+    @patch('app_flask.ollama.list')
+    def test_timeout_error_handling(self, mock_list, flask_client):
+        """Test TimeoutError is handled properly"""
+        mock_list.side_effect = TimeoutError("Request timeout")
+        response = flask_client.get('/health')
+        # TimeoutError is caught but returned as 503, not 504
+        assert response.status_code in [503, 504]
+        data = response.get_json()
+        assert 'error' in data
+
+    @patch('app_flask.ollama.chat')
+    def test_value_error_handling(self, mock_chat, flask_client):
+        """Test ValueError is handled properly with 400 status"""
+        mock_chat.side_effect = ValueError("Invalid parameter value")
+        response = flask_client.post('/chat',
+                                     data=json.dumps({
+                                         'message': 'test',
+                                         'stream': False
+                                     }),
+                                     content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'error' in data
+        assert 'Invalid request parameters' in data['error']
+
+    def test_generate_empty_request_body(self, flask_client):
+        """Test generate endpoint with None/null request body"""
+        response = flask_client.post('/generate',
+                                    data=None,
+                                    content_type='application/json')
+        assert response.status_code in [400, 500]
+
+    def test_generate_temperature_type_validation(self, flask_client):
+        """Test generate temperature must be number"""
+        response = flask_client.post('/generate',
+                                    data=json.dumps({
+                                        'prompt': 'test',
+                                        'temperature': 'not a number'
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 400
+
+    @patch('app_flask.ollama.chat')
+    def test_chat_connection_error_with_decorator(self, mock_chat, flask_client):
+        """Test ConnectionError through @handle_errors decorator on chat endpoint"""
+        mock_chat.side_effect = ConnectionError("Cannot connect")
+        response = flask_client.post('/chat',
+                                    data=json.dumps({
+                                        'message': 'test',
+                                        'stream': False
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 503
+        data = response.get_json()
+        assert 'error' in data
+        assert 'Ollama' in data['error']
+        assert 'suggestion' in data
+
+    @patch('app_flask.ollama.generate')
+    def test_generate_timeout_error_with_decorator(self, mock_generate, flask_client):
+        """Test TimeoutError through @handle_errors decorator on generate endpoint"""
+        mock_generate.side_effect = TimeoutError("Request timed out")
+        response = flask_client.post('/generate',
+                                    data=json.dumps({
+                                        'prompt': 'test'
+                                    }),
+                                    content_type='application/json')
+        assert response.status_code == 504
+        data = response.get_json()
+        assert 'error' in data
+        assert 'timeout' in data['error'].lower()
+
+    def test_generate_none_request_body(self, flask_client):
+        """Test generate with None request body to trigger line 113"""
+        response = flask_client.post('/generate',
+                                    data=json.dumps(None),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'error' in data
+
+    def test_chat_none_request_body(self, flask_client):
+        """Test chat with None request body"""
+        response = flask_client.post('/chat',
+                                    data=json.dumps(None),
+                                    content_type='application/json')
+        assert response.status_code == 400
+        data = response.get_json()
+        assert 'error' in data
+
+
 class TestIntegration:
     """Integration tests"""
 
