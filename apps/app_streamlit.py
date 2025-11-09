@@ -685,7 +685,7 @@ with st.sidebar:  # pragma: no cover
     }
 
     for key, info in model_info.items():
-        if key in selected_model.lower():
+        if selected_model and key in selected_model.lower():
             st.info(f"{info['icon']} {info['desc']} ({info['params']})")
             break
 
@@ -714,7 +714,7 @@ with st.sidebar:  # pragma: no cover
     # Statistics
     st.markdown("### 📊 Session Stats")
     st.metric("Messages", st.session_state.total_messages)
-    st.metric("Model", selected_model.split(":")[0])
+    st.metric("Model", selected_model.split(":")[0] if selected_model else "N/A")
 
     st.markdown("---")
 
@@ -800,7 +800,8 @@ if prompt := st.chat_input(
         full_response = ""
 
         # Stream response
-        for chunk in generate_response(prompt, selected_model, temperature):
+        model_to_use = selected_model if selected_model else "llama3.2"
+        for chunk in generate_response(prompt, model_to_use, temperature):
             full_response += chunk
             message_placeholder.markdown(full_response + "▌")
 
