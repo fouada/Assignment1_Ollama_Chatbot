@@ -217,7 +217,7 @@ class TestRealFlaskIntegration:
         # Should be a real AI response, not mocked
         assert isinstance(data["response"], str)
 
-    def test_flask_health_check_real(self, flask_client):
+    def test_flask_health_check_real(self, flask_client, check_ollama_running):
         """
         REAL TEST: Health check with real Ollama
 
@@ -260,7 +260,7 @@ class TestRealFlaskIntegration:
 class TestRealStreamlitIntegration:
     """Test Streamlit functions with REAL Ollama"""
 
-    def test_streamlit_check_connection_real(self):
+    def test_streamlit_check_connection_real(self, check_ollama_running):
         """
         REAL TEST: check_ollama_connection() with real Ollama
 
@@ -322,7 +322,7 @@ class TestRealStreamlitIntegration:
 class TestRealErrorScenarios:
     """Test error handling with real scenarios"""
 
-    def test_invalid_model_name_real(self, flask_client):
+    def test_invalid_model_name_real(self, flask_client, check_ollama_running):
         """
         REAL TEST: Request with non-existent model
 
