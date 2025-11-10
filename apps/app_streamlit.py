@@ -814,19 +814,21 @@ def load_messages_from_localstorage():
         # Use a file-based approach for simplicity (still local, still private)
         import json
         from pathlib import Path
-        
+
         cache_file = Path.home() / ".ollama_streamlit_cache.json"
-        
+
         try:
             if cache_file.exists():
                 with open(cache_file, "r") as f:
                     data = json.load(f)
                     st.session_state.messages = data.get("messages", [])
                     st.session_state.total_messages = data.get("totalMessages", 0)
-                    logger.info(f"💾 Loaded {len(st.session_state.messages)} messages from cache")
+                    logger.info(
+                        f"💾 Loaded {len(st.session_state.messages)} messages from cache"
+                    )
         except Exception as e:
             logger.error(f"Error loading cache: {e}")
-        
+
         st.session_state.history_loaded = True
 
 
@@ -834,14 +836,14 @@ def save_messages_to_cache():
     """Save messages to a local cache file"""
     import json
     from pathlib import Path
-    
+
     cache_file = Path.home() / ".ollama_streamlit_cache.json"
-    
+
     try:
         data = {
             "messages": st.session_state.messages,
             "totalMessages": st.session_state.total_messages,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         with open(cache_file, "w") as f:
             json.dump(data, f, indent=2)
@@ -853,9 +855,9 @@ def save_messages_to_cache():
 def clear_cache():
     """Clear the local cache file"""
     from pathlib import Path
-    
+
     cache_file = Path.home() / ".ollama_streamlit_cache.json"
-    
+
     try:
         if cache_file.exists():
             cache_file.unlink()
@@ -964,9 +966,10 @@ with st.sidebar:  # pragma: no cover
     st.markdown("### 📊 Session Stats")
     st.metric("Messages", st.session_state.total_messages)
     st.metric("Model", selected_model.split(":")[0] if selected_model else "N/A")
-    
+
     # Storage info
     from pathlib import Path
+
     cache_file = Path.home() / ".ollama_streamlit_cache.json"
     if cache_file.exists():
         st.caption("💾 Conversation saved locally")
@@ -977,36 +980,38 @@ with st.sidebar:  # pragma: no cover
 
     # Chat History Panel
     st.markdown("### 💬 Conversation History")
-    
+
     if len(st.session_state.messages) > 0:
         # Create scrollable container with all messages
         history_items = []
-        
+
         for idx, message in enumerate(st.session_state.messages):
             role = message["role"]
             content = message["content"]
-            
+
             # Truncate long messages for preview (show first 150 chars)
             preview = content[:150] + "..." if len(content) > 150 else content
-            
+
             # Escape HTML to prevent tags from showing or breaking layout
             preview_escaped = html.escape(preview)
-            
+
             # Create clickable history item with data-target attribute
             message_id = f"msg-{idx}"
             history_items.append(
                 f'<div class="chat-history-item {role}" data-target="{message_id}" style="cursor: pointer;">'
                 f'<div class="chat-history-role {role}">{"👤 You" if role == "user" else "🤖 Assistant"}</div>'
                 f'<div class="chat-history-content">{preview_escaped}</div>'
-                f'</div>'
+                f"</div>"
             )
-        
+
         # Build complete HTML (single line, no extra whitespace)
-        history_html = '<div class="chat-history-container">' + ''.join(history_items) + '</div>'
-        
+        history_html = (
+            '<div class="chat-history-container">' + "".join(history_items) + "</div>"
+        )
+
         # Use st.write with unsafe_allow_html instead of st.markdown
         st.write(history_html, unsafe_allow_html=True)
-        
+
         # Add JavaScript for clickable history items (using components.html for proper execution)
         components.html(
             """
@@ -1081,7 +1086,10 @@ with st.sidebar:  # pragma: no cover
             height=0,
         )
     else:
-        st.write('<div class="chat-history-empty">No messages yet.<br>Start a conversation!</div>', unsafe_allow_html=True)
+        st.write(
+            '<div class="chat-history-empty">No messages yet.<br>Start a conversation!</div>',
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
 
@@ -1149,8 +1157,11 @@ else:  # pragma: no cover
     # Display Chat History
     for idx, message in enumerate(st.session_state.messages):
         # Add anchor ID for this message
-        st.markdown(f'<span id="msg-{idx}" class="message-anchor"></span>', unsafe_allow_html=True)
-        
+        st.markdown(
+            f'<span id="msg-{idx}" class="message-anchor"></span>',
+            unsafe_allow_html=True,
+        )
+
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
@@ -1181,7 +1192,7 @@ if prompt := st.chat_input(
     # Save assistant response
     st.session_state.messages.append({"role": "assistant", "content": full_response})
     st.session_state.total_messages += 1
-    
+
     # Save to cache for persistence
     save_messages_to_cache()
 

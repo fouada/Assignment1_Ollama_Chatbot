@@ -251,7 +251,7 @@ class TestPersistenceFunctions:
         # Setup session state
         mock_session_state.messages = [
             {"role": "user", "content": "Hello"},
-            {"role": "assistant", "content": "Hi there"}
+            {"role": "assistant", "content": "Hi there"},
         ]
         mock_session_state.total_messages = 2
 
@@ -269,14 +269,16 @@ class TestPersistenceFunctions:
         from app_streamlit import save_messages_to_localstorage
 
         mock_session_state.messages = []
-        
+
         # Should return early without error
         save_messages_to_localstorage()
 
     @patch("app_streamlit.st.session_state")
     @patch("builtins.open", create=True)
     @patch("pathlib.Path.exists")
-    def test_load_messages_from_localstorage(self, mock_exists, mock_open, mock_session_state):
+    def test_load_messages_from_localstorage(
+        self, mock_exists, mock_open, mock_session_state
+    ):
         """Test loading messages from cache file"""
         from app_streamlit import load_messages_from_localstorage
         import json
@@ -284,13 +286,13 @@ class TestPersistenceFunctions:
         # Setup
         mock_session_state.history_loaded = False
         mock_exists.return_value = True
-        
+
         cache_data = {
             "messages": [{"role": "user", "content": "Test"}],
             "totalMessages": 1,
-            "timestamp": "2025-01-01T00:00:00"
+            "timestamp": "2025-01-01T00:00:00",
         }
-        
+
         mock_file = MagicMock()
         mock_file.__enter__.return_value.read.return_value = json.dumps(cache_data)
         mock_open.return_value = mock_file
@@ -304,7 +306,9 @@ class TestPersistenceFunctions:
 
     @patch("app_streamlit.st.session_state")
     @patch("pathlib.Path.exists")
-    def test_load_messages_from_localstorage_no_cache(self, mock_exists, mock_session_state):
+    def test_load_messages_from_localstorage_no_cache(
+        self, mock_exists, mock_session_state
+    ):
         """Test loading when no cache file exists"""
         from app_streamlit import load_messages_from_localstorage
 
@@ -318,7 +322,9 @@ class TestPersistenceFunctions:
     @patch("app_streamlit.st.session_state")
     @patch("builtins.open", create=True)
     @patch("pathlib.Path.exists")
-    def test_load_messages_from_localstorage_error(self, mock_exists, mock_open, mock_session_state):
+    def test_load_messages_from_localstorage_error(
+        self, mock_exists, mock_open, mock_session_state
+    ):
         """Test error handling when loading from cache fails"""
         from app_streamlit import load_messages_from_localstorage
 
@@ -338,7 +344,7 @@ class TestPersistenceFunctions:
 
         mock_session_state.messages = [{"role": "user", "content": "Test"}]
         mock_session_state.total_messages = 1
-        
+
         mock_file = MagicMock()
         mock_open.return_value.__enter__.return_value = mock_file
 

@@ -297,16 +297,16 @@ class TestErrorHandlers:
         """Test 500 error handler"""
         # Import the app to access error handler directly
         from app_flask import app, internal_error
-        
+
         # Create a mock error
         mock_error = Exception("Test internal server error")
-        
+
         # Test the error handler within app context
         with app.app_context():
             response_tuple = internal_error(mock_error)
             response_data = response_tuple[0].get_json()
             status_code = response_tuple[1]
-            
+
             # Verify the error handler response
             assert status_code == 500
             assert "error" in response_data
