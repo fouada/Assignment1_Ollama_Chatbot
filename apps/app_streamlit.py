@@ -1193,9 +1193,6 @@ st.markdown(
     <p style="color: #7dd3fc !important; margin: 10px 0;">
         🔒 Your conversations are completely private and saved locally on your machine
     </p>
-    <p style="color: #a1a1aa !important; margin: 10px 0; font-size: 0.85rem;">
-        💾 Conversations persist across page refreshes • Stored at: ~/.ollama_streamlit_cache.json
-    </p>
     <p style="color: #7dd3fc !important; margin: 10px 0;">💡 Powered by Ollama | Built with ❤️ using Streamlit</p>
 </div>
 """,
