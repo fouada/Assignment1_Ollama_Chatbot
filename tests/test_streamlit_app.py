@@ -46,6 +46,15 @@ class TestHelperFunctions:
         assert result is False
 
     @patch("app_streamlit.ollama.list")
+    def test_check_ollama_connection_connection_error(self, mock_list):
+        """Test Ollama connection with ConnectionError"""
+        from app_streamlit import check_ollama_connection
+
+        mock_list.side_effect = ConnectionError("Connection refused")
+        result = check_ollama_connection()
+        assert result is False
+
+    @patch("app_streamlit.ollama.list")
     def test_get_available_models_success(self, mock_list, mock_ollama_list):
         """Test retrieving available models"""
         from app_streamlit import get_available_models
@@ -84,6 +93,17 @@ class TestHelperFunctions:
         from app_streamlit import get_available_models
 
         mock_list.side_effect = Exception("API Error")
+        models = get_available_models()
+        assert models == []
+        mock_error.assert_called_once()
+
+    @patch("app_streamlit.ollama.list")
+    @patch("app_streamlit.st.error")
+    def test_get_available_models_connection_error(self, mock_error, mock_list):
+        """Test handling of connection errors when fetching models"""
+        from app_streamlit import get_available_models
+
+        mock_list.side_effect = ConnectionError("Cannot connect to Ollama server")
         models = get_available_models()
         assert models == []
         mock_error.assert_called_once()
@@ -205,6 +225,176 @@ class TestGenerateResponse:
         response_parts = list(generate_response("Test", "llama3.2", 0.7))
         assert "Error:" in response_parts[0]
         assert "Cannot reach Ollama server" in response_parts[0]
+
+    @patch("app_streamlit.ollama.chat")
+    def test_generate_response_value_error(self, mock_chat):
+        """Test handling of ValueError (invalid model or parameters)"""
+        from app_streamlit import generate_response
+
+        mock_chat.side_effect = ValueError("Invalid model or parameters")
+
+        response_parts = list(generate_response("Test", "invalid_model", 0.7))
+        assert len(response_parts) == 1
+        assert "Error:" in response_parts[0]
+        assert "Invalid model or parameters" in response_parts[0]
+
+
+class TestPersistenceFunctions:
+    """Test message persistence functions"""
+
+    @patch("app_streamlit.st.session_state")
+    @patch("app_streamlit.components.html")
+    def test_save_messages_to_localstorage(self, mock_html, mock_session_state):
+        """Test saving messages to localStorage"""
+        from app_streamlit import save_messages_to_localstorage
+
+        # Setup session state
+        mock_session_state.messages = [
+            {"role": "user", "content": "Hello"},
+            {"role": "assistant", "content": "Hi there"}
+        ]
+        mock_session_state.total_messages = 2
+
+        save_messages_to_localstorage()
+
+        # Verify components.html was called
+        mock_html.assert_called_once()
+        call_args = mock_html.call_args[0][0]
+        assert "localStorage" in call_args
+        assert "setItem" in call_args
+
+    @patch("app_streamlit.st.session_state")
+    def test_save_messages_to_localstorage_empty(self, mock_session_state):
+        """Test saving empty messages list does nothing"""
+        from app_streamlit import save_messages_to_localstorage
+
+        mock_session_state.messages = []
+        
+        # Should return early without error
+        save_messages_to_localstorage()
+
+    @patch("app_streamlit.st.session_state")
+    @patch("builtins.open", create=True)
+    @patch("pathlib.Path.exists")
+    def test_load_messages_from_localstorage(self, mock_exists, mock_open, mock_session_state):
+        """Test loading messages from cache file"""
+        from app_streamlit import load_messages_from_localstorage
+        import json
+
+        # Setup
+        mock_session_state.history_loaded = False
+        mock_exists.return_value = True
+        
+        cache_data = {
+            "messages": [{"role": "user", "content": "Test"}],
+            "totalMessages": 1,
+            "timestamp": "2025-01-01T00:00:00"
+        }
+        
+        mock_file = MagicMock()
+        mock_file.__enter__.return_value.read.return_value = json.dumps(cache_data)
+        mock_open.return_value = mock_file
+
+        # Mock json.load to return our test data
+        with patch("json.load", return_value=cache_data):
+            load_messages_from_localstorage()
+
+        # Verify session state was updated
+        assert mock_session_state.history_loaded is True
+
+    @patch("app_streamlit.st.session_state")
+    @patch("pathlib.Path.exists")
+    def test_load_messages_from_localstorage_no_cache(self, mock_exists, mock_session_state):
+        """Test loading when no cache file exists"""
+        from app_streamlit import load_messages_from_localstorage
+
+        mock_session_state.history_loaded = False
+        mock_exists.return_value = False
+
+        # Should not raise error
+        load_messages_from_localstorage()
+        assert mock_session_state.history_loaded is True
+
+    @patch("app_streamlit.st.session_state")
+    @patch("builtins.open", create=True)
+    @patch("pathlib.Path.exists")
+    def test_load_messages_from_localstorage_error(self, mock_exists, mock_open, mock_session_state):
+        """Test error handling when loading from cache fails"""
+        from app_streamlit import load_messages_from_localstorage
+
+        mock_session_state.history_loaded = False
+        mock_exists.return_value = True
+        mock_open.side_effect = Exception("Read error")
+
+        # Should not raise exception, but handle gracefully
+        load_messages_from_localstorage()
+        assert mock_session_state.history_loaded is True
+
+    @patch("app_streamlit.st.session_state")
+    @patch("builtins.open", create=True)
+    def test_save_messages_to_cache(self, mock_open, mock_session_state):
+        """Test saving messages to cache file"""
+        from app_streamlit import save_messages_to_cache
+
+        mock_session_state.messages = [{"role": "user", "content": "Test"}]
+        mock_session_state.total_messages = 1
+        
+        mock_file = MagicMock()
+        mock_open.return_value.__enter__.return_value = mock_file
+
+        save_messages_to_cache()
+
+        # Verify file was opened for writing
+        mock_open.assert_called_once()
+        assert "w" in str(mock_open.call_args)
+
+    @patch("app_streamlit.st.session_state")
+    @patch("builtins.open", create=True)
+    def test_save_messages_to_cache_error(self, mock_open, mock_session_state):
+        """Test error handling in save_messages_to_cache"""
+        from app_streamlit import save_messages_to_cache
+
+        mock_session_state.messages = [{"role": "user", "content": "Test"}]
+        mock_session_state.total_messages = 1
+        mock_open.side_effect = Exception("Write error")
+
+        # Should not raise exception
+        save_messages_to_cache()
+
+    @patch("pathlib.Path.unlink")
+    @patch("pathlib.Path.exists")
+    def test_clear_cache(self, mock_exists, mock_unlink):
+        """Test clearing cache file"""
+        from app_streamlit import clear_cache
+
+        mock_exists.return_value = True
+
+        clear_cache()
+
+        # Verify file was deleted
+        mock_unlink.assert_called_once()
+
+    @patch("pathlib.Path.exists")
+    def test_clear_cache_no_file(self, mock_exists):
+        """Test clearing cache when file doesn't exist"""
+        from app_streamlit import clear_cache
+
+        mock_exists.return_value = False
+
+        # Should not raise error
+        clear_cache()
+
+    @patch("pathlib.Path.unlink")
+    @patch("pathlib.Path.exists")
+    def test_clear_cache_error(self, mock_exists, mock_unlink):
+        """Test error handling in clear_cache"""
+        from app_streamlit import clear_cache
+
+        mock_exists.return_value = True
+        mock_unlink.side_effect = Exception("Delete error")
+
+        # Should not raise exception
+        clear_cache()
 
 
 class TestModelInfo:

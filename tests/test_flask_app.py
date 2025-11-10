@@ -293,6 +293,26 @@ class TestErrorHandlers:
         data = response.get_json()
         assert "error" in data
 
+    def test_500_internal_server_error(self, flask_client):
+        """Test 500 error handler"""
+        # Import the app to access error handler directly
+        from app_flask import app, internal_error
+        
+        # Create a mock error
+        mock_error = Exception("Test internal server error")
+        
+        # Test the error handler within app context
+        with app.app_context():
+            response_tuple = internal_error(mock_error)
+            response_data = response_tuple[0].get_json()
+            status_code = response_tuple[1]
+            
+            # Verify the error handler response
+            assert status_code == 500
+            assert "error" in response_data
+            assert response_data["error"] == "Internal server error"
+            assert "timestamp" in response_data
+
     def test_index_route(self, flask_client):
         """Test index route returns HTML"""
         response = flask_client.get("/")
