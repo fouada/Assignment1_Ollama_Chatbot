@@ -7,10 +7,116 @@
 class LuxuryChatbot {
     constructor() {
         this.chatHistory = []; // Store chat messages for sidebar
+        this.messageCounter = 0; // Unique ID counter for messages
+        this.storageKey = 'ollama_chat_history'; // localStorage key
         this.initElements();
         this.initEventListeners();
         this.loadModels();
         this.checkHealth();
+        this.configureMarked();
+        this.loadChatHistory(); // Load saved chat history
+    }
+
+    configureMarked() {
+        // Configure marked.js for better rendering
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (err) {
+                            console.error('Highlight error:', err);
+                        }
+                    }
+                    return code;
+                },
+                breaks: true,
+                gfm: true
+            });
+        }
+    }
+
+    saveChatHistory() {
+        // Save chat history to localStorage
+        try {
+            const historyData = {
+                messages: this.chatHistory,
+                messageCounter: this.messageCounter,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(this.storageKey, JSON.stringify(historyData));
+            console.log('💾 Chat history saved to localStorage');
+        } catch (error) {
+            console.error('Error saving chat history:', error);
+        }
+    }
+
+    loadChatHistory() {
+        // Load chat history from localStorage
+        try {
+            const savedData = localStorage.getItem(this.storageKey);
+            if (savedData) {
+                const historyData = JSON.parse(savedData);
+                this.chatHistory = historyData.messages || [];
+                this.messageCounter = historyData.messageCounter || 0;
+                
+                // Restore messages to the UI
+                this.chatHistory.forEach(message => {
+                    this.restoreMessage(message);
+                });
+                
+                this.updateChatHistory();
+                console.log(`💾 Loaded ${this.chatHistory.length} messages from localStorage`);
+            }
+        } catch (error) {
+            console.error('Error loading chat history:', error);
+            // Clear corrupted data
+            localStorage.removeItem(this.storageKey);
+        }
+    }
+
+    restoreMessage(message) {
+        // Restore a message to the UI (similar to addMessage but from saved data)
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.role}-message`;
+        messageDiv.id = message.id;
+
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'message-avatar';
+        avatarDiv.textContent = message.role === 'user' ? '👤' : '🤖';
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'message-bubble';
+
+        const textDiv = document.createElement('div');
+        textDiv.className = 'message-text';
+        this.renderContent(textDiv, message.content);
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-time';
+        timeDiv.textContent = message.timestamp;
+
+        bubbleDiv.appendChild(textDiv);
+        bubbleDiv.appendChild(timeDiv);
+        contentDiv.appendChild(bubbleDiv);
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+
+        this.chatMessages.appendChild(messageDiv);
+    }
+
+    clearStoredHistory() {
+        // Clear saved history from localStorage
+        try {
+            localStorage.removeItem(this.storageKey);
+            console.log('🗑️ Chat history cleared from localStorage');
+        } catch (error) {
+            console.error('Error clearing chat history:', error);
+        }
     }
 
     initElements() {
@@ -244,13 +350,16 @@ class LuxuryChatbot {
 
                         if (data.done) {
                             // Streaming complete: now add to history
-                            if (fullResponse) {
+                            if (fullResponse && botMessageElement) {
                                 this.chatHistory.push({
+                                    id: botMessageElement.id,
                                     role: 'bot',
                                     content: fullResponse,
                                     timestamp: this.getCurrentTime()
                                 });
                                 this.updateChatHistory();
+                                // Save to localStorage
+                                this.saveChatHistory();
                             }
                             break;
                         }
@@ -268,8 +377,10 @@ class LuxuryChatbot {
 
     addMessageWithoutHistory(role, content) {
         // Same as addMessage but without adding to history
+        const messageId = `message-${this.messageCounter++}`;
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role}-message`;
+        messageDiv.id = messageId;
 
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'message-avatar';
@@ -283,7 +394,7 @@ class LuxuryChatbot {
 
         const textDiv = document.createElement('div');
         textDiv.className = 'message-text';
-        textDiv.textContent = content;
+        this.renderContent(textDiv, content);
 
         const timeDiv = document.createElement('div');
         timeDiv.className = 'message-time';
@@ -301,9 +412,26 @@ class LuxuryChatbot {
         return messageDiv;
     }
 
+    renderContent(element, content) {
+        // Render content as markdown with syntax highlighting
+        if (typeof marked !== 'undefined') {
+            element.innerHTML = marked.parse(content);
+            // Apply syntax highlighting to code blocks
+            if (typeof hljs !== 'undefined') {
+                element.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+        } else {
+            element.textContent = content;
+        }
+    }
+
     addMessage(role, content) {
+        const messageId = `message-${this.messageCounter++}`;
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${role}-message`;
+        messageDiv.id = messageId;
 
         const avatarDiv = document.createElement('div');
         avatarDiv.className = 'message-avatar';
@@ -317,7 +445,7 @@ class LuxuryChatbot {
 
         const textDiv = document.createElement('div');
         textDiv.className = 'message-text';
-        textDiv.textContent = content;
+        this.renderContent(textDiv, content);
 
         const timeDiv = document.createElement('div');
         timeDiv.className = 'message-time';
@@ -334,11 +462,15 @@ class LuxuryChatbot {
 
         // Add to chat history
         this.chatHistory.push({
+            id: messageId,
             role: role,
             content: content,
             timestamp: this.getCurrentTime()
         });
         this.updateChatHistory();
+        
+        // Save to localStorage
+        this.saveChatHistory();
 
         return messageDiv;
     }
@@ -346,7 +478,7 @@ class LuxuryChatbot {
     updateMessage(messageElement, content) {
         const textDiv = messageElement.querySelector('.message-text');
         if (textDiv) {
-            textDiv.textContent = content;
+            this.renderContent(textDiv, content);
             this.scrollToBottom();
         }
     }
@@ -389,7 +521,7 @@ class LuxuryChatbot {
     }
 
     clearChat() {
-        const confirmClear = confirm('Are you sure you want to clear the conversation?');
+        const confirmClear = confirm('Are you sure you want to clear the conversation? This will also delete saved history.');
         if (confirmClear) {
             // Remove all messages except welcome card
             const messages = this.chatMessages.querySelectorAll('.message');
@@ -397,7 +529,11 @@ class LuxuryChatbot {
 
             // Clear chat history
             this.chatHistory = [];
+            this.messageCounter = 0;
             this.updateChatHistory();
+
+            // Clear from localStorage
+            this.clearStoredHistory();
 
             // Scroll to top
             this.chatMessages.scrollTop = 0;
@@ -422,7 +558,7 @@ class LuxuryChatbot {
 
         let historyHTML = '';
         
-        this.chatHistory.forEach(message => {
+        this.chatHistory.forEach((message, index) => {
             const role = message.role === 'user' ? 'user' : 'assistant';
             const roleLabel = message.role === 'user' ? '👤 You' : '🤖 Assistant';
             
@@ -432,7 +568,7 @@ class LuxuryChatbot {
                 : this.escapeHtml(message.content);
 
             historyHTML += `
-                <div class="chat-history-item ${role}">
+                <div class="chat-history-item ${role}" data-message-id="${message.id}" data-index="${index}">
                     <div class="chat-history-role ${role}">
                         ${roleLabel}
                     </div>
@@ -443,6 +579,36 @@ class LuxuryChatbot {
 
         // Use innerHTML to render the HTML properly
         this.chatHistoryContainer.innerHTML = historyHTML;
+
+        // Add click event listeners to history items
+        this.chatHistoryContainer.querySelectorAll('.chat-history-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const messageId = item.getAttribute('data-message-id');
+                this.scrollToMessage(messageId);
+            });
+        });
+    }
+
+    scrollToMessage(messageId) {
+        const messageElement = document.getElementById(messageId);
+        if (messageElement) {
+            // Close sidebar
+            if (this.sidebar.classList.contains('open')) {
+                this.toggleSidebar();
+            }
+
+            // Scroll to message with smooth behavior
+            messageElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+
+            // Add highlight animation
+            messageElement.classList.add('highlight');
+            setTimeout(() => {
+                messageElement.classList.remove('highlight');
+            }, 2000);
+        }
     }
 
     escapeHtml(text) {

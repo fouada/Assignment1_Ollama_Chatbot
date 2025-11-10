@@ -13,6 +13,7 @@ from pathlib import Path
 
 import ollama
 import streamlit as st
+import streamlit.components.v1 as components
 
 # ============================================
 # LOGGING CONFIGURATION
@@ -489,14 +490,62 @@ st.markdown(
         color: #a1a1aa !important;
     }
 
-    /* Code Blocks */
+    /* Code Blocks - Enhanced with proper visibility */
     code {
-        background: rgba(26, 26, 36, 0.8);
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        border-radius: 8px;
-        padding: 0.25rem 0.5rem;
-        color: #f093fb;
-        font-family: 'Monaco', 'Courier New', monospace;
+        background: rgba(26, 26, 36, 0.9) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        border-radius: 6px !important;
+        padding: 0.2rem 0.5rem !important;
+        color: #4ade80 !important;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+        font-size: 0.9em !important;
+    }
+
+    /* Pre blocks (multi-line code) */
+    pre {
+        background: rgba(19, 19, 36, 0.95) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        overflow-x: auto !important;
+        margin: 0.75rem 0 !important;
+    }
+
+    pre code {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        color: #e4e4e7 !important;
+        display: block !important;
+    }
+
+    /* Code blocks in chat messages */
+    [data-testid="stChatMessageContent"] code {
+        background: rgba(19, 19, 36, 0.9) !important;
+        color: #4ade80 !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    }
+
+    [data-testid="stChatMessageContent"] pre {
+        background: rgba(19, 19, 36, 0.95) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    }
+
+    [data-testid="stChatMessageContent"] pre code {
+        background: transparent !important;
+        border: none !important;
+        color: #e4e4e7 !important;
+    }
+
+    /* Streamlit code component */
+    .stCode {
+        background: rgba(19, 19, 36, 0.95) !important;
+        border: 1px solid rgba(102, 126, 234, 0.3) !important;
+        border-radius: 12px !important;
+    }
+
+    .stCode code {
+        color: #e4e4e7 !important;
     }
 
     /* Scrollbar Styling */
@@ -537,6 +586,8 @@ st.markdown(
         border-left: 3px solid;
         transition: all 0.2s ease;
         cursor: pointer;
+        text-decoration: none;
+        display: block;
     }
 
     .chat-history-item:hover {
@@ -586,6 +637,29 @@ st.markdown(
         color: #a1a1aa;
         font-size: 0.85rem;
         font-style: italic;
+    }
+
+    /* Message anchor target */
+    .message-anchor {
+        display: block;
+        position: relative;
+        top: -80px;
+        visibility: hidden;
+    }
+
+    /* Highlight animation for clicked messages */
+    @keyframes highlightPulse {
+        0%, 100% {
+            background-color: transparent;
+        }
+        50% {
+            background-color: rgba(102, 126, 234, 0.2);
+        }
+    }
+
+    .stChatMessage.highlight {
+        animation: highlightPulse 2s ease-in-out;
+        border-radius: 16px;
     }
 </style>
 """,
@@ -680,6 +754,7 @@ def generate_response(prompt, model, temperature=0.7):
 # SESSION STATE INITIALIZATION
 # ============================================
 
+# Initialize session state variables
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -688,6 +763,109 @@ if "selected_model" not in st.session_state:
 
 if "total_messages" not in st.session_state:
     st.session_state.total_messages = 0
+
+if "history_loaded" not in st.session_state:
+    st.session_state.history_loaded = False
+
+
+# ============================================
+# LOCALSTORAGE PERSISTENCE FUNCTIONS
+# ============================================
+
+
+def save_messages_to_localstorage():
+    """Save messages to browser localStorage using JavaScript"""
+    if not st.session_state.messages:
+        return
+
+    import json
+
+    messages_json = json.dumps(st.session_state.messages).replace("'", "\\'")
+    total_messages = st.session_state.total_messages
+    
+    components.html(
+        f"""
+        <script>
+        (function() {{
+            const STORAGE_KEY = 'ollama_streamlit_chat_history';
+            const messages = {messages_json};
+            
+            try {{
+                const historyData = {{
+                    messages: messages,
+                    totalMessages: {total_messages},
+                    timestamp: new Date().toISOString()
+                }};
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(historyData));
+                console.log('💾 Saved', messages.length, 'messages to localStorage');
+            }} catch (error) {{
+                console.error('Error saving chat history:', error);
+            }}
+        }})();
+        </script>
+        """,
+        height=0,
+    )
+
+
+def load_messages_from_localstorage():
+    """Load messages from browser localStorage and restore to session state"""
+    if not st.session_state.history_loaded:
+        # Use a file-based approach for simplicity (still local, still private)
+        import json
+        from pathlib import Path
+        
+        cache_file = Path.home() / ".ollama_streamlit_cache.json"
+        
+        try:
+            if cache_file.exists():
+                with open(cache_file, "r") as f:
+                    data = json.load(f)
+                    st.session_state.messages = data.get("messages", [])
+                    st.session_state.total_messages = data.get("totalMessages", 0)
+                    logger.info(f"💾 Loaded {len(st.session_state.messages)} messages from cache")
+        except Exception as e:
+            logger.error(f"Error loading cache: {e}")
+        
+        st.session_state.history_loaded = True
+
+
+def save_messages_to_cache():
+    """Save messages to a local cache file"""
+    import json
+    from pathlib import Path
+    
+    cache_file = Path.home() / ".ollama_streamlit_cache.json"
+    
+    try:
+        data = {
+            "messages": st.session_state.messages,
+            "totalMessages": st.session_state.total_messages,
+            "timestamp": datetime.now().isoformat()
+        }
+        with open(cache_file, "w") as f:
+            json.dump(data, f, indent=2)
+        logger.info(f"💾 Saved {len(st.session_state.messages)} messages to cache")
+    except Exception as e:
+        logger.error(f"Error saving cache: {e}")
+
+
+def clear_cache():
+    """Clear the local cache file"""
+    from pathlib import Path
+    
+    cache_file = Path.home() / ".ollama_streamlit_cache.json"
+    
+    try:
+        if cache_file.exists():
+            cache_file.unlink()
+            logger.info("🗑️ Cache file cleared")
+    except Exception as e:
+        logger.error(f"Error clearing cache: {e}")
+
+
+# Load messages on first run
+load_messages_from_localstorage()
 
 # ============================================
 # SIDEBAR - SETTINGS & CONTROLS
@@ -786,6 +964,14 @@ with st.sidebar:  # pragma: no cover
     st.markdown("### 📊 Session Stats")
     st.metric("Messages", st.session_state.total_messages)
     st.metric("Model", selected_model.split(":")[0] if selected_model else "N/A")
+    
+    # Storage info
+    from pathlib import Path
+    cache_file = Path.home() / ".ollama_streamlit_cache.json"
+    if cache_file.exists():
+        st.caption("💾 Conversation saved locally")
+    else:
+        st.caption("📝 Start chatting to save")
 
     st.markdown("---")
 
@@ -806,14 +992,94 @@ with st.sidebar:  # pragma: no cover
             # Escape HTML to prevent tags from showing or breaking layout
             preview_escaped = html.escape(preview)
             
-            # Create history item (note: no extra indentation/spaces)
-            history_items.append(f'<div class="chat-history-item {role}"><div class="chat-history-role {role}">{"👤 You" if role == "user" else "🤖 Assistant"}</div><div class="chat-history-content">{preview_escaped}</div></div>')
+            # Create clickable history item with data-target attribute
+            message_id = f"msg-{idx}"
+            history_items.append(
+                f'<div class="chat-history-item {role}" data-target="{message_id}" style="cursor: pointer;">'
+                f'<div class="chat-history-role {role}">{"👤 You" if role == "user" else "🤖 Assistant"}</div>'
+                f'<div class="chat-history-content">{preview_escaped}</div>'
+                f'</div>'
+            )
         
         # Build complete HTML (single line, no extra whitespace)
         history_html = '<div class="chat-history-container">' + ''.join(history_items) + '</div>'
         
         # Use st.write with unsafe_allow_html instead of st.markdown
         st.write(history_html, unsafe_allow_html=True)
+        
+        # Add JavaScript for clickable history items (using components.html for proper execution)
+        components.html(
+            """
+            <script>
+            (function() {
+                // Function to handle message clicks
+                function handleMessageClick(event) {
+                    const targetId = event.currentTarget.getAttribute('data-target');
+                    if (!targetId) return;
+                    
+                    event.preventDefault();
+                    
+                    // Access parent document (Streamlit's main frame)
+                    const parentDoc = window.parent.document;
+                    
+                    // Find the target element in parent document
+                    const targetElement = parentDoc.getElementById(targetId);
+                    if (targetElement) {
+                        // Smooth scroll to element
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        
+                        // Find the chat message container to highlight
+                        const chatMessage = targetElement.closest('[data-testid="stChatMessage"]');
+                        if (chatMessage) {
+                            // Add highlight class
+                            chatMessage.classList.add('highlight');
+                            
+                            // Remove highlight after animation
+                            setTimeout(function() {
+                                chatMessage.classList.remove('highlight');
+                            }, 2000);
+                        }
+                    }
+                }
+                
+                // Function to attach event listeners
+                function attachListeners() {
+                    const parentDoc = window.parent.document;
+                    const historyItems = parentDoc.querySelectorAll('.chat-history-item[data-target]');
+                    
+                    historyItems.forEach(function(item) {
+                        // Remove old listener if exists
+                        item.removeEventListener('click', handleMessageClick);
+                        // Add new listener
+                        item.addEventListener('click', handleMessageClick);
+                    });
+                }
+                
+                // Initial setup
+                attachListeners();
+                
+                // Observe DOM changes in parent document
+                const observer = new MutationObserver(function(mutations) {
+                    attachListeners();
+                });
+                
+                // Start observing the sidebar in parent document
+                const parentDoc = window.parent.document;
+                const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+                if (sidebar) {
+                    observer.observe(sidebar, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+            })();
+            </script>
+            """,
+            height=0,
+        )
     else:
         st.write('<div class="chat-history-empty">No messages yet.<br>Start a conversation!</div>', unsafe_allow_html=True)
 
@@ -823,6 +1089,7 @@ with st.sidebar:  # pragma: no cover
     if st.button("🗑️ Clear Chat History", use_container_width=True, type="secondary"):
         st.session_state.messages = []
         st.session_state.total_messages = 0
+        clear_cache()  # Clear saved cache
         st.rerun()
 
     st.markdown("---")
@@ -880,7 +1147,10 @@ if len(st.session_state.messages) == 0:
     )
 else:  # pragma: no cover
     # Display Chat History
-    for message in st.session_state.messages:
+    for idx, message in enumerate(st.session_state.messages):
+        # Add anchor ID for this message
+        st.markdown(f'<span id="msg-{idx}" class="message-anchor"></span>', unsafe_allow_html=True)
+        
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
@@ -911,6 +1181,9 @@ if prompt := st.chat_input(
     # Save assistant response
     st.session_state.messages.append({"role": "assistant", "content": full_response})
     st.session_state.total_messages += 1
+    
+    # Save to cache for persistence
+    save_messages_to_cache()
 
 # Footer
 st.markdown("---")
@@ -918,7 +1191,10 @@ st.markdown(
     """
 <div style="text-align: center; padding: 20px;">
     <p style="color: #7dd3fc !important; margin: 10px 0;">
-        🔒 Your conversations are completely private and stored only in your browser session
+        🔒 Your conversations are completely private and saved locally on your machine
+    </p>
+    <p style="color: #a1a1aa !important; margin: 10px 0; font-size: 0.85rem;">
+        💾 Conversations persist across page refreshes • Stored at: ~/.ollama_streamlit_cache.json
     </p>
     <p style="color: #7dd3fc !important; margin: 10px 0;">💡 Powered by Ollama | Built with ❤️ using Streamlit</p>
 </div>
