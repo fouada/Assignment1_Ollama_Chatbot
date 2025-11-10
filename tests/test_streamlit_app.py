@@ -3,6 +3,7 @@ Comprehensive unit tests for Streamlit application
 Target: 95%+ code coverage
 """
 
+import json
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -281,7 +282,6 @@ class TestPersistenceFunctions:
     ):
         """Test loading messages from cache file"""
         from app_streamlit import load_messages_from_localstorage
-        import json
 
         # Setup
         mock_session_state.history_loaded = False
