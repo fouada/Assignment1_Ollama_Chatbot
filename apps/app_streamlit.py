@@ -782,7 +782,7 @@ def save_messages_to_localstorage():
 
     messages_json = json.dumps(st.session_state.messages).replace("'", "\\'")
     total_messages = st.session_state.total_messages
-    
+
     components.html(
         f"""
         <script>
