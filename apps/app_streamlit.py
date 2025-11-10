@@ -6,6 +6,7 @@ Features: 100% Private | Cost-Free | No Internet Required
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
+import html
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -516,6 +517,76 @@ st.markdown(
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(102, 126, 234, 0.7);
     }
+
+    /* Chat History Panel in Sidebar */
+    .chat-history-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        background: rgba(26, 26, 36, 0.4);
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        margin: 1rem 0;
+    }
+
+    .chat-history-item {
+        background: rgba(30, 30, 46, 0.6);
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        border-radius: 8px;
+        border-left: 3px solid;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .chat-history-item:hover {
+        background: rgba(30, 30, 46, 0.8);
+        transform: translateX(2px);
+    }
+
+    .chat-history-item.user {
+        border-left-color: #f093fb;
+    }
+
+    .chat-history-item.assistant {
+        border-left-color: #667eea;
+    }
+
+    .chat-history-role {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        opacity: 0.8;
+    }
+
+    .chat-history-role.user {
+        color: #f093fb;
+    }
+
+    .chat-history-role.assistant {
+        color: #667eea;
+    }
+
+    .chat-history-content {
+        font-size: 0.85rem;
+        color: #e4e4e7;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
+
+    .chat-history-empty {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #a1a1aa;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
 </style>
 """,
     unsafe_allow_html=True,
@@ -715,6 +786,36 @@ with st.sidebar:  # pragma: no cover
     st.markdown("### 📊 Session Stats")
     st.metric("Messages", st.session_state.total_messages)
     st.metric("Model", selected_model.split(":")[0] if selected_model else "N/A")
+
+    st.markdown("---")
+
+    # Chat History Panel
+    st.markdown("### 💬 Conversation History")
+    
+    if len(st.session_state.messages) > 0:
+        # Create scrollable container with all messages
+        history_items = []
+        
+        for idx, message in enumerate(st.session_state.messages):
+            role = message["role"]
+            content = message["content"]
+            
+            # Truncate long messages for preview (show first 150 chars)
+            preview = content[:150] + "..." if len(content) > 150 else content
+            
+            # Escape HTML to prevent tags from showing or breaking layout
+            preview_escaped = html.escape(preview)
+            
+            # Create history item (note: no extra indentation/spaces)
+            history_items.append(f'<div class="chat-history-item {role}"><div class="chat-history-role {role}">{"👤 You" if role == "user" else "🤖 Assistant"}</div><div class="chat-history-content">{preview_escaped}</div></div>')
+        
+        # Build complete HTML (single line, no extra whitespace)
+        history_html = '<div class="chat-history-container">' + ''.join(history_items) + '</div>'
+        
+        # Use st.write with unsafe_allow_html instead of st.markdown
+        st.write(history_html, unsafe_allow_html=True)
+    else:
+        st.write('<div class="chat-history-empty">No messages yet.<br>Start a conversation!</div>', unsafe_allow_html=True)
 
     st.markdown("---")
 
