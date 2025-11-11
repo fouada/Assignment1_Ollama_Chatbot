@@ -603,11 +603,10 @@ A luxurious, ChatGPT-like web application that provides:
 - Real-time streaming chat responses (word-by-word display)
 - Model selection dropdown (choose between llama3.2, mistral, phi3, codellama)
 - Temperature control slider (0.0-2.0) for adjusting AI creativity
-- Chat history management with automatic persistence across page refreshes
-- Clickable conversation history in sidebar for easy navigation
+- Chat history management with session persistence
 - Connection status monitoring
 - Session statistics tracking
-- Privacy feature indicators (conversations saved locally)
+- Privacy feature indicators
 - Clear conversation functionality
 - Responsive, gradient-based UI design
 
@@ -647,7 +646,6 @@ Professional launcher and shutdown scripts that handle:
 - ✅ **Multi-Model Support** - Switch between different LLM models
 - ✅ **Temperature Control** - Adjust response creativity (deterministic ↔ creative)
 - ✅ **Chat History** - Session-based conversation tracking
-- ✅ **💾 Conversation Persistence** - Conversations survive page refreshes (100% local)
 - ✅ **REST API** - Full programmatic access via HTTP endpoints
 - ✅ **Health Monitoring** - Server status and connectivity checks
 - ✅ **Error Handling** - Graceful error messages and recovery
