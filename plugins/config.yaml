@@ -1,0 +1,242 @@
+# Plugin System Configuration
+# Production-Grade Configuration for MIT-Level Architecture
+
+# ============================================================================
+# Global Plugin Manager Settings
+# ============================================================================
+plugin_manager:
+  enable_hot_reload: false  # Set to true in development
+  enable_circuit_breaker: true
+  max_concurrent_plugins: 10
+  default_timeout: 30.0
+  plugin_discovery_paths:
+    - "plugins/backend_plugins"
+    - "plugins/examples"
+    - "plugins/custom"  # Add your custom plugins here
+
+# ============================================================================
+# Hook System Configuration
+# ============================================================================
+hooks:
+  default_timeout: 30.0
+  max_concurrent_hooks: 10
+  circuit_breaker:
+    failure_threshold: 5
+    timeout_seconds: 60
+
+# ============================================================================
+# Backend Plugins
+# ============================================================================
+backends:
+  ollama:
+    enabled: true
+    plugin_file: "backend_plugins/ollama_backend_plugin.py"
+    config:
+      host: "http://localhost:11434"
+      default_model: "llama3.2"
+      timeout: 120.0
+      max_retries: 3
+    priority: "NORMAL"
+
+  # Example: OpenAI Backend (implement as needed)
+  # openai:
+  #   enabled: false
+  #   plugin_file: "backend_plugins/openai_backend_plugin.py"
+  #   config:
+  #     api_key: "${OPENAI_API_KEY}"  # Use environment variable
+  #     model: "gpt-4"
+  #     timeout: 60.0
+  #   priority: "NORMAL"
+
+# ============================================================================
+# Message Processing Plugins
+# ============================================================================
+message_processors:
+  content_filter:
+    enabled: true
+    plugin_file: "examples/content_filter_plugin.py"
+    config:
+      filter_profanity: true
+      filter_pii: true
+      replacement: "***"
+      custom_words: []
+      max_content_length: 1000
+    priority: "CRITICAL"  # Run first for security
+
+  # Add more message processors as needed
+  # translator:
+  #   enabled: false
+  #   plugin_file: "custom/translator_plugin.py"
+  #   config:
+  #     target_language: "en"
+  #   priority: "NORMAL"
+
+# ============================================================================
+# Feature Extension Plugins
+# ============================================================================
+features:
+  conversation_memory:
+    enabled: true
+    plugin_file: "examples/conversation_memory_plugin.py"
+    config:
+      max_messages: 50
+      enable_summarization: false
+      session_timeout_minutes: 30
+    priority: "HIGH"
+
+  rag:
+    enabled: true
+    plugin_file: "examples/rag_plugin.py"
+    config:
+      enable_rag: true
+      top_k: 3
+      relevance_threshold: 0.5
+      # knowledge_base_path: "data/knowledge_base.json"  # Optional
+    priority: "NORMAL"
+
+  # Example: Function calling
+  # function_calling:
+  #   enabled: false
+  #   plugin_file: "custom/function_calling_plugin.py"
+  #   config:
+  #     allowed_functions: ["search", "calculate", "get_weather"]
+  #   priority: "NORMAL"
+
+# ============================================================================
+# Middleware Plugins
+# ============================================================================
+middleware:
+  # ISO/IEC 25010 Security: Non-repudiation & Accountability
+  audit_trail:
+    enabled: true
+    plugin_file: "examples/audit_plugin.py"
+    config:
+      audit_directory: "logs/audit"
+    priority: "CRITICAL"
+
+  # ISO/IEC 25010 Security: Authenticity & Confidentiality
+  authentication:
+    enabled: true
+    plugin_file: "examples/auth_plugin.py"
+    config:
+      require_auth: false  # Set to true for production with remote access
+      token_expiry_hours: 24
+      create_default_admin: false
+      public_endpoints:
+        - "/api"
+        - "/health"
+        - "/auth/login"
+        - "/auth/register"
+    priority: "CRITICAL"
+
+  # ISO/IEC 25010 Security & Performance: DoS Protection
+  rate_limiter:
+    enabled: true
+    plugin_file: "examples/rate_limit_plugin.py"
+    config:
+      max_requests_per_minute: 60
+      max_burst: 10
+      enable_user_limiting: true
+      enable_ip_limiting: true
+    priority: "CRITICAL"
+
+  logging:
+    enabled: true
+    plugin_file: "examples/logging_middleware_plugin.py"
+    config:
+      log_requests: true
+      log_responses: true
+      log_performance: true
+      sanitize_fields: ["password", "token", "api_key", "secret"]
+      max_content_length: 1000
+    priority: "MONITORING"  # Run last for observability
+
+  # Example: Caching
+  # cache:
+  #   enabled: false
+  #   plugin_file: "custom/cache_plugin.py"
+  #   config:
+  #     ttl_seconds: 3600
+  #     max_size: 1000
+  #   priority: "HIGH"
+
+# ============================================================================
+# Observability & Monitoring
+# ============================================================================
+observability:
+  metrics:
+    enabled: true
+    export_interval_seconds: 60
+    # Export to Prometheus, DataDog, etc.
+    # prometheus_port: 9090
+
+  health_checks:
+    enabled: true
+    interval_seconds: 30
+    endpoints:
+      - "/health"
+      - "/plugins"
+
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    format: "json"  # json or text
+    file: "logs/plugin_system.log"
+    rotation: "daily"
+    retention_days: 30
+
+  # Resource monitoring for cost analysis
+  resource_monitor:
+    enabled: true
+    plugin_file: "monitoring_plugins/resource_monitor_plugin.py"
+    config:
+      report_interval_seconds: 300  # Report every 5 minutes
+      alert_thresholds:
+        cpu_percent: 90
+        memory_percent: 85
+        gpu_memory_percent: 90
+    priority: "MONITORING"
+
+# ============================================================================
+# Security
+# ============================================================================
+security:
+  plugin_sandboxing:
+    enabled: true  # Isolate plugin execution
+    max_memory_mb: 512
+    max_cpu_percent: 50
+
+  allowed_imports:
+    # Whitelist of allowed imports for plugins
+    - "asyncio"
+    - "logging"
+    - "datetime"
+    - "typing"
+    - "json"
+    - "re"
+    # Add more as needed
+
+  denied_imports:
+    # Blacklist dangerous imports
+    - "os.system"
+    - "subprocess"
+    - "eval"
+    - "exec"
+
+# ============================================================================
+# Development Settings
+# ============================================================================
+development:
+  debug: false
+  auto_reload: false
+  verbose_logging: false
+  enable_profiling: false
+
+# ============================================================================
+# Production Settings
+# ============================================================================
+production:
+  strict_validation: true
+  fail_on_plugin_error: false  # Graceful degradation
+  enable_metrics: true
+  enable_health_checks: true
+  max_plugin_failures: 10

@@ -13,3 +13,10 @@ requests>=2.32.0
 
 # Environment variable management
 python-dotenv>=1.0.0
+
+# Plugin System Dependencies
+pyyaml>=6.0.1  # Configuration loading
+
+# Visualization and Dashboard
+plotly>=5.18.0  # Interactive charts
+pandas>=2.1.0  # Data manipulation for visualization
