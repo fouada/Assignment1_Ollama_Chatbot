@@ -403,18 +403,25 @@ This project represents **significant engineering effort** and professional-leve
 <p><em>Enterprise-level CI/CD pipeline running on every commit</em></p>
 </td>
 <td width="50%">
-<h4>📜 Automated Test Execution</h4>
-<img src="docs/screenshots/scripts/run-tests-script.png" alt="Test Script" width="100%"/>
-<p><strong>Local Test Validation:</strong></p>
+<h4>🧪 Comprehensive Test Execution - Part 1</h4>
+<img src="docs/screenshots/testing/pytest-running-all-tests_1.png" alt="Pytest Execution Part 1" width="100%"/>
+<p><em>All 119 tests executing with detailed output</em></p>
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<h4>📊 Test Results & 100% Coverage Achievement</h4>
+<img src="docs/screenshots/testing/pytest-running-all-tests_2.png" alt="Pytest Results & Coverage" width="100%"/>
+<p><strong>Professional Test Automation Results:</strong></p>
 <ul>
-<li>✅ All 119 tests passing</li>
+<li>✅ All 119 tests passing (102 unit + 17 integration)</li>
 <li>✅ 100% code coverage achieved</li>
-<li>✅ Unit tests: 102 (fast, mocked)</li>
-<li>✅ Integration tests: 17 (real Ollama)</li>
-<li>✅ Execution time: 22 seconds</li>
-<li>✅ Comprehensive validation suite</li>
+<li>✅ Flask: 142 statements, 0 missing → 100%</li>
+<li>✅ Streamlit: 127 statements, 0 missing → 100%</li>
+<li>✅ Total: 269 statements, 0 missing → 100%</li>
+<li>✅ Execution time: 74.52s (119 tests)</li>
 </ul>
-<p><em>Professional test automation with full coverage</em></p>
+<p><em>Comprehensive validation with industry-leading coverage</em></p>
 </td>
 </tr>
 </table>
@@ -603,10 +610,11 @@ A luxurious, ChatGPT-like web application that provides:
 - Real-time streaming chat responses (word-by-word display)
 - Model selection dropdown (choose between llama3.2, mistral, phi3, codellama)
 - Temperature control slider (0.0-2.0) for adjusting AI creativity
-- Chat history management with session persistence
+- Chat history management with automatic persistence across page refreshes
+- Clickable conversation history in sidebar for easy navigation
 - Connection status monitoring
 - Session statistics tracking
-- Privacy feature indicators
+- Privacy feature indicators (conversations saved locally)
 - Clear conversation functionality
 - Responsive, gradient-based UI design
 
@@ -646,6 +654,7 @@ Professional launcher and shutdown scripts that handle:
 - ✅ **Multi-Model Support** - Switch between different LLM models
 - ✅ **Temperature Control** - Adjust response creativity (deterministic ↔ creative)
 - ✅ **Chat History** - Session-based conversation tracking
+- ✅ **💾 Conversation Persistence** - Conversations survive page refreshes (100% local)
 - ✅ **REST API** - Full programmatic access via HTTP endpoints
 - ✅ **Health Monitoring** - Server status and connectivity checks
 - ✅ **Error Handling** - Graceful error messages and recovery
