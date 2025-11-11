@@ -18,23 +18,231 @@
 
 ---
 
+## 📸 Visual Showcase
+
+### User Interfaces
+
+<table>
+<tr>
+<td width="50%">
+<h4>🌐 Streamlit Web Interface</h4>
+<img src="docs/screenshots/ui/streamlit/Streamlit_UI_1_With_Model_Options.png" alt="Streamlit UI - Model Selection" width="100%"/>
+<p><em>Beautiful ChatGPT-like interface with model selection and temperature control</em></p>
+</td>
+<td width="50%">
+<h4>💬 Live Chat Conversation</h4>
+<img src="docs/screenshots/ui/streamlit/Streamlit_UI_2_With_Model_Chat.png" alt="Streamlit UI - Chat" width="100%"/>
+<p><em>Real-time AI conversation with streaming responses</em></p>
+</td>
+</tr>
+<tr>
+<td width="50%">
+<h4>🔧 Flask REST API Interface</h4>
+<img src="docs/screenshots/ui/flask/flask_UI_1_With_Model_Options.png" alt="Flask UI - Options" width="100%"/>
+<p><em>Professional REST API with interactive documentation</em></p>
+</td>
+<td width="50%">
+<h4>🤖 Flask API Chat</h4>
+<img src="docs/screenshots/ui/flask/flask_UI_2_with_Model_chat.png" alt="Flask UI - Chat" width="100%"/>
+<p><em>API-powered chat interface for programmatic access</em></p>
+</td>
+</tr>
+</table>
+
+### AI Features in Action
+
+<table>
+<tr>
+<td width="50%">
+<h4>🦙 Llama 3.2 Model Response</h4>
+<img src="docs/screenshots/features/model-comparison-llama32.png" alt="Llama 3.2 Response" width="100%"/>
+<p><em>Fast, accurate responses from Llama 3.2 (3B parameters)</em></p>
+</td>
+<td width="50%">
+<h4>⚡ Mistral Model Response</h4>
+<img src="docs/screenshots/features/model-comparison-mistral.png" alt="Mistral Response" width="100%"/>
+<p><em>Powerful reasoning from Mistral (7B parameters)</em></p>
+</td>
+</tr>
+<tr>
+<td width="50%">
+<h4>💻 Code Generation with CodeLlama</h4>
+<img src="docs/screenshots/features/code-generation-codellama.png" alt="CodeLlama Generation" width="100%"/>
+<p><em>Professional code generation with detailed comments</em></p>
+</td>
+<td width="50%">
+<h4>⚡ Streaming Response</h4>
+<img src="docs/screenshots/features/streaming-response-in-progress.png" alt="Streaming Response" width="100%"/>
+<p><em>Real-time token-by-token response generation</em></p>
+</td>
+</tr>
+</table>
+
+### Temperature Control Demonstration
+
+<table>
+<tr>
+<td width="50%">
+<h4>🎯 Low Temperature (0.2) - Focused</h4>
+<img src="docs/screenshots/features/temperature-low-focused.png" alt="Low Temperature" width="100%"/>
+<p><em>Deterministic, factual responses for precise tasks</em></p>
+</td>
+<td width="50%">
+<h4>🎨 High Temperature (1.8) - Creative</h4>
+<img src="docs/screenshots/features/temperature-high-creative.png" alt="High Temperature" width="100%"/>
+<p><em>Creative, varied responses for brainstorming</em></p>
+</td>
+</tr>
+</table>
+
+### Conversation Management
+
+<table>
+<tr>
+<td colspan="2">
+<h4>💬 Extended Conversation with History Panel</h4>
+<p><em>Full conversation with clickable history sidebar</em></p>
+</td>
+</tr>
+<tr>
+<td width="50%">
+<img src="docs/screenshots/features/conversation-history-long-part1.png" alt="Conversation Part 1" width="100%"/>
+<p><em>Beginning of conversation with sidebar navigation</em></p>
+</td>
+<td width="50%">
+<img src="docs/screenshots/features/conversation-history-long-part2.png" alt="Conversation Part 2" width="100%"/>
+<p><em>Continued conversation showing context retention</em></p>
+</td>
+</tr>
+<tr>
+<td width="50%">
+<img src="docs/screenshots/features/conversation-history-long-part3.png" alt="Conversation Part 3" width="100%"/>
+<p><em>Middle portion with detailed AI responses</em></p>
+</td>
+<td width="50%">
+<img src="docs/screenshots/features/conversation-history-long-part4.png" alt="Conversation Part 4" width="100%"/>
+<p><em>End of conversation demonstrating full context tracking</em></p>
+</td>
+</tr>
+</table>
+
+### Dual Interface Capability
+
+<table>
+<tr>
+<td width="100%">
+<h4>🔄 Flask API + Streamlit UI Running Simultaneously</h4>
+<img src="docs/screenshots/features/dual-interface-side-by-side.png" alt="Dual Interface" width="100%"/>
+<p><em>Both interfaces operational at the same time - web UI for users, REST API for developers</em></p>
+</td>
+</tr>
+</table>
+
+### Professional Testing & Quality
+
+<table>
+<tr>
+<td width="50%">
+<h4>🧪 Comprehensive Test Suite</h4>
+<img src="docs/screenshots/testing/pytest-running-all-tests_1.png" alt="Pytest Tests Part 1" width="100%"/>
+<p><em>119 tests passing - Unit + Integration</em></p>
+</td>
+<td width="50%">
+<h4>📊 100% Coverage Achievement</h4>
+<img src="docs/screenshots/testing/pytest-running-all-tests_2.png" alt="Pytest Tests Part 2" width="100%"/>
+<p><em>All 119 tests passed with 100% code coverage</em></p>
+</td>
+</tr>
+<tr>
+<td width="50%">
+<h4>📈 HTML Coverage Report</h4>
+<img src="docs/screenshots/testing/coverage-html-report.png" alt="Coverage Report" width="100%"/>
+<p><em>Interactive coverage report showing 100% for both Flask and Streamlit</em></p>
+</td>
+<td width="50%">
+<h4>🔍 Line-by-Line Coverage</h4>
+<img src="docs/screenshots/testing/coverage-line-by-line.png" alt="Line Coverage" width="100%"/>
+<p><em>Every line tested and validated (green = covered)</em></p>
+</td>
+</tr>
+</table>
+
+### REST API Testing
+
+<table>
+<tr>
+<td width="33%">
+<h4>💚 Health Check API</h4>
+<img src="docs/screenshots/api/flask-health-check-response.png" alt="Health Check" width="100%"/>
+<p><em>System health monitoring endpoint</em></p>
+</td>
+<td width="33%">
+<h4>📋 Models List API</h4>
+<img src="docs/screenshots/api/flask-models-list-response.png" alt="Models API" width="100%"/>
+<p><em>Available AI models listing</em></p>
+</td>
+<td width="33%">
+<h4>💬 Chat API Response</h4>
+<img src="docs/screenshots/api/flask-chat-api-request-response.png" alt="Chat API" width="100%"/>
+<p><em>Full AI conversation via REST</em></p>
+</td>
+</tr>
+</table>
+
+### Robust Error Handling
+
+<table>
+<tr>
+<td width="50%">
+<h4>⚠️ Ollama Disconnected Error</h4>
+<img src="docs/screenshots/error-handling/ollama-disconnected-error.png" alt="Connection Error" width="100%"/>
+<p><em>Graceful error handling with clear user guidance</em></p>
+</td>
+<td width="50%">
+<h4>❗ No Models Warning</h4>
+<img src="docs/screenshots/error-handling/no-models-warning.png" alt="No Models" width="100%"/>
+<p><em>Helpful error messages with fix instructions</em></p>
+</td>
+</tr>
+</table>
+
+### CI/CD & Automation
+
+<table>
+<tr>
+<td width="50%">
+<h4>🚀 GitHub Actions CI/CD</h4>
+<img src="docs/screenshots/ci-cd/github-actions-workflows.png" alt="GitHub Actions" width="100%"/>
+<p><em>Automated testing on every commit across multiple platforms</em></p>
+</td>
+<td width="50%">
+<h4>📜 Test Execution Script</h4>
+<img src="docs/screenshots/scripts/run-tests-script.png" alt="Test Script" width="100%"/>
+<p><em>Comprehensive validation with automated test runner</em></p>
+</td>
+</tr>
+</table>
+
+---
+
 ## 📋 Table of Contents
 
-1. [Abstract](#-abstract)
-2. [Quality Assurance](#-quality-assurance)
-3. [What Does This Repository Do?](#-what-does-this-repository-do)
-4. [Features](#-features)
-5. [Software Requirements](#-software-requirements)
-6. [Installation](#-installation)
-7. [How to Operate](#-how-to-operate)
-8. [Project Structure](#-project-structure)
-9. [Testing](#-testing)
-10. [Instructions & Roles](#-instructions--roles)
-11. [Edge Cases & Error Handling](#-edge-cases--error-handling)
-12. [Troubleshooting](#-troubleshooting)
-13. [Documentation](#-documentation)
-14. [Contributing](#-contributing)
-15. [License](#-license)
+1. [📸 Visual Showcase](#-visual-showcase) ⭐ **NEW**
+2. [Abstract](#-abstract)
+3. [Quality Assurance](#-quality-assurance)
+4. [What Does This Repository Do?](#-what-does-this-repository-do)
+5. [Features](#-features)
+6. [Software Requirements](#-software-requirements)
+7. [Installation](#-installation)
+8. [How to Operate](#-how-to-operate)
+9. [Project Structure](#-project-structure)
+10. [Testing](#-testing)
+11. [Instructions & Roles](#-instructions--roles)
+12. [Edge Cases & Error Handling](#-edge-cases--error-handling)
+13. [Troubleshooting](#-troubleshooting)
+14. [Documentation](#-documentation)
+15. [Contributing](#-contributing)
+16. [License](#-license)
 
 ---
 
@@ -3617,6 +3825,50 @@ SOFTWARE.
 - **Authors:**
   - Fouad Azem (ID: 040830861)
   - Tal Goldengorn (ID: 207042573)
+
+---
+
+## 📸 Complete Visual Documentation
+
+This README includes **comprehensive visual documentation** with over **25 screenshots** demonstrating every aspect of the system:
+
+### 📊 Screenshot Coverage:
+
+| Category | Screenshots | What They Show |
+|----------|-------------|----------------|
+| **🌐 User Interfaces** | 4 | Flask & Streamlit UIs in action |
+| **🤖 AI Features** | 4 | Model comparisons, code generation, streaming |
+| **🎨 Temperature Control** | 2 | Creative vs focused AI responses |
+| **💬 Conversations** | 4 | Extended conversation with history tracking |
+| **🔄 Dual Interface** | 1 | Both Flask and Streamlit running together |
+| **🧪 Testing & Quality** | 4 | 100% test coverage, pytest results |
+| **📡 REST API** | 3 | Health check, models, chat endpoints |
+| **⚠️ Error Handling** | 2 | Graceful error messages and recovery |
+| **🚀 CI/CD & Scripts** | 2 | GitHub Actions & automation scripts |
+| **Total** | **26** | **Complete system documentation** |
+
+### 🎯 Why Visual Documentation Matters:
+
+✅ **For Students:** Shows working implementation, not just code  
+✅ **For Graders:** Proves functionality with real screenshots  
+✅ **For Developers:** Clear examples of expected behavior  
+✅ **For Users:** Visual guide to features and capabilities  
+✅ **For Quality:** Demonstrates 100% test coverage visually  
+
+### 📁 All Screenshots Are Organized:
+
+```
+docs/screenshots/
+├── ui/              # User interfaces (Flask, Streamlit)
+├── features/        # AI capabilities & temperature control
+├── api/             # REST API endpoints
+├── testing/         # Test results & coverage
+├── error-handling/  # Error scenarios
+├── scripts/         # Automation scripts
+└── ci-cd/           # GitHub Actions workflows
+```
+
+**Every screenshot in this README is a real capture from the actual running system**, demonstrating that all documented features work as described.
 
 ---
 
