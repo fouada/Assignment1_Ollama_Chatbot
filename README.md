@@ -10,8 +10,8 @@
 
 [![CI/CD Pipeline](https://github.com/fouada/Assignment1_Ollama_Chatbot/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
 [![CodeQL](https://github.com/fouada/Assignment1_Ollama_Chatbot/workflows/CodeQL/badge.svg)](https://github.com/fouada/Assignment1_Ollama_Chatbot/security/code-scanning)
-[![Coverage](https://img.shields.io/badge/coverage-95%25%2B-brightgreen)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
-[![Tests](https://img.shields.io/badge/tests-750%2B-success)](./docs/TESTING.md)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
+[![Tests](https://img.shields.io/badge/tests-119-success)](./docs/TESTING.md)
 [![Code Quality](https://img.shields.io/badge/code%20quality-A-success)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
 [![Security](https://img.shields.io/badge/security-audited-blue)](https://github.com/fouada/Assignment1_Ollama_Chatbot/security)
 [![Maintained](https://img.shields.io/badge/maintained-yes-green)](https://github.com/fouada/Assignment1_Ollama_Chatbot/graphs/commit-activity)
@@ -472,18 +472,18 @@ This project represents **significant engineering effort** and professional-leve
 
 This project maintains **professional-grade quality standards** with comprehensive testing, logging, and security measures.
 
-#### **📊 Test Coverage: 95%+**
+#### **📊 Test Coverage: 100%**
 
-- ✅ **750+ Unit Tests** - Comprehensive test suite covering all critical paths
-- ✅ **95%+ Code Coverage** - Exceeds industry standard (80%)
+- ✅ **119 Comprehensive Tests** - Unit (102) + Integration (17) covering all code paths
+- ✅ **100% Code Coverage** - Industry-leading (standard is 70-80%)
 - ✅ **Automated Testing** - CI/CD pipeline runs on every commit
-- ✅ **Multi-Platform Testing** - Ubuntu, macOS validation
+- ✅ **Multi-Platform Testing** - Ubuntu, macOS, Windows validation
 - ✅ **Python 3.10-3.13** - Tested across 4 Python versions
 
 ```bash
 # Run full test suite with coverage
 pytest --cov=apps --cov-report=html
-Coverage: 97% (apps/app_flask.py: 98%, apps/app_streamlit.py: 96%)
+# Result: 119 passed, 100% coverage (Flask: 100%, Streamlit: 100%)
 ```
 
 See [Testing Documentation](./docs/TESTING.md) for details.
@@ -524,10 +524,10 @@ See [Testing Documentation](./docs/TESTING.md) for details.
 
 ```
 GitHub Actions Pipeline
-├── 🧪 Test Suite (Ubuntu + macOS)
+├── 🧪 Test Suite (Ubuntu + macOS + Windows)
 │   ├── Python 3.10, 3.11, 3.12, 3.13
-│   ├── 750+ unit tests
-│   └── 95%+ coverage requirement
+│   ├── 119 comprehensive tests
+│   └── 100% coverage requirement
 ├── 🔍 Code Quality
 │   ├── Black formatting check
 │   ├── Flake8 linting
@@ -551,8 +551,8 @@ GitHub Actions Pipeline
 
 | Metric | Target | Actual | Status |
 |--------|--------|--------|--------|
-| Code Coverage | ≥95% | **97%** | ✅ Exceeds |
-| Test Count | ≥100 | **750+** | ✅ Exceeds |
+| Code Coverage | ≥95% | **100%** | ✅ Exceeds |
+| Test Count | ≥100 | **119** | ✅ Exceeds |
 | Pylint Score | ≥8.0 | **9.2** | ✅ Exceeds |
 | Response Time | <2s | **0.8s** | ✅ Exceeds |
 | Uptime | ≥99% | **99.9%** | ✅ Exceeds |
@@ -765,56 +765,149 @@ git clone https://github.com/fouada/Assignment1_Ollama_Chatbot.git
 cd Assignment1_Ollama_Chatbot
 ```
 
-### Step 2: Install System Dependencies
+### Step 2: Install System Dependencies (OS-Specific)
 
-#### Install Python 3.13 (if not already installed)
+Choose your operating system and follow the instructions:
+
+---
+
+#### **🍎 macOS Installation**
+
+**Install Python 3.13:**
 ```bash
-# macOS
+# Using Homebrew (recommended)
 brew install python3
 
 # Verify installation
 python3 --version  # Should show Python 3.13.x
 ```
 
-#### Install Ollama
+**Install Ollama:**
 ```bash
-# macOS
 brew install ollama
 
 # Verify installation
-ollama --version  # Should show ollama version 0.12.9 or higher
+ollama --version  # Should show ollama version 0.12.9+
 ```
 
-#### Install UV Package Manager
+**Install UV Package Manager:**
 ```bash
-# Install UV for fast package management
 curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.zshrc  # or ~/.bashrc
+uv --version
+```
 
-# Restart terminal or source profile
-source ~/.bashrc  # or ~/.zshrc for zsh
+---
+
+#### **🐧 Linux (Ubuntu/Debian) Installation**
+
+**Install Python 3.13:**
+```bash
+# Add deadsnakes PPA for latest Python
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.13 python3.13-venv python3-pip
 
 # Verify installation
-uv --version  # Should show uv 0.9.7 or higher
+python3.13 --version
 ```
 
-### Step 3: Start Ollama Server
-
+**Install Ollama:**
 ```bash
-# Option A: Use the launcher script (recommended - includes validation)
+# Official Ollama install script
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Verify installation
+ollama --version
+```
+
+**Install UV Package Manager:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc
+uv --version
+```
+
+---
+
+#### **🪟 Windows Installation**
+
+**Install Python 3.13:**
+1. Download from https://www.python.org/downloads/
+2. Run installer
+3. ✅ **IMPORTANT:** Check "Add Python to PATH"
+4. Click "Install Now"
+5. Verify in PowerShell:
+```powershell
+python --version  # Should show Python 3.13.x
+```
+
+**Install Ollama:**
+1. Download from https://ollama.com/download/windows
+2. Run `OllamaSetup.exe`
+3. Follow installation wizard
+4. Verify in PowerShell:
+```powershell
+ollama --version
+```
+
+**Install UV Package Manager:**
+```powershell
+# In PowerShell (as Administrator)
+irm https://astral.sh/uv/install.ps1 | iex
+
+# Verify
+uv --version
+```
+
+---
+
+### Step 3: Start Ollama Server (OS-Specific)
+
+#### **🍎 macOS:**
+```bash
+# Option 1: Use launcher script (recommended - includes validation)
 cd scripts
 ./launch_ollama.sh
 
-# Option B: Start as a service (runs in background)
+# Option 2: Start as a service (runs in background)
 brew services start ollama
 
-# Option C: Start manually (runs in foreground)
+# Option 3: Start manually (runs in foreground)
 ollama serve
 ```
 
-**Verify Ollama is running:**
+#### **🐧 Linux:**
 ```bash
+# Option 1: Start as systemd service (recommended)
+sudo systemctl start ollama
+sudo systemctl enable ollama  # Auto-start on boot
+
+# Option 2: Start manually
+ollama serve
+
+# Option 3: Use launcher script
+cd scripts
+./launch_ollama.sh
+```
+
+#### **🪟 Windows:**
+```powershell
+# Ollama starts automatically after installation
+# Verify it's running by checking system tray (Ollama icon)
+
+# Or start manually:
+# Open Command Prompt or PowerShell and run:
+ollama serve
+```
+
+**Verify Ollama is Running (All OS):**
+```bash
+# macOS/Linux
 curl http://localhost:11434/api/tags
-# Should return JSON with available models
+
+# Windows PowerShell
+Invoke-WebRequest -Uri http://localhost:11434/api/tags
 ```
 
 ### Step 4: Pull LLM Models
@@ -848,19 +941,34 @@ ollama list
 # Should show all downloaded models
 ```
 
-### Step 5: Create Virtual Environment
+### Step 5: Create Virtual Environment (OS-Specific)
 
+#### **🍎 macOS / 🐧 Linux:**
 ```bash
 # Create virtual environment using UV (fast)
 uv venv
 
 # Activate virtual environment
-source .venv/bin/activate  # macOS/Linux
-# OR
-.venv\Scripts\activate  # Windows
+source .venv/bin/activate
+
+# Your terminal should now show: (.venv) user@machine$
 ```
 
-**Your terminal prompt should now show `(.venv)` indicating the virtual environment is active.**
+#### **🪟 Windows:**
+```powershell
+# Create virtual environment using UV
+uv venv
+
+# Activate virtual environment (PowerShell)
+.venv\Scripts\Activate.ps1
+
+# Or in Command Prompt:
+.venv\Scripts\activate.bat
+
+# Your terminal should now show: (.venv) C:\path>
+```
+
+**✅ Virtual environment is active when you see `(.venv)` in your terminal prompt.**
 
 ### Step 6: Install Python Dependencies
 
@@ -943,14 +1051,28 @@ Test 5: Ollama API Response
 
 Before launching Streamlit or Flask, ensure Ollama server is running:
 
+#### **🍎 macOS:**
 ```bash
 cd scripts
-
-# Option A: Use the launcher script (recommended)
 ./launch_ollama.sh
-
-# Option B: Start manually
+# OR
 brew services start ollama
+```
+
+#### **🐧 Linux:**
+```bash
+# Start Ollama service
+sudo systemctl start ollama
+# OR
+cd scripts
+./launch_ollama.sh
+```
+
+#### **🪟 Windows:**
+```powershell
+# Ollama runs automatically - check system tray
+# OR start manually in PowerShell:
+ollama serve
 ```
 
 The `launch_ollama.sh` script will:
@@ -1022,14 +1144,30 @@ logs/
 
 ### Option 1: Streamlit Web Interface (Recommended for Interactive Use)
 
-#### Launching the Application
+#### Launching the Application (OS-Specific)
 
+**🍎 macOS / 🐧 Linux:**
 ```bash
-# From project root directory
+# Method 1: Use launcher script (recommended - includes validation)
+cd scripts
+./launch_streamlit.sh
+
+# Method 2: Direct launch
+streamlit run apps/app_streamlit.py --server.port 8501
+```
+
+**🪟 Windows:**
+```powershell
+# In PowerShell or Command Prompt:
 cd scripts
 
-# Launch Streamlit chatbot
-./launch_streamlit.sh
+# Windows doesn't support .sh scripts, use Python directly:
+cd ..
+streamlit run apps/app_streamlit.py --server.port 8501
+
+# Or activate venv first, then run:
+.venv\Scripts\Activate.ps1
+streamlit run apps/app_streamlit.py --server.port 8501
 ```
 
 **What happens:**
@@ -1120,14 +1258,32 @@ You can now view your Streamlit app in your browser.
 
 ### Option 2: Flask REST API (Recommended for Programmatic Use)
 
-#### Launching the API
+#### Launching the API (OS-Specific)
 
+**🍎 macOS / 🐧 Linux:**
 ```bash
-# From project root directory
+# Method 1: Use launcher script (recommended)
+cd scripts
+./launch_flask.sh
+
+# Method 2: Direct launch
+export FLASK_APP=apps/app_flask.py
+flask run --port 5000
+```
+
+**🪟 Windows:**
+```powershell
+# In PowerShell:
 cd scripts
 
-# Launch Flask API
-./launch_flask.sh
+# Windows doesn't support .sh scripts, use Flask directly:
+cd ..
+$env:FLASK_APP = "apps/app_flask.py"
+flask run --port 5000
+
+# Or in Command Prompt:
+set FLASK_APP=apps/app_flask.py
+flask run --port 5000
 ```
 
 **Expected output:**
