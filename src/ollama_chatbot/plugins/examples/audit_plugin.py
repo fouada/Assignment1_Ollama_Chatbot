@@ -80,7 +80,6 @@ class AuditPlugin(BaseMiddleware):
             plugin_type=PluginType.MIDDLEWARE,
             dependencies=(),
             tags=("security", "audit", "compliance", "iso25010"),
-            priority=HookPriority.CRITICAL,
         )
 
     async def _do_initialize(self, config: PluginConfig) -> PluginResult[None]:

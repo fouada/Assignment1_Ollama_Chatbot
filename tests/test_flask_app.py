@@ -278,7 +278,7 @@ class TestErrorHandlers:
     def test_500_internal_server_error(self, flask_client):
         """Test 500 error handler"""
         # Import the app to access error handler directly
-        from app_flask import app, internal_error
+        from ollama_chatbot.api.flask_app import app, internal_error
 
         # Create a mock error
         mock_error = Exception("Test internal server error")

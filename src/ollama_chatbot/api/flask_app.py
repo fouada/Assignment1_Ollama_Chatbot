@@ -28,7 +28,15 @@ from flask import (
 # APP CONFIGURATION
 # ============================================
 
-app = Flask(__name__)
+# Configure Flask to look for templates in the UI directory
+template_dir = Path(__file__).parent.parent / "ui" / "templates"
+static_dir = Path(__file__).parent.parent / "ui" / "static"
+
+app = Flask(
+    __name__,
+    template_folder=str(template_dir) if template_dir.exists() else None,
+    static_folder=str(static_dir) if static_dir.exists() else None,
+)
 app.config["JSON_SORT_KEYS"] = False
 
 # Create logs directory if it doesn't exist

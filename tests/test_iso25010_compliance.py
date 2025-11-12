@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
+import pytest_asyncio
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -54,7 +55,7 @@ class TestAuditPlugin:
     7. Chain verification on corrupted logs
     """
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def audit_plugin(self, tmp_path):
         """Create audit plugin with temporary directory"""
         plugin = AuditPlugin()
@@ -300,7 +301,7 @@ class TestAuthPlugin:
     10. Rate limiting integration
     """
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def auth_plugin(self):
         """Create auth plugin"""
         plugin = AuthPlugin()
@@ -586,7 +587,7 @@ class TestRateLimitPlugin:
     8. Time-based refill accuracy
     """
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def rate_limit_plugin(self):
         """Create rate limit plugin"""
         plugin = RateLimitPlugin()
@@ -808,7 +809,7 @@ class TestISO25010Integration:
     5. Performance under load
     """
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def all_plugins(self, tmp_path):
         """Create all compliance plugins"""
         # Audit plugin
