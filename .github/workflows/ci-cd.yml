@@ -39,13 +39,13 @@ jobs:
 
       - name: 🔍 Lint with flake8
         run: |
-          python -m uv run flake8 apps/ --count --select=E9,F63,F7,F82 --show-source --statistics
-          python -m uv run flake8 apps/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          python -m uv run flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m uv run flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
       - name: 🧪 Run tests with pytest
         # Note: Excludes integration tests (run in separate job with Ollama)
         run: |
-          python -m uv run pytest tests/ -v --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95 -m "not integration"
+          python -m uv run pytest tests/ -v --cov=src/ollama_chatbot --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95 -m "not integration"
 
       - name: 📊 Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -84,16 +84,16 @@ jobs:
           pip install -r requirements.txt
 
       - name: 🎨 Check code formatting with Black
-        run: black --check apps/ tests/
+        run: black --check src/ tests/
 
       - name: 📏 Check import sorting with isort
-        run: isort --check-only apps/ tests/
+        run: isort --check-only src/ tests/
 
       - name: 🔍 Lint with Pylint
-        run: pylint apps/ --fail-under=8.0 || true
+        run: pylint src/ --fail-under=8.0 || true
 
       - name: 🔎 Type check with mypy
-        run: mypy apps/ --ignore-missing-imports || true
+        run: mypy src/ --ignore-missing-imports || true
 
   # ============================================
   # SECURITY SCAN JOB
@@ -114,7 +114,7 @@ jobs:
       - name: 🔐 Run security checks with Bandit
         run: |
           pip install bandit
-          bandit -r apps/ -f json -o bandit-report.json || true
+          bandit -r src/ -f json -o bandit-report.json || true
 
       - name: 🔒 Check for known vulnerabilities
         run: |
@@ -212,7 +212,7 @@ jobs:
 
       - name: 🧪 Run ALL tests (unit + integration) with coverage
         run: |
-          pytest tests/ -v --cov=apps --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95 --tb=short
+          pytest tests/ -v --cov=src/ollama_chatbot --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95 --tb=short
           
       - name: 📊 Upload comprehensive coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -261,7 +261,7 @@ jobs:
 
       - name: 🧪 Run all tests for badge generation
         run: |
-          pytest tests/ --cov=apps --cov-report=term -m "not integration" || echo "Badge will show unit test coverage"
+          pytest tests/ --cov=src/ollama_chatbot --cov-report=term -m "not integration" || echo "Badge will show unit test coverage"
 
       - name: 🏅 Generate coverage badge
         run: |
