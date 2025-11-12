@@ -15,6 +15,9 @@ import ollama
 import streamlit as st
 import streamlit.components.v1 as components
 
+# Import custom CSS styles from separate module
+from streamlit_styles import get_custom_css
+
 # ============================================
 # LOGGING CONFIGURATION
 # ============================================
@@ -53,618 +56,8 @@ st.set_page_config(
 # ============================================
 # CUSTOM CSS - LUXURIOUS PREMIUM DESIGN
 # ============================================
-st.markdown(
-    """
-<style>
-    /* Import Premium Font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap'); /* noqa */
-
-    /* Force Dark Theme at Root Level */
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
-        background-color: #0f0f1e !important;
-        color: #e4e4e7 !important;
-    }
-
-    /* Main App Background with Animated Gradient */
-    .main {
-        background: #0f0f1e !important;
-        font-family: 'Inter', sans-serif;
-        color: #e4e4e7 !important;
-    }
-
-    /* Force Dark Background for Main Content Area */
-    .block-container {
-        background: transparent !important;
-    }
-
-    /* Ensure ALL text elements are readable - Universal text color fix */
-    * {
-        color: #e4e4e7;
-    }
-
-    .main p, .main span, .main div, .main li, .main a {
-        color: #e4e4e7 !important;
-    }
-
-    /* Text elements */
-    p, span, div, label, li, a, td, th {
-        color: #e4e4e7 !important;
-    }
-
-    /* Animated Background Effect */
-    .main::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background:
-            radial-gradient(circle at 20% 30%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.1) 0%, transparent 50%);
-        z-index: 0;
-        pointer-events: none;
-        animation: gradientShift 15s ease infinite;
-    }
-
-    @keyframes gradientShift {
-        0%, 100% { opacity: 0.5; transform: scale(1); }
-        50% { opacity: 0.8; transform: scale(1.1); }
-    }
-
-    /* Sidebar - Premium Glass Effect */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(19, 19, 36, 0.98) 0%, rgba(13, 13, 26, 0.98) 100%);
-        backdrop-filter: blur(20px);
-        border-right: 1px solid rgba(102, 126, 234, 0.3);
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-    }
-
-    [data-testid="stSidebar"] > div {
-        padding: 2rem 1rem;
-    }
-
-    /* Sidebar text colors */
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span {
-        color: #e4e4e7 !important;
-    }
-
-    /* Headers with Gradient Text */
-    h1 {
-        font-family: 'Playfair Display', serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-weight: 700;
-        text-shadow: none;
-        margin-bottom: 0.5rem;
-    }
-
-    h2 {
-        color: #f093fb;
-        font-weight: 600;
-        margin-top: 1rem;
-    }
-
-    h3 {
-        color: #a8a8b3;
-        font-weight: 500;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    /* Chat Messages - Luxurious Style */
-    .stChatMessage {
-        background: rgba(30, 30, 46, 0.8);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-        transition: all 0.3s ease;
-    }
-
-    .stChatMessage:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
-        border-color: rgba(102, 126, 234, 0.4);
-    }
-
-    /* User Messages - Pink Gradient */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-        background: linear-gradient(135deg, rgba(240, 147, 251, 0.15) 0%, rgba(245, 87, 108, 0.15) 100%) !important;
-        border: 1px solid rgba(240, 147, 251, 0.4) !important;
-    }
-
-    /* Assistant Messages - Purple Gradient */
-    [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%) !important;
-        border: 1px solid rgba(102, 126, 234, 0.4) !important;
-    }
-
-    /* Message Content */
-    [data-testid="stChatMessageContent"] {
-        color: #f4f4f5 !important;
-        line-height: 1.6;
-        font-size: 1rem;
-    }
-
-    [data-testid="stChatMessageContent"] p {
-        color: #f4f4f5 !important;
-    }
-
-    [data-testid="stChatMessageContent"] * {
-        color: #f4f4f5 !important;
-    }
-
-    /* Chat Input Box - Premium Style */
-    .stChatInput > div {
-        background: rgba(26, 26, 36, 0.8);
-        backdrop-filter: blur(20px);
-        border: 2px solid rgba(102, 126, 234, 0.3);
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-
-    .stChatInput input {
-        color: #ffffff !important;
-        font-size: 1rem;
-    }
-
-    .stChatInput input::placeholder {
-        color: #a1a1aa;
-    }
-
-    /* All Streamlit labels */
-    label {
-        color: #e4e4e7 !important;
-    }
-
-    /* Markdown text */
-    .stMarkdown {
-        color: #e4e4e7;
-    }
-
-    /* Text Input & TextArea */
-    .stTextInput > div > div > input,
-    .stTextArea > div > div > textarea {
-        background: rgba(26, 26, 36, 0.8);
-        color: #ffffff;
-        border: 2px solid rgba(102, 126, 234, 0.2);
-        border-radius: 12px;
-        padding: 12px;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .stTextInput > div > div > input:focus,
-    .stTextArea > div > div > textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
-    }
-
-    /* Buttons - Premium Gradient */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 12px;
-        border: none;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 24px rgba(102, 126, 234, 0.6);
-    }
-
-    .stButton > button:active {
-        transform: translateY(0);
-    }
-
-    /* Selectbox - Premium Style - Fixed for visibility */
-    .stSelectbox > div > div {
-        background: rgba(26, 26, 36, 0.95) !important;
-        border: 2px solid rgba(102, 126, 234, 0.3) !important;
-        border-radius: 12px !important;
-    }
-
-    .stSelectbox [data-baseweb="select"] {
-        background: rgba(26, 26, 36, 0.95) !important;
-        color: #ffffff !important;
-    }
-
-    /* Selectbox text color */
-    .stSelectbox [data-baseweb="select"] > div {
-        color: #ffffff !important;
-        background: rgba(26, 26, 36, 0.95) !important;
-    }
-
-    /* Selected option text */
-    .stSelectbox [data-baseweb="select"] span {
-        color: #ffffff !important;
-    }
-
-    /* Dropdown menu background */
-    [data-baseweb="popover"] {
-        background: rgba(26, 26, 36, 0.98) !important;
-    }
-
-    /* Dropdown menu items */
-    [role="listbox"] {
-        background: rgba(26, 26, 36, 0.98) !important;
-    }
-
-    [role="option"] {
-        background: rgba(26, 26, 36, 0.95) !important;
-        color: #ffffff !important;
-    }
-
-    [role="option"]:hover {
-        background: rgba(102, 126, 234, 0.3) !important;
-        color: #ffffff !important;
-    }
-
-    /* Selectbox input field */
-    .stSelectbox input {
-        color: #ffffff !important;
-        background: rgba(26, 26, 36, 0.95) !important;
-    }
-
-    /* Slider - Premium Gradient */
-    .stSlider > div > div > div > div {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    }
-
-    .stSlider [role="slider"] {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        box-shadow: 0 2px 8px rgba(240, 147, 251, 0.4);
-    }
-
-    /* Metrics */
-    [data-testid="stMetric"] {
-        background: rgba(26, 26, 36, 0.5);
-        padding: 1rem;
-        border-radius: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-    }
-
-    [data-testid="stMetricValue"] {
-        color: #667eea;
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-
-    [data-testid="stMetricLabel"] {
-        color: #a8a8b3;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.75rem;
-    }
-
-    /* Alert Boxes */
-    .stAlert {
-        border-radius: 12px;
-        border: 1px solid;
-        backdrop-filter: blur(10px);
-    }
-
-    .stSuccess {
-        background: rgba(34, 197, 94, 0.1);
-        border-color: rgba(34, 197, 94, 0.3);
-        color: #4ade80;
-    }
-
-    .stError {
-        background: rgba(239, 68, 68, 0.1);
-        border-color: rgba(239, 68, 68, 0.3);
-        color: #f87171;
-    }
-
-    .stWarning {
-        background: rgba(251, 146, 60, 0.1);
-        border-color: rgba(251, 146, 60, 0.3);
-        color: #fb923c;
-    }
-
-    .stInfo {
-        background: rgba(79, 172, 254, 0.1);
-        border-color: rgba(79, 172, 254, 0.3);
-        color: #4facfe;
-    }
-
-    /* Welcome Card - Ultra Premium */
-    .welcome-card {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
-        backdrop-filter: blur(20px);
-        padding: 2.5rem;
-        border-radius: 20px;
-        color: #f4f4f5;
-        margin: 2rem 0;
-        border: 1px solid rgba(102, 126, 234, 0.4);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .welcome-card h2 {
-        font-family: 'Playfair Display', serif;
-        background: linear-gradient(135deg, #8b9fef 0%, #f093fb 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    .welcome-card h3 {
-        color: #d4d4d8 !important;
-    }
-
-    .welcome-card p {
-        color: #e4e4e7 !important;
-    }
-
-    .welcome-card ul {
-        list-style: none;
-        padding-left: 0;
-    }
-
-    .welcome-card li {
-        padding: 0.5rem 0;
-        font-size: 1.05rem;
-        color: #e4e4e7;
-    }
-
-    .welcome-card strong {
-        color: #f4f4f5;
-    }
-
-    /* Feature Badge */
-    .feature-badge {
-        display: inline-block;
-        background: rgba(102, 126, 234, 0.2);
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        margin: 0.25rem;
-        border: 1px solid rgba(102, 126, 234, 0.5);
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: #e4e4e7;
-        transition: all 0.3s ease;
-    }
-
-    .feature-badge:hover {
-        background: rgba(102, 126, 234, 0.3);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-
-    /* Status Indicator - Enhanced */
-    .status-online {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        background: #4ade80;
-        border-radius: 50%;
-        margin-right: 8px;
-        box-shadow: 0 0 12px #4ade80;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-            box-shadow: 0 0 12px #4ade80;
-        }
-        50% {
-            opacity: 0.6;
-            box-shadow: 0 0 20px #4ade80;
-        }
-    }
-
-    /* Divider */
-    hr {
-        border: none;
-        height: 1px;
-        background: linear-gradient(90deg, transparent 0%, rgba(102, 126, 234, 0.3) 50%, transparent 100%);
-        margin: 1.5rem 0;
-    }
-
-    /* Caption Text */
-    .caption {
-        color: #a1a1aa;
-        font-size: 0.85rem;
-    }
-
-    /* Streamlit caption elements */
-    .stCaption {
-        color: #a1a1aa !important;
-    }
-
-    /* Code Blocks - Enhanced with proper visibility */
-    code {
-        background: rgba(26, 26, 36, 0.9) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        border-radius: 6px !important;
-        padding: 0.2rem 0.5rem !important;
-        color: #4ade80 !important;
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
-        font-size: 0.9em !important;
-    }
-
-    /* Pre blocks (multi-line code) */
-    pre {
-        background: rgba(19, 19, 36, 0.95) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        border-radius: 12px !important;
-        padding: 1rem !important;
-        overflow-x: auto !important;
-        margin: 0.75rem 0 !important;
-    }
-
-    pre code {
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-        color: #e4e4e7 !important;
-        display: block !important;
-    }
-
-    /* Code blocks in chat messages */
-    [data-testid="stChatMessageContent"] code {
-        background: rgba(19, 19, 36, 0.9) !important;
-        color: #4ade80 !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-    }
-
-    [data-testid="stChatMessageContent"] pre {
-        background: rgba(19, 19, 36, 0.95) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-    }
-
-    [data-testid="stChatMessageContent"] pre code {
-        background: transparent !important;
-        border: none !important;
-        color: #e4e4e7 !important;
-    }
-
-    /* Streamlit code component */
-    .stCode {
-        background: rgba(19, 19, 36, 0.95) !important;
-        border: 1px solid rgba(102, 126, 234, 0.3) !important;
-        border-radius: 12px !important;
-    }
-
-    .stCode code {
-        color: #e4e4e7 !important;
-    }
-
-    /* Scrollbar Styling */
-    ::-webkit-scrollbar {
-        width: 10px;
-        height: 10px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: rgba(26, 26, 36, 0.5);
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: rgba(102, 126, 234, 0.5);
-        border-radius: 5px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(102, 126, 234, 0.7);
-    }
-
-    /* Chat History Panel in Sidebar */
-    .chat-history-container {
-        max-height: 400px;
-        overflow-y: auto;
-        padding: 0.5rem;
-        background: rgba(26, 26, 36, 0.4);
-        border-radius: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
-        margin: 1rem 0;
-    }
-
-    .chat-history-item {
-        background: rgba(30, 30, 46, 0.6);
-        padding: 0.75rem;
-        margin: 0.5rem 0;
-        border-radius: 8px;
-        border-left: 3px solid;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        text-decoration: none;
-        display: block;
-    }
-
-    .chat-history-item:hover {
-        background: rgba(30, 30, 46, 0.8);
-        transform: translateX(2px);
-    }
-
-    .chat-history-item.user {
-        border-left-color: #f093fb;
-    }
-
-    .chat-history-item.assistant {
-        border-left-color: #667eea;
-    }
-
-    .chat-history-role {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.25rem;
-        opacity: 0.8;
-    }
-
-    .chat-history-role.user {
-        color: #f093fb;
-    }
-
-    .chat-history-role.assistant {
-        color: #667eea;
-    }
-
-    .chat-history-content {
-        font-size: 0.85rem;
-        color: #e4e4e7;
-        line-height: 1.4;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-    }
-
-    .chat-history-empty {
-        text-align: center;
-        padding: 2rem 1rem;
-        color: #a1a1aa;
-        font-size: 0.85rem;
-        font-style: italic;
-    }
-
-    /* Message anchor target */
-    .message-anchor {
-        display: block;
-        position: relative;
-        top: -80px;
-        visibility: hidden;
-    }
-
-    /* Highlight animation for clicked messages */
-    @keyframes highlightPulse {
-        0%, 100% {
-            background-color: transparent;
-        }
-        50% {
-            background-color: rgba(102, 126, 234, 0.2);
-        }
-    }
-
-    .stChatMessage.highlight {
-        animation: highlightPulse 2s ease-in-out;
-        border-radius: 16px;
-    }
-</style>
-""",
-    unsafe_allow_html=True,
-)
+# CSS is now imported from separate module for better maintainability
+st.markdown(get_custom_css(), unsafe_allow_html=True)
 
 # ============================================
 # HELPER FUNCTIONS
@@ -769,49 +162,13 @@ if "history_loaded" not in st.session_state:
 
 
 # ============================================
-# LOCALSTORAGE PERSISTENCE FUNCTIONS
+# CACHE-BASED PERSISTENCE FUNCTIONS
 # ============================================
 
 
-def save_messages_to_localstorage():
-    """Save messages to browser localStorage using JavaScript"""
-    if not st.session_state.messages:
-        return
-
-    import json
-
-    messages_json = json.dumps(st.session_state.messages).replace("'", "\\'")
-    total_messages = st.session_state.total_messages
-
-    components.html(
-        f"""
-        <script>
-        (function() {{
-            const STORAGE_KEY = 'ollama_streamlit_chat_history';
-            const messages = {messages_json};
-            
-            try {{
-                const historyData = {{
-                    messages: messages,
-                    totalMessages: {total_messages},
-                    timestamp: new Date().toISOString()
-                }};
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(historyData));
-                console.log('💾 Saved', messages.length, 'messages to localStorage');
-            }} catch (error) {{
-                console.error('Error saving chat history:', error);
-            }}
-        }})();
-        </script>
-        """,
-        height=0,
-    )
-
-
 def load_messages_from_localstorage():
-    """Load messages from browser localStorage and restore to session state"""
+    """Load messages from local cache file and restore to session state"""
     if not st.session_state.history_loaded:
-        # Use a file-based approach for simplicity (still local, still private)
         import json
         from pathlib import Path
 
@@ -819,35 +176,51 @@ def load_messages_from_localstorage():
 
         try:
             if cache_file.exists():
-                with open(cache_file, "r") as f:
+                with open(cache_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     st.session_state.messages = data.get("messages", [])
                     st.session_state.total_messages = data.get("totalMessages", 0)
                     logger.info(
                         f"💾 Loaded {len(st.session_state.messages)} messages from cache"
                     )
-        except Exception as e:
+        except (json.JSONDecodeError, IOError) as e:
             logger.error(f"Error loading cache: {e}")
+            # Clear corrupted cache file
+            try:
+                cache_file.unlink(missing_ok=True)
+            except Exception:
+                pass
 
         st.session_state.history_loaded = True
 
 
 def save_messages_to_cache():
-    """Save messages to a local cache file"""
+    """Save messages to a local cache file with size limits"""
     import json
     from pathlib import Path
 
     cache_file = Path.home() / ".ollama_streamlit_cache.json"
+    max_messages = 100  # Limit to last 100 messages
 
     try:
+        # Trim messages if too many
+        messages_to_save = st.session_state.messages[-max_messages:]
+        
         data = {
-            "messages": st.session_state.messages,
+            "messages": messages_to_save,
             "totalMessages": st.session_state.total_messages,
             "timestamp": datetime.now().isoformat(),
         }
-        with open(cache_file, "w") as f:
+        
+        # Write atomically by writing to temp file first
+        temp_file = cache_file.with_suffix('.tmp')
+        with open(temp_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
-        logger.info(f"💾 Saved {len(st.session_state.messages)} messages to cache")
+        
+        # Atomic rename
+        temp_file.replace(cache_file)
+        
+        logger.info(f"💾 Saved {len(messages_to_save)} messages to cache")
     except Exception as e:
         logger.error(f"Error saving cache: {e}")
 

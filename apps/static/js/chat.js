@@ -9,8 +9,12 @@ class LuxuryChatbot {
         this.chatHistory = []; // Store chat messages for sidebar
         this.messageCounter = 0; // Unique ID counter for messages
         this.storageKey = 'ollama_chat_history'; // localStorage key
+        this.abortController = null; // For cancelling in-flight requests
+        this.maxMessageLength = 5000; // Maximum message length
+        this.maxStorageSize = 5 * 1024 * 1024; // 5MB localStorage limit
         this.initElements();
         this.initEventListeners();
+        this.setupHistoryClickHandler(); // Event delegation for history clicks
         this.loadModels();
         this.checkHealth();
         this.configureMarked();
@@ -35,20 +39,52 @@ class LuxuryChatbot {
                 gfm: true
             });
         }
+
+        // Verify DOMPurify is loaded for XSS protection
+        if (typeof DOMPurify === 'undefined') {
+            console.error('⚠️ DOMPurify is not loaded! XSS protection unavailable.');
+        } else {
+            console.log('✅ DOMPurify loaded - XSS protection active');
+        }
     }
 
     saveChatHistory() {
-        // Save chat history to localStorage
+        // Save chat history to localStorage with quota handling
         try {
             const historyData = {
                 messages: this.chatHistory,
                 messageCounter: this.messageCounter,
                 timestamp: new Date().toISOString()
             };
+            const dataStr = JSON.stringify(historyData);
+            
+            // Check size before saving
+            if (dataStr.length > this.maxStorageSize) {
+                console.warn('⚠️ Chat history too large, trimming old messages...');
+                // Keep only last 50 messages
+                this.chatHistory = this.chatHistory.slice(-50);
+                historyData.messages = this.chatHistory;
+            }
+            
             localStorage.setItem(this.storageKey, JSON.stringify(historyData));
             console.log('💾 Chat history saved to localStorage');
         } catch (error) {
-            console.error('Error saving chat history:', error);
+            if (error.name === 'QuotaExceededError') {
+                console.error('❌ Storage quota exceeded, clearing old data...');
+                // Try to recover by keeping only recent messages
+                this.chatHistory = this.chatHistory.slice(-20);
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify({
+                        messages: this.chatHistory,
+                        messageCounter: this.messageCounter,
+                        timestamp: new Date().toISOString()
+                    }));
+                } catch (e) {
+                    console.error('Failed to save even after trimming:', e);
+                }
+            } else {
+                console.error('Error saving chat history:', error);
+            }
         }
     }
 
@@ -263,8 +299,23 @@ class LuxuryChatbot {
         const message = this.userInput.value.trim();
         if (!message) return;
 
+        // Validate message length
+        if (message.length > this.maxMessageLength) {
+            alert(`Message too long! Maximum length is ${this.maxMessageLength} characters.`);
+            return;
+        }
+
         const model = this.modelSelect.value;
         const temperature = parseFloat(this.temperatureSlider.value);
+
+        // Cancel any existing request
+        if (this.abortController) {
+            this.abortController.abort();
+            console.log('⚠️ Previous request cancelled');
+        }
+
+        // Create new abort controller for this request
+        this.abortController = new AbortController();
 
         // Disable input
         this.setInputState(false);
@@ -281,7 +332,7 @@ class LuxuryChatbot {
         const typingId = this.addTypingIndicator();
 
         try {
-            // Send request
+            // Send request with abort signal
             const response = await fetch('/chat', {
                 method: 'POST',
                 headers: {
@@ -292,11 +343,13 @@ class LuxuryChatbot {
                     model: model,
                     temperature: temperature,
                     stream: true
-                })
+                }),
+                signal: this.abortController.signal
             });
 
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
             }
 
             // Remove typing indicator
@@ -308,8 +361,21 @@ class LuxuryChatbot {
         } catch (error) {
             console.error('Error:', error);
             this.removeTypingIndicator(typingId);
-            this.addMessage('bot', '❌ Sorry, there was an error processing your request. Please make sure Ollama is running.');
+            
+            // Don't show error if request was aborted intentionally
+            if (error.name !== 'AbortError') {
+                let errorMsg = '❌ Sorry, there was an error processing your request.';
+                if (error.message.includes('Failed to fetch')) {
+                    errorMsg += ' Please make sure Ollama is running and accessible.';
+                } else if (error.message.includes('HTTP')) {
+                    errorMsg += ` Server error: ${error.message}`;
+                }
+                this.addMessage('bot', errorMsg);
+            }
         } finally {
+            // Clear abort controller
+            this.abortController = null;
+            
             // Re-enable input
             this.setInputState(true);
             this.userInput.focus();
@@ -413,16 +479,34 @@ class LuxuryChatbot {
     }
 
     renderContent(element, content) {
-        // Render content as markdown with syntax highlighting
-        if (typeof marked !== 'undefined') {
-            element.innerHTML = marked.parse(content);
+        // Render content as markdown with syntax highlighting and XSS protection
+        if (typeof marked !== 'undefined' && typeof DOMPurify !== 'undefined') {
+            // Parse markdown to HTML
+            const rawHTML = marked.parse(content);
+            
+            // Sanitize HTML to prevent XSS attacks
+            const cleanHTML = DOMPurify.sanitize(rawHTML, {
+                ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre', 
+                              'a', 'ul', 'ol', 'li', 'blockquote', 'h1', 'h2', 'h3', 
+                              'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+                ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+                ALLOW_DATA_ATTR: false
+            });
+            
+            element.innerHTML = cleanHTML;
+            
             // Apply syntax highlighting to code blocks
             if (typeof hljs !== 'undefined') {
                 element.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightElement(block);
                 });
             }
+        } else if (typeof marked !== 'undefined') {
+            // Fallback: Use marked without sanitization (not recommended)
+            console.warn('⚠️ DOMPurify not available - rendering without XSS protection');
+            element.innerHTML = marked.parse(content);
         } else {
+            // Fallback: Plain text
             element.textContent = content;
         }
     }
@@ -579,13 +663,19 @@ class LuxuryChatbot {
 
         // Use innerHTML to render the HTML properly
         this.chatHistoryContainer.innerHTML = historyHTML;
+    }
 
-        // Add click event listeners to history items
-        this.chatHistoryContainer.querySelectorAll('.chat-history-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const messageId = item.getAttribute('data-message-id');
-                this.scrollToMessage(messageId);
-            });
+    setupHistoryClickHandler() {
+        // Use event delegation to avoid memory leaks
+        // Single event listener on container instead of individual items
+        this.chatHistoryContainer.addEventListener('click', (e) => {
+            const historyItem = e.target.closest('.chat-history-item');
+            if (historyItem) {
+                const messageId = historyItem.getAttribute('data-message-id');
+                if (messageId) {
+                    this.scrollToMessage(messageId);
+                }
+            }
         });
     }
 

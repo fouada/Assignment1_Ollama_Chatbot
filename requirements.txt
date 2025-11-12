@@ -4,6 +4,8 @@
 # Web Frameworks
 streamlit>=1.39.0
 flask>=3.0.0
+flask-cors>=4.0.0  # CORS support for Flask API
+flask-limiter>=3.5.0  # Rate limiting for Flask API
 
 # Ollama Python Client
 ollama>=0.3.0
