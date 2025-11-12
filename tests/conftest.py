@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 
-# Add apps directory to path
+# Add src directory to path
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root / "apps"))
+sys.path.insert(0, str(project_root / "src"))
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def sample_generate_request():
 def flask_client():
     """Flask test client"""
     # Import here to avoid circular imports
-    from app_flask import app
+    from ollama_chatbot.api.flask_app import app
 
     app.config["TESTING"] = True
     with app.test_client() as client:
