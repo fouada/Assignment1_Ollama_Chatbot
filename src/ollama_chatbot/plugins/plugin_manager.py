@@ -23,12 +23,19 @@ import importlib
 import importlib.util
 import inspect
 import logging
-import resource
 import signal
 import sys
 from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+
+# Unix-specific resource module (not available on Windows)
+try:
+    import resource
+    RESOURCE_AVAILABLE = True
+except ImportError:
+    RESOURCE_AVAILABLE = False
+    resource = None
 
 try:
     from watchdog.observers import Observer
@@ -103,6 +110,10 @@ class PluginSandbox:
         if not self.enabled:
             return
 
+        if not RESOURCE_AVAILABLE:
+            logger.debug("Resource limiting not available on this platform (Windows)")
+            return
+
         try:
             # Memory limit
             mem_bytes = self.max_memory_mb * 1024 * 1024
@@ -122,6 +133,9 @@ class PluginSandbox:
     def restore_limits(self) -> None:
         """Restore original resource limits"""
         if not self.enabled or not self._original_limits:
+            return
+
+        if not RESOURCE_AVAILABLE:
             return
 
         try:
