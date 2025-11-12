@@ -10,8 +10,8 @@
 
 [![CI/CD Pipeline](https://github.com/fouada/Assignment1_Ollama_Chatbot/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
 [![CodeQL](https://github.com/fouada/Assignment1_Ollama_Chatbot/workflows/CodeQL/badge.svg)](https://github.com/fouada/Assignment1_Ollama_Chatbot/security/code-scanning)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
-[![Tests](https://img.shields.io/badge/tests-119-success)](./docs/TESTING.md)
+[![Coverage](https://img.shields.io/badge/coverage-92.35%25-brightgreen)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
+[![Tests](https://img.shields.io/badge/tests-414-success)](./docs/TESTING.md)
 [![Code Quality](https://img.shields.io/badge/code%20quality-A-success)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
 [![Security](https://img.shields.io/badge/security-audited-blue)](https://github.com/fouada/Assignment1_Ollama_Chatbot/security)
 [![Maintained](https://img.shields.io/badge/maintained-yes-green)](https://github.com/fouada/Assignment1_Ollama_Chatbot/graphs/commit-activity)
@@ -98,7 +98,7 @@ This project delivers something exceptional: **TWO COMPLETE, INDEPENDENT INTERFA
 | **Maximum Flexibility** | Can run together or independently |
 | **Multiple Use Cases** | UI for humans, API for automation |
 | **Production-Ready** | Docker containerization supports both |
-| **Comprehensive Testing** | Both interfaces have 100% test coverage |
+| **Comprehensive Testing** | Both interfaces have 92.35% test coverage (1219/1320 lines) |
 
 ### **🌟 Key Characteristics:**
 - 🔒 **100% Private** - All data processing happens locally; no data leaves your machine
@@ -110,7 +110,7 @@ This project delivers something exceptional: **TWO COMPLETE, INDEPENDENT INTERFA
 - 🔓 **No API Keys** - No external authentication or registration needed
 - 🔄 **Dual Interface** - Two complete implementations (Streamlit + Flask)
 - 💬 **Advanced UX** - Clickable history, conversation persistence, smooth animations
-- 🐳 **Production-Ready** - Docker support, CI/CD pipeline, 100% test coverage
+- 🐳 **Production-Ready** - Docker support, CI/CD pipeline, 92.35% test coverage
 
 ### **This project is ideal for:**
 - Privacy-conscious users who want AI capabilities without cloud dependency
@@ -126,7 +126,7 @@ This project delivers something exceptional: **TWO COMPLETE, INDEPENDENT INTERFA
 | 🏆 [**Project Achievements**](#-project-achievements--hard-work-summary) | **185+ hours** of quantified work |
 | ✨ [**Advanced Features**](#-features) | Clickable history, Docker, CI/CD, auto-save |
 | 📸 [**Visual Showcase**](#-visual-showcase) | **26 professional screenshots** proving all features |
-| 🧪 [**Testing Details**](#-testing) | **119 tests** with detailed breakdown |
+| 🧪 [**Testing Details**](#-testing) | **414 tests** with detailed breakdown |
 | 🐳 [**Docker Deployment**](#-docker--production-deployment) | Production containerization guide |
 | 🚀 [**CI/CD Pipeline**](#cicd--automation) | GitHub Actions with automated checks |
 | 📖 [**Installation Guide**](#-installation) | Complete setup instructions |
@@ -143,8 +143,8 @@ This project represents **significant engineering effort** and professional-leve
 | Metric | Value | Achievement |
 |--------|-------|-------------|
 | **Code Written** | 3,500+ lines | 2 complete applications |
-| **Tests Written** | 119 comprehensive tests | Unit + Integration |
-| **Test Coverage** | 100% | Industry-leading |
+| **Tests Written** | 414 comprehensive tests | Unit + Integration |
+| **Test Coverage** | 92.35% | Industry-leading (1219/1320 lines) |
 | **Documentation** | 5,600+ lines | README + PRD + guides |
 | **Screenshots** | 26 professional images | Visual proof |
 | **Scripts** | 10 automation scripts | Professional tooling |
@@ -164,10 +164,10 @@ This project represents **significant engineering effort** and professional-leve
   - **Smooth scroll animations** - Visual feedback when navigating history
   - **Session statistics** - Real-time metrics tracking
 
-✅ **Comprehensive Testing** - 119 tests covering:
-  - 102 unit tests (mocked, fast)
-  - 17 integration tests (real AI responses)
-  - 100% code coverage achieved
+✅ **Comprehensive Testing** - 414 tests covering:
+  - Unit tests (mocked, fast)
+  - Integration tests (real AI responses)
+  - 92.35% code coverage achieved (1219/1320 lines)
   - Multi-platform testing (Ubuntu, macOS, Windows)
   - Multi-version testing (Python 3.10-3.13)
 
@@ -327,19 +327,19 @@ This project represents **significant engineering effort** and professional-leve
 <td width="50%">
 <h4>🧪 Comprehensive Test Suite</h4>
 <img src="docs/screenshots/testing/pytest-running-all-tests_1.png" alt="Pytest Tests Part 1" width="100%"/>
-<p><em>119 tests passing - Unit + Integration</em></p>
+<p><em>414 tests passing - Unit + Integration</em></p>
 </td>
 <td width="50%">
-<h4>📊 100% Coverage Achievement</h4>
+<h4>📊 92.35% Coverage Achievement</h4>
 <img src="docs/screenshots/testing/pytest-running-all-tests_2.png" alt="Pytest Tests Part 2" width="100%"/>
-<p><em>All 119 tests passed with 100% code coverage</em></p>
+<p><em>All 414 tests passed with 92.35% code coverage (1219/1320 lines)</em></p>
 </td>
 </tr>
 <tr>
 <td width="50%">
 <h4>📈 HTML Coverage Report</h4>
 <img src="docs/screenshots/testing/coverage-html-report.png" alt="Coverage Report" width="100%"/>
-<p><em>Interactive coverage report showing 100% for both Flask and Streamlit</em></p>
+<p><em>Interactive coverage report showing 92.35% overall coverage for both Flask and Streamlit</em></p>
 </td>
 <td width="50%">
 <h4>🔍 Line-by-Line Coverage</h4>
@@ -399,7 +399,7 @@ This project represents **significant engineering effort** and professional-leve
 <ul>
 <li>✅ Multi-platform testing (Ubuntu, macOS, Windows)</li>
 <li>✅ Multi-version Python (3.10, 3.11, 3.12, 3.13)</li>
-<li>✅ 119 tests with 100% coverage enforcement</li>
+<li>✅ 414 tests with 92.35% coverage (1219/1320 lines)</li>
 <li>✅ Security scanning (Bandit, CodeQL, Safety)</li>
 <li>✅ Code quality (flake8, pylint, black, isort)</li>
 <li>✅ Docker image build and deployment</li>
@@ -409,7 +409,7 @@ This project represents **significant engineering effort** and professional-leve
 <td width="50%">
 <h4>🧪 Comprehensive Test Execution - Part 1</h4>
 <img src="docs/screenshots/testing/pytest-running-all-tests_1.png" alt="Pytest Execution Part 1" width="100%"/>
-<p><em>All 119 tests executing with detailed output</em></p>
+<p><em>All 414 tests executing with detailed output</em></p>
 </td>
 </tr>
 <tr>
@@ -483,10 +483,10 @@ This project represents **significant engineering effort** and professional-leve
 
 This project maintains **professional-grade quality standards** with comprehensive testing, logging, and security measures.
 
-#### **📊 Test Coverage: 100%**
+#### **📊 Test Coverage: 92.35%**
 
-- ✅ **119 Comprehensive Tests** - Unit (102) + Integration (17) covering all code paths
-- ✅ **100% Code Coverage** - Industry-leading (standard is 70-80%)
+- ✅ **414 Comprehensive Tests** - Unit + Integration covering 1219/1320 lines
+- ✅ **92.35% Code Coverage** - Industry-leading (standard is 70-80%)
 - ✅ **Automated Testing** - CI/CD pipeline runs on every commit
 - ✅ **Multi-Platform Testing** - Ubuntu, macOS, Windows validation
 - ✅ **Python 3.10-3.13** - Tested across 4 Python versions
@@ -710,7 +710,7 @@ Professional launcher and shutdown scripts that handle:
 ### 🔧 Technical Features
 - ✅ **Python 3.13** - Latest Python with performance improvements
 - ✅ **Virtual Environment** - Isolated Python environment
-- ✅ **100% Test Coverage** - 119 tests, comprehensive validation
+- ✅ **92.35% Test Coverage** - 414 tests, comprehensive validation (1219/1320 lines)
 - ✅ **Comprehensive Logging** - Full operation tracking and debugging
 - ✅ **Input Validation** - Type-safe API with parameter validation
 - ✅ **Professional Structure** - Clean, organized codebase
@@ -4466,7 +4466,7 @@ What makes this project exceptional:
 **Quality Standards:**
 - ✅ **ISO/IEC 25010**: All 8 characteristics tested
 - ✅ **WCAG 2.1 Level AA**: Full accessibility compliance
-- ✅ **100% Test Coverage**: 119 tests, 4,500+ lines
+- ✅ **92.35% Test Coverage**: 414 tests, 1219/1320 lines covered
 - ✅ **Security Compliant**: GDPR, HIPAA, SOC 2, ADA
 
 **Run Tests:**
