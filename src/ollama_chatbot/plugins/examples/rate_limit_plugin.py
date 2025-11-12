@@ -14,8 +14,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from plugins.base_plugin import BaseMiddleware
-from plugins.types import (
+from ..base_plugin import BaseMiddleware
+from ..types import (
     HookPriority,
     PluginConfig,
     PluginMetadata,

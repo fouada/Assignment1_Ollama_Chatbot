@@ -8,7 +8,9 @@ from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
 import psutil
-from plugins.plugin_interface import PluginInterface, PluginResult
+
+from ..base_plugin import BasePlugin
+from ..types import PluginResult
 
 try:
     import GPUtil
@@ -32,7 +34,7 @@ class ResourceSnapshot:
     disk_io_write_mb: float
 
 
-class ResourceMonitorPlugin(PluginInterface):
+class ResourceMonitorPlugin(BasePlugin):
     """Monitor system resource usage for cost tracking"""
 
     def __init__(self):
