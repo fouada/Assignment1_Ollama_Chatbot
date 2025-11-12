@@ -61,9 +61,7 @@ class SimpleVectorStore:
 
         for doc in self.documents.values():
             # Simple relevance score based on keyword matching
-            score = sum(
-                word in doc.content.lower() for word in query_lower.split()
-            )
+            score = sum(word in doc.content.lower() for word in query_lower.split())
             scored_docs.append((score, doc))
 
         # Sort by score and return top-k
@@ -118,8 +116,7 @@ class RAGPlugin(BaseFeatureExtension):
             await self._load_default_documents()
 
             self._logger.info(
-                f"RAG initialized: {len(self._vector_store.documents)} documents, "
-                f"top_k={self._top_k}"
+                f"RAG initialized: {len(self._vector_store.documents)} documents, " f"top_k={self._top_k}"
             )
 
             return PluginResult.ok(None)
@@ -191,9 +188,7 @@ class RAGPlugin(BaseFeatureExtension):
                 },
             )
 
-            self._logger.info(
-                f"Enhanced context with {len(relevant_docs)} document(s)"
-            )
+            self._logger.info(f"Enhanced context with {len(relevant_docs)} document(s)")
 
             return PluginResult.ok(enhanced_context)
 
@@ -270,9 +265,7 @@ class RAGPlugin(BaseFeatureExtension):
             Document ID
         """
         doc_id = f"doc_{len(self._vector_store.documents) + 1}"
-        doc = Document(
-            id=doc_id, content=content, metadata=metadata or {}
-        )
+        doc = Document(id=doc_id, content=content, metadata=metadata or {})
         self._vector_store.add_document(doc)
         self._logger.info(f"Added document: {doc_id}")
         return doc_id

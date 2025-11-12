@@ -18,4 +18,3 @@ __all__ = [
     "__author__",
     "__license__",
 ]
-

@@ -245,18 +245,12 @@ def get_models():
             {
                 "name": model.model,
                 "size": model.size,
-                "modified_at": (
-                    model.modified_at.isoformat() if model.modified_at else None
-                ),
+                "modified_at": (model.modified_at.isoformat() if model.modified_at else None),
                 "details": {
                     "format": model.details.format if model.details else None,
                     "family": model.details.family if model.details else None,
-                    "parameter_size": (
-                        model.details.parameter_size if model.details else None
-                    ),
-                    "quantization_level": (
-                        model.details.quantization_level if model.details else None
-                    ),
+                    "parameter_size": (model.details.parameter_size if model.details else None),
+                    "quantization_level": (model.details.quantization_level if model.details else None),
                 },
             }
         )
@@ -298,9 +292,7 @@ def chat():
     temperature = data.get("temperature", 0.7)
     stream = data.get("stream", True)
 
-    logger.info(
-        f"Chat request - Model: {model}, Stream: {stream}, Message length: {len(message)}"
-    )
+    logger.info(f"Chat request - Model: {model}, Stream: {stream}, Message length: {len(message)}")
 
     if stream:
 
@@ -375,9 +367,7 @@ def generate():
 
     logger.info(f"Generate request - Model: {model}, Prompt length: {len(prompt)}")
 
-    response = ollama.generate(
-        model=model, prompt=prompt, stream=False, options={"temperature": temperature}
-    )
+    response = ollama.generate(model=model, prompt=prompt, stream=False, options={"temperature": temperature})
 
     return jsonify(
         {
@@ -396,9 +386,7 @@ def generate():
 @app.errorhandler(404)
 def not_found(error):
     return (
-        jsonify(
-            {"error": "Endpoint not found", "timestamp": datetime.now().isoformat()}
-        ),
+        jsonify({"error": "Endpoint not found", "timestamp": datetime.now().isoformat()}),
         404,
     )
 
@@ -406,9 +394,7 @@ def not_found(error):
 @app.errorhandler(405)
 def method_not_allowed(error):
     return (
-        jsonify(
-            {"error": "Method not allowed", "timestamp": datetime.now().isoformat()}
-        ),
+        jsonify({"error": "Method not allowed", "timestamp": datetime.now().isoformat()}),
         405,
     )
 
@@ -416,9 +402,7 @@ def method_not_allowed(error):
 @app.errorhandler(500)
 def internal_error(error):
     return (
-        jsonify(
-            {"error": "Internal server error", "timestamp": datetime.now().isoformat()}
-        ),
+        jsonify({"error": "Internal server error", "timestamp": datetime.now().isoformat()}),
         500,
     )
 
@@ -438,9 +422,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     # Get configuration from environment variables for security
     debug_mode = os.getenv("FLASK_DEBUG", "False").lower() == "true"
-    host_addr = os.getenv(
-        "FLASK_HOST", "127.0.0.1"
-    )  # Default to localhost for security
+    host_addr = os.getenv("FLASK_HOST", "127.0.0.1")  # Default to localhost for security
     port_num = int(os.getenv("FLASK_PORT", "5000"))
 
     app.run(host=host_addr, port=port_num, debug=debug_mode, threaded=True)

@@ -30,6 +30,7 @@ from plugins.types import (
 @dataclass
 class User:
     """User model"""
+
     user_id: str
     username: str
     email: str
@@ -43,6 +44,7 @@ class User:
 @dataclass
 class Token:
     """JWT Token model"""
+
     token: str
     user_id: str
     expires_at: str
@@ -94,19 +96,13 @@ class AuthPlugin(BaseMiddleware):
         """Initialize authentication system"""
         try:
             # Generate or load secret key
-            self._secret_key = config.config.get(
-                "secret_key",
-                secrets.token_urlsafe(32)
-            )
+            self._secret_key = config.config.get("secret_key", secrets.token_urlsafe(32))
 
             self._token_expiry_hours = config.config.get("token_expiry_hours", 24)
             self._require_auth = config.config.get("require_auth", True)
-            self._public_endpoints = config.config.get("public_endpoints", [
-                "/api",
-                "/health",
-                "/auth/login",
-                "/auth/register"
-            ])
+            self._public_endpoints = config.config.get(
+                "public_endpoints", ["/api", "/health", "/auth/login", "/auth/register"]
+            )
 
             # Create default admin user if configured
             if config.config.get("create_default_admin", False):
@@ -117,7 +113,7 @@ class AuthPlugin(BaseMiddleware):
                 extra={
                     "require_auth": self._require_auth,
                     "token_expiry_hours": self._token_expiry_hours,
-                }
+                },
             )
 
             return PluginResult.ok(None)
@@ -171,11 +167,7 @@ class AuthPlugin(BaseMiddleware):
                     return PluginResult.ok(request)
 
             # Authentication failed
-            return PluginResult.fail(
-                "Authentication required",
-                error_code="AUTH_REQUIRED",
-                status_code=401
-            )
+            return PluginResult.fail("Authentication required", error_code="AUTH_REQUIRED", status_code=401)
 
         except Exception as e:
             self._logger.error(f"Authentication error: {e}")
@@ -188,12 +180,14 @@ class AuthPlugin(BaseMiddleware):
             if "headers" not in response:
                 response["headers"] = {}
 
-            response["headers"].update({
-                "X-Content-Type-Options": "nosniff",
-                "X-Frame-Options": "DENY",
-                "X-XSS-Protection": "1; mode=block",
-                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-            })
+            response["headers"].update(
+                {
+                    "X-Content-Type-Options": "nosniff",
+                    "X-Frame-Options": "DENY",
+                    "X-XSS-Protection": "1; mode=block",
+                    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                }
+            )
 
             return PluginResult.ok(response)
 
@@ -201,11 +195,7 @@ class AuthPlugin(BaseMiddleware):
             return PluginResult.ok(response)
 
     async def register_user(
-        self,
-        username: str,
-        email: str,
-        password: str,
-        roles: Optional[List[str]] = None
+        self, username: str, email: str, password: str, roles: Optional[List[str]] = None
     ) -> PluginResult[User]:
         """Register a new user"""
         try:
@@ -280,11 +270,7 @@ class AuthPlugin(BaseMiddleware):
 
         # Create signature
         payload_str = json.dumps(payload, sort_keys=True)
-        signature = hmac.new(
-            self._secret_key.encode(),
-            payload_str.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(self._secret_key.encode(), payload_str.encode(), hashlib.sha256).hexdigest()
 
         # Combine payload and signature
         token_str = f"{payload_str}.{signature}"
@@ -312,11 +298,7 @@ class AuthPlugin(BaseMiddleware):
             payload_str, signature = parts
 
             # Verify signature
-            expected_signature = hmac.new(
-                self._secret_key.encode(),
-                payload_str.encode(),
-                hashlib.sha256
-            ).hexdigest()
+            expected_signature = hmac.new(self._secret_key.encode(), payload_str.encode(), hashlib.sha256).hexdigest()
 
             if not hmac.compare_digest(signature, expected_signature):
                 return PluginResult.fail("Invalid token signature")
@@ -368,13 +350,15 @@ class AuthPlugin(BaseMiddleware):
 
     async def _do_health_check(self) -> PluginResult[Dict[str, Any]]:
         """Health check"""
-        return PluginResult.ok({
-            "status": "healthy",
-            "users_count": len(self._users),
-            "active_tokens": len(self._tokens),
-            "api_keys_count": len(self._api_keys),
-            "auth_enabled": self._require_auth,
-        })
+        return PluginResult.ok(
+            {
+                "status": "healthy",
+                "users_count": len(self._users),
+                "active_tokens": len(self._tokens),
+                "api_keys_count": len(self._api_keys),
+                "auth_enabled": self._require_auth,
+            }
+        )
 
 
 # Export plugin

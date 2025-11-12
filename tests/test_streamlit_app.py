@@ -277,9 +277,7 @@ class TestPersistenceFunctions:
     @patch("app_streamlit.st.session_state")
     @patch("builtins.open", create=True)
     @patch("pathlib.Path.exists")
-    def test_load_messages_from_localstorage(
-        self, mock_exists, mock_open, mock_session_state
-    ):
+    def test_load_messages_from_localstorage(self, mock_exists, mock_open, mock_session_state):
         """Test loading messages from cache file"""
         from app_streamlit import load_messages_from_localstorage
 
@@ -306,9 +304,7 @@ class TestPersistenceFunctions:
 
     @patch("app_streamlit.st.session_state")
     @patch("pathlib.Path.exists")
-    def test_load_messages_from_localstorage_no_cache(
-        self, mock_exists, mock_session_state
-    ):
+    def test_load_messages_from_localstorage_no_cache(self, mock_exists, mock_session_state):
         """Test loading when no cache file exists"""
         from app_streamlit import load_messages_from_localstorage
 
@@ -322,9 +318,7 @@ class TestPersistenceFunctions:
     @patch("app_streamlit.st.session_state")
     @patch("builtins.open", create=True)
     @patch("pathlib.Path.exists")
-    def test_load_messages_from_localstorage_error(
-        self, mock_exists, mock_open, mock_session_state
-    ):
+    def test_load_messages_from_localstorage_error(self, mock_exists, mock_open, mock_session_state):
         """Test error handling when loading from cache fails"""
         from app_streamlit import load_messages_from_localstorage
 

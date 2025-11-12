@@ -684,9 +684,7 @@ def check_ollama_connection():
         logger.error(f"✗ Ollama connection timeout: {str(e)}")
         return False
     except Exception as e:
-        logger.error(
-            f"✗ Ollama connection failed - Unexpected error: {str(e)}", exc_info=True
-        )
+        logger.error(f"✗ Ollama connection failed - Unexpected error: {str(e)}", exc_info=True)
         return False
 
 
@@ -714,9 +712,7 @@ def get_available_models():
 
 def generate_response(prompt, model, temperature=0.7):
     """Generate response using Ollama with streaming"""
-    logger.info(
-        f"🤖 Generating response - Model: {model}, Temperature: {temperature}, Prompt length: {len(prompt)}"
-    )
+    logger.info(f"🤖 Generating response - Model: {model}, Temperature: {temperature}, Prompt length: {len(prompt)}")
 
     try:
         response = ollama.chat(
@@ -732,9 +728,7 @@ def generate_response(prompt, model, temperature=0.7):
                 token_count += 1
                 yield chunk["message"]["content"]
 
-        logger.info(
-            f"✓ Response generation completed - Tokens generated: {token_count}"
-        )
+        logger.info(f"✓ Response generation completed - Tokens generated: {token_count}")
 
     except ConnectionError as e:
         error_msg = f"Cannot connect to Ollama server: {str(e)}"
@@ -823,9 +817,7 @@ def load_messages_from_localstorage():
                     data = json.load(f)
                     st.session_state.messages = data.get("messages", [])
                     st.session_state.total_messages = data.get("totalMessages", 0)
-                    logger.info(
-                        f"💾 Loaded {len(st.session_state.messages)} messages from cache"
-                    )
+                    logger.info(f"💾 Loaded {len(st.session_state.messages)} messages from cache")
         except Exception as e:
             logger.error(f"Error loading cache: {e}")
 
@@ -953,11 +945,7 @@ with st.sidebar:  # pragma: no cover
         help="Lower = More focused and deterministic\nHigher = More creative and random",
     )
 
-    temp_label = (
-        "🎯 Focused"
-        if temperature < 0.5
-        else "⚖️ Balanced" if temperature < 1.0 else "🎨 Creative"
-    )
+    temp_label = "🎯 Focused" if temperature < 0.5 else "⚖️ Balanced" if temperature < 1.0 else "🎨 Creative"
     st.caption(temp_label)
 
     st.markdown("---")
@@ -1005,9 +993,7 @@ with st.sidebar:  # pragma: no cover
             )
 
         # Build complete HTML (single line, no extra whitespace)
-        history_html = (
-            '<div class="chat-history-container">' + "".join(history_items) + "</div>"
-        )
+        history_html = '<div class="chat-history-container">' + "".join(history_items) + "</div>"
 
         # Use st.write with unsafe_allow_html instead of st.markdown
         st.write(history_html, unsafe_allow_html=True)
@@ -1166,9 +1152,7 @@ else:  # pragma: no cover
             st.markdown(message["content"])
 
 # Chat Input
-if prompt := st.chat_input(
-    "💭 Type your message here...", key="chat_input"
-):  # pragma: no cover
+if prompt := st.chat_input("💭 Type your message here...", key="chat_input"):  # pragma: no cover
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.session_state.total_messages += 1

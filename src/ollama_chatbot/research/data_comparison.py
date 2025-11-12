@@ -26,6 +26,7 @@ import ollama
 @dataclass
 class BenchmarkResult:
     """Single benchmark measurement"""
+
     model: str
     prompt: str
     response: str
@@ -43,6 +44,7 @@ class BenchmarkResult:
 @dataclass
 class StatisticalComparison:
     """Statistical comparison results"""
+
     metric_name: str
     group1_name: str
     group2_name: str
@@ -81,15 +83,10 @@ class DataComparator:
             "explanation": "Explain how photosynthesis works.",
             "coding": "Write a Python function to sort a list using quicksort.",
             "creative": "Write a short poem about artificial intelligence.",
-            "reasoning": "If all cats are mammals and some mammals are black, are some cats black?"
+            "reasoning": "If all cats are mammals and some mammals are black, are some cats black?",
         }
 
-    def benchmark_model(
-        self,
-        model: str,
-        num_trials: int = 10,
-        temperature: float = 0.7
-    ) -> Dict[str, Any]:
+    def benchmark_model(self, model: str, num_trials: int = 10, temperature: float = 0.7) -> Dict[str, Any]:
         """
         Comprehensive benchmark of a single model.
 
@@ -128,7 +125,7 @@ class DataComparator:
                     response = ollama.chat(
                         model=model,
                         messages=[{"role": "user", "content": prompt}],
-                        options={"temperature": temperature}
+                        options={"temperature": temperature},
                     )
 
                     end_time = time.time()
@@ -138,11 +135,7 @@ class DataComparator:
                     tokens = len(response_text.split())
                     throughput = tokens / latency if latency > 0 else 0
 
-                    quality_score = self._calculate_comprehensive_quality(
-                        response_text,
-                        prompt,
-                        category
-                    )
+                    quality_score = self._calculate_comprehensive_quality(response_text, prompt, category)
 
                     benchmark = BenchmarkResult(
                         model=model,
@@ -153,18 +146,16 @@ class DataComparator:
                         throughput=throughput,
                         quality_score=quality_score,
                         timestamp=datetime.now().isoformat(),
-                        metadata={
-                            "category": category,
-                            "trial": trial + 1,
-                            "temperature": temperature
-                        }
+                        metadata={"category": category, "trial": trial + 1, "temperature": temperature},
                     )
 
                     results.append(benchmark)
                     self.benchmarks.append(benchmark)
 
-                    print(f"  Trial {trial + 1}/{num_trials}: {latency:.3f}s, "
-                          f"{throughput:.1f} tok/s, Quality: {quality_score:.2f}")
+                    print(
+                        f"  Trial {trial + 1}/{num_trials}: {latency:.3f}s, "
+                        f"{throughput:.1f} tok/s, Quality: {quality_score:.2f}"
+                    )
 
                 except Exception as e:
                     print(f"  Trial {trial + 1}/{num_trials}: Error - {str(e)}")
@@ -176,12 +167,7 @@ class DataComparator:
 
         return analysis
 
-    def compare_models(
-        self,
-        models: List[str],
-        num_trials: int = 10,
-        temperature: float = 0.7
-    ) -> Dict[str, Any]:
+    def compare_models(self, models: List[str], num_trials: int = 10, temperature: float = 0.7) -> Dict[str, Any]:
         """
         Statistical comparison of multiple models.
 
@@ -226,14 +212,11 @@ class DataComparator:
         pairwise_comparisons = []
 
         for i, model1 in enumerate(models):
-            for model2 in models[i + 1:]:
+            for model2 in models[i + 1 :]:
                 print(f"\nComparing {model1} vs {model2}:")
 
                 comparison = self._perform_statistical_comparison(
-                    model1,
-                    model2,
-                    model_results[model1],
-                    model_results[model2]
+                    model1, model2, model_results[model1], model_results[model2]
                 )
 
                 pairwise_comparisons.append(comparison)
@@ -241,8 +224,8 @@ class DataComparator:
                 # Print summary
                 for metric_comp in comparison:
                     print(f"  {metric_comp['metric']}: ", end="")
-                    if metric_comp['significant']:
-                        winner = metric_comp['better_model']
+                    if metric_comp["significant"]:
+                        winner = metric_comp["better_model"]
                         print(f"✓ {winner} significantly better (p={metric_comp['p_value']:.4f})")
                     else:
                         print(f"✗ No significant difference (p={metric_comp['p_value']:.4f})")
@@ -255,21 +238,17 @@ class DataComparator:
                 "models_compared": models,
                 "trials_per_model": num_trials,
                 "significance_level": 0.05,
-                "total_benchmarks": sum(r["total_benchmarks"] for r in model_results.values())
+                "total_benchmarks": sum(r["total_benchmarks"] for r in model_results.values()),
             },
             "model_results": model_results,
             "pairwise_comparisons": pairwise_comparisons,
             "overall_rankings": rankings,
-            "recommendations": self._generate_recommendations(rankings, pairwise_comparisons)
+            "recommendations": self._generate_recommendations(rankings, pairwise_comparisons),
         }
 
         return analysis
 
-    def latency_analysis(
-        self,
-        models: List[str] = None,
-        num_samples: int = 50
-    ) -> Dict[str, Any]:
+    def latency_analysis(self, models: List[str] = None, num_samples: int = 50) -> Dict[str, Any]:
         """
         Detailed latency distribution analysis.
 
@@ -307,9 +286,7 @@ class DataComparator:
                 try:
                     start = time.time()
                     response = ollama.chat(
-                        model=model,
-                        messages=[{"role": "user", "content": prompt}],
-                        options={"temperature": 0.7}
+                        model=model, messages=[{"role": "user", "content": prompt}], options={"temperature": 0.7}
                     )
                     end = time.time()
 
@@ -362,26 +339,21 @@ class DataComparator:
                     "median": round(median, 4),
                     "min": round(min(latencies), 4),
                     "max": round(max(latencies), 4),
-                    "range": round(max(latencies) - min(latencies), 4)
+                    "range": round(max(latencies) - min(latencies), 4),
                 },
                 "variability": {
                     "std": round(std, 4),
                     "variance": round(variance, 4),
                     "cv_percent": round(cv, 2),
-                    "interpretation": self._interpret_cv(cv)
+                    "interpretation": self._interpret_cv(cv),
                 },
-                "percentiles": {
-                    "p50": round(p50, 4),
-                    "p90": round(p90, 4),
-                    "p95": round(p95, 4),
-                    "p99": round(p99, 4)
-                },
+                "percentiles": {"p50": round(p50, 4), "p90": round(p90, 4), "p95": round(p95, 4), "p99": round(p99, 4)},
                 "distribution_shape": {
                     "skewness": round(skewness, 4),
                     "kurtosis": round(kurtosis, 4),
-                    "shape_interpretation": self._interpret_distribution(skewness, kurtosis)
+                    "shape_interpretation": self._interpret_distribution(skewness, kurtosis),
                 },
-                "sample_size": n
+                "sample_size": n,
             }
 
         # Comparative analysis
@@ -393,17 +365,13 @@ class DataComparator:
             "recommendations": {
                 "fastest_mean": min(analysis.items(), key=lambda x: x[1]["descriptive_statistics"]["mean"])[0],
                 "most_consistent": min(analysis.items(), key=lambda x: x[1]["variability"]["cv_percent"])[0],
-                "best_p99": min(analysis.items(), key=lambda x: x[1]["percentiles"]["p99"])[0]
-            }
+                "best_p99": min(analysis.items(), key=lambda x: x[1]["percentiles"]["p99"])[0],
+            },
         }
 
         return result
 
-    def quality_metrics_analysis(
-        self,
-        model: str,
-        num_samples: int = 20
-    ) -> Dict[str, Any]:
+    def quality_metrics_analysis(self, model: str, num_samples: int = 20) -> Dict[str, Any]:
         """
         Multi-dimensional quality assessment.
 
@@ -426,13 +394,7 @@ class DataComparator:
         print(f"Samples: {num_samples}")
         print(f"{'='*70}\n")
 
-        quality_scores = {
-            "factual": [],
-            "explanation": [],
-            "coding": [],
-            "creative": [],
-            "reasoning": []
-        }
+        quality_scores = {"factual": [], "explanation": [], "coding": [], "creative": [], "reasoning": []}
 
         for category, prompt in self.test_prompts.items():
             print(f"Testing {category} quality...")
@@ -440,18 +402,12 @@ class DataComparator:
             for trial in range(num_samples // len(self.test_prompts)):
                 try:
                     response = ollama.chat(
-                        model=model,
-                        messages=[{"role": "user", "content": prompt}],
-                        options={"temperature": 0.7}
+                        model=model, messages=[{"role": "user", "content": prompt}], options={"temperature": 0.7}
                     )
 
                     response_text = response.get("message", {}).get("content", "")
 
-                    score = self._calculate_comprehensive_quality(
-                        response_text,
-                        prompt,
-                        category
-                    )
+                    score = self._calculate_comprehensive_quality(response_text, prompt, category)
 
                     quality_scores[category].append(score)
 
@@ -471,7 +427,7 @@ class DataComparator:
                 "std": statistics.stdev(scores) if len(scores) > 1 else 0,
                 "min": min(scores),
                 "max": max(scores),
-                "samples": len(scores)
+                "samples": len(scores),
             }
 
         # Overall quality score
@@ -479,7 +435,7 @@ class DataComparator:
         overall = {
             "mean": statistics.mean(all_scores) if all_scores else 0,
             "std": statistics.stdev(all_scores) if len(all_scores) > 1 else 0,
-            "consistency": 1 - (statistics.stdev(all_scores) if len(all_scores) > 1 else 0)
+            "consistency": 1 - (statistics.stdev(all_scores) if len(all_scores) > 1 else 0),
         }
 
         result = {
@@ -487,17 +443,12 @@ class DataComparator:
             "category_analysis": analysis,
             "overall_quality": overall,
             "strongest_category": max(analysis.items(), key=lambda x: x[1]["mean"])[0] if analysis else None,
-            "weakest_category": min(analysis.items(), key=lambda x: x[1]["mean"])[0] if analysis else None
+            "weakest_category": min(analysis.items(), key=lambda x: x[1]["mean"])[0] if analysis else None,
         }
 
         return result
 
-    def _calculate_comprehensive_quality(
-        self,
-        response: str,
-        prompt: str,
-        category: str
-    ) -> float:
+    def _calculate_comprehensive_quality(self, response: str, prompt: str, category: str) -> float:
         """
         Multi-dimensional quality assessment.
 
@@ -522,7 +473,7 @@ class DataComparator:
             "explanation": (50, 200),
             "coding": (20, 100),
             "creative": (30, 150),
-            "reasoning": (20, 100)
+            "reasoning": (20, 100),
         }
         optimal_range = optimal_lengths.get(category, (20, 200))
 
@@ -534,7 +485,7 @@ class DataComparator:
             score += 0.05  # Too short
 
         # 2. Coherence - sentence structure (20%)
-        sentences = response.count('.') + response.count('!') + response.count('?')
+        sentences = response.count(".") + response.count("!") + response.count("?")
         if sentences >= 2:
             avg_words_per_sentence = word_count / sentences
             if 10 <= avg_words_per_sentence <= 25:  # Good sentence length
@@ -549,7 +500,7 @@ class DataComparator:
         score += overlap * 0.30
 
         # 4. Completeness - proper ending (15%)
-        if response.rstrip().endswith(('.', '!', '?')):
+        if response.rstrip().endswith((".", "!", "?")):
             score += 0.15
 
         # 5. Clarity - avoids excessive repetition (15%)
@@ -564,12 +515,7 @@ class DataComparator:
 
         return min(score, 1.0)
 
-    def _analyze_benchmark_results(
-        self,
-        results: List[BenchmarkResult],
-        model: str,
-        errors: int
-    ) -> Dict[str, Any]:
+    def _analyze_benchmark_results(self, results: List[BenchmarkResult], model: str, errors: int) -> Dict[str, Any]:
         """Statistical analysis of benchmark results"""
         if not results:
             return {"error": "No valid results"}
@@ -593,32 +539,28 @@ class DataComparator:
                 "std": statistics.stdev(latencies) if len(latencies) > 1 else 0,
                 "min": min(latencies),
                 "max": max(latencies),
-                "ci_95": lat_ci
+                "ci_95": lat_ci,
             },
             "throughput": {
                 "mean": statistics.mean(throughputs),
                 "std": statistics.stdev(throughputs) if len(throughputs) > 1 else 0,
                 "min": min(throughputs),
                 "max": max(throughputs),
-                "ci_95": thr_ci
+                "ci_95": thr_ci,
             },
             "quality": {
                 "mean": statistics.mean(quality_scores),
                 "std": statistics.stdev(quality_scores) if len(quality_scores) > 1 else 0,
                 "min": min(quality_scores),
                 "max": max(quality_scores),
-                "ci_95": qual_ci
-            }
+                "ci_95": qual_ci,
+            },
         }
 
         return analysis
 
     def _perform_statistical_comparison(
-        self,
-        model1: str,
-        model2: str,
-        results1: Dict[str, Any],
-        results2: Dict[str, Any]
+        self, model1: str, model2: str, results1: Dict[str, Any], results2: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """
         Perform statistical hypothesis testing between two models.
@@ -640,13 +582,10 @@ class DataComparator:
             m2_n = results2["total_benchmarks"]
 
             # t-test
-            t_stat, p_value = self._independent_t_test(
-                m1_mean, m1_std, m1_n,
-                m2_mean, m2_std, m2_n
-            )
+            t_stat, p_value = self._independent_t_test(m1_mean, m1_std, m1_n, m2_mean, m2_std, m2_n)
 
             # Effect size (Cohen's d)
-            pooled_std = math.sqrt((m1_std ** 2 + m2_std ** 2) / 2)
+            pooled_std = math.sqrt((m1_std**2 + m2_std**2) / 2)
             cohens_d = (m1_mean - m2_mean) / pooled_std if pooled_std > 0 else 0
 
             # Determine significance (α = 0.05, two-tailed)
@@ -658,26 +597,26 @@ class DataComparator:
             else:
                 better = model1 if m1_mean > m2_mean else model2
 
-            comparisons.append({
-                "metric": metric,
-                "model1": model1,
-                "model2": model2,
-                "model1_mean": round(m1_mean, 4),
-                "model2_mean": round(m2_mean, 4),
-                "t_statistic": round(t_stat, 4),
-                "p_value": round(p_value, 4),
-                "cohens_d": round(abs(cohens_d), 4),
-                "effect_size_interpretation": self._interpret_effect_size(abs(cohens_d)),
-                "significant": significant,
-                "better_model": better if significant else "No significant difference"
-            })
+            comparisons.append(
+                {
+                    "metric": metric,
+                    "model1": model1,
+                    "model2": model2,
+                    "model1_mean": round(m1_mean, 4),
+                    "model2_mean": round(m2_mean, 4),
+                    "t_statistic": round(t_stat, 4),
+                    "p_value": round(p_value, 4),
+                    "cohens_d": round(abs(cohens_d), 4),
+                    "effect_size_interpretation": self._interpret_effect_size(abs(cohens_d)),
+                    "significant": significant,
+                    "better_model": better if significant else "No significant difference",
+                }
+            )
 
         return comparisons
 
     def _independent_t_test(
-        self,
-        mean1: float, std1: float, n1: int,
-        mean2: float, std2: float, n2: int
+        self, mean1: float, std1: float, n1: int, mean2: float, std2: float, n2: int
     ) -> Tuple[float, float]:
         """
         Independent samples t-test.
@@ -687,7 +626,7 @@ class DataComparator:
         """
         # Calculate t-statistic
         numerator = mean1 - mean2
-        denominator = math.sqrt((std1 ** 2 / n1) + (std2 ** 2 / n2))
+        denominator = math.sqrt((std1**2 / n1) + (std2**2 / n2))
 
         t_stat = numerator / denominator if denominator > 0 else 0
 
@@ -711,7 +650,7 @@ class DataComparator:
         # For exact values, would use scipy.stats.t.sf()
 
         # Standard normal approximation
-        z = t / math.sqrt(1 + t ** 2 / df)
+        z = t / math.sqrt(1 + t**2 / df)
 
         # Two-tailed p-value approximation
         p_value = 2 * (1 - self._normal_cdf(abs(z)))
@@ -727,11 +666,7 @@ class DataComparator:
 
         return 1 - p if x >= 0 else p
 
-    def _confidence_interval(
-        self,
-        data: List[float],
-        confidence: float = 0.95
-    ) -> Tuple[float, float]:
+    def _confidence_interval(self, data: List[float], confidence: float = 0.95) -> Tuple[float, float]:
         """
         Calculate confidence interval.
 
@@ -764,7 +699,7 @@ class DataComparator:
         n = len(data)
         m3 = sum((x - mean) ** 3 for x in data) / n
 
-        return m3 / (std ** 3)
+        return m3 / (std**3)
 
     def _calculate_kurtosis(self, data: List[float], mean: float, std: float) -> float:
         """
@@ -778,7 +713,7 @@ class DataComparator:
         n = len(data)
         m4 = sum((x - mean) ** 4 for x in data) / n
 
-        return (m4 / (std ** 4)) - 3
+        return (m4 / (std**4)) - 3
 
     def _interpret_cv(self, cv: float) -> str:
         """Interpret coefficient of variation"""
@@ -825,7 +760,7 @@ class DataComparator:
         # Implementation for comparing distributions
         return {
             "fastest_mean": min(analysis.items(), key=lambda x: x[1]["descriptive_statistics"]["mean"])[0],
-            "most_consistent": min(analysis.items(), key=lambda x: x[1]["variability"]["cv_percent"])[0]
+            "most_consistent": min(analysis.items(), key=lambda x: x[1]["variability"]["cv_percent"])[0],
         }
 
     def _rank_models(self, model_results: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -843,19 +778,17 @@ class DataComparator:
             norm_throughput = results["throughput"]["mean"] / 100  # Approximate normalization
             norm_quality = results["quality"]["mean"]
 
-            composite_score = (
-                0.3 * norm_latency +
-                0.3 * norm_throughput +
-                0.4 * norm_quality
-            )
+            composite_score = 0.3 * norm_latency + 0.3 * norm_throughput + 0.4 * norm_quality
 
-            rankings.append({
-                "model": model,
-                "composite_score": round(composite_score, 4),
-                "latency_score": round(norm_latency, 4),
-                "throughput_score": round(norm_throughput, 4),
-                "quality_score": round(norm_quality, 4)
-            })
+            rankings.append(
+                {
+                    "model": model,
+                    "composite_score": round(composite_score, 4),
+                    "latency_score": round(norm_latency, 4),
+                    "throughput_score": round(norm_throughput, 4),
+                    "quality_score": round(norm_quality, 4),
+                }
+            )
 
         # Sort by composite score (descending)
         rankings.sort(key=lambda x: x["composite_score"], reverse=True)
@@ -867,9 +800,7 @@ class DataComparator:
         return rankings
 
     def _generate_recommendations(
-        self,
-        rankings: List[Dict[str, Any]],
-        comparisons: List[Dict[str, Any]]
+        self, rankings: List[Dict[str, Any]], comparisons: List[Dict[str, Any]]
     ) -> Dict[str, str]:
         """Generate practical recommendations based on analysis"""
         best_overall = rankings[0]["model"] if rankings else "Unknown"
@@ -877,7 +808,7 @@ class DataComparator:
         recommendations = {
             "best_overall": f"{best_overall} - Highest composite score",
             "use_cases": f"Choose {best_overall} for balanced performance across all metrics",
-            "alternatives": "Consider specialized models for specific workloads"
+            "alternatives": "Consider specialized models for specific workloads",
         }
 
         return recommendations
@@ -885,15 +816,12 @@ class DataComparator:
     def export_data(self, filename: str = "comparison_data.json") -> None:
         """Export all comparison data to JSON"""
         data = {
-            "metadata": {
-                "export_timestamp": datetime.now().isoformat(),
-                "total_benchmarks": len(self.benchmarks)
-            },
+            "metadata": {"export_timestamp": datetime.now().isoformat(), "total_benchmarks": len(self.benchmarks)},
             "benchmarks": [b.to_dict() for b in self.benchmarks],
-            "comparisons": [c.to_dict() for c in self.comparisons]
+            "comparisons": [c.to_dict() for c in self.comparisons],
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         print(f"\n✓ Data exported to {filename}")

@@ -45,9 +45,7 @@ class ContentFilterPlugin(BaseMessageProcessor):
 
         # Regex patterns for PII
         self._email_pattern = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
-        self._phone_pattern = re.compile(
-            r"\b(?:\+?1[-.]?)?\(?([0-9]{3})\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\b"
-        )
+        self._phone_pattern = re.compile(r"\b(?:\+?1[-.]?)?\(?([0-9]{3})\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\b")
         self._ssn_pattern = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 
     @property
@@ -89,9 +87,7 @@ class ContentFilterPlugin(BaseMessageProcessor):
         self._profanity_words.clear()
         return PluginResult.ok(None)
 
-    async def _process_message(
-        self, message: Message, context: ChatContext
-    ) -> PluginResult[Message]:
+    async def _process_message(self, message: Message, context: ChatContext) -> PluginResult[Message]:
         """
         Filter message content
 
@@ -171,28 +167,20 @@ class ContentFilterPlugin(BaseMessageProcessor):
         count = 0
 
         # Filter emails
-        filtered_text, email_count = self._replace_pattern(
-            text, self._email_pattern, "[EMAIL]"
-        )
+        filtered_text, email_count = self._replace_pattern(text, self._email_pattern, "[EMAIL]")
         count += email_count
 
         # Filter phone numbers
-        filtered_text, phone_count = self._replace_pattern(
-            filtered_text, self._phone_pattern, "[PHONE]"
-        )
+        filtered_text, phone_count = self._replace_pattern(filtered_text, self._phone_pattern, "[PHONE]")
         count += phone_count
 
         # Filter SSNs
-        filtered_text, ssn_count = self._replace_pattern(
-            filtered_text, self._ssn_pattern, "[SSN]"
-        )
+        filtered_text, ssn_count = self._replace_pattern(filtered_text, self._ssn_pattern, "[SSN]")
         count += ssn_count
 
         return filtered_text, count
 
-    def _replace_pattern(
-        self, text: str, pattern: re.Pattern, replacement: str
-    ) -> tuple[str, int]:
+    def _replace_pattern(self, text: str, pattern: re.Pattern, replacement: str) -> tuple[str, int]:
         """
         Replace regex pattern matches
 

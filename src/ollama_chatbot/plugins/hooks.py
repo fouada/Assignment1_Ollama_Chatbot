@@ -70,9 +70,7 @@ class CircuitBreakerState:
 
         if self.failure_count >= self.failure_threshold:
             self.state = "open"
-            logger.warning(
-                f"Circuit breaker opened after {self.failure_count} failures"
-            )
+            logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
 
     def can_execute(self) -> bool:
         """Check if execution is allowed"""
@@ -238,14 +236,9 @@ class HookManager:
             if plugin_name not in self._metrics:
                 self._metrics[plugin_name] = PluginMetrics(plugin_name=plugin_name)
 
-        logger.info(
-            f"Registered hook: {hook_type.value} for plugin '{plugin_name}' "
-            f"with priority {priority.name}"
-        )
+        logger.info(f"Registered hook: {hook_type.value} for plugin '{plugin_name}' " f"with priority {priority.name}")
 
-    async def unregister_hook(
-        self, hook_type: HookType, plugin_name: str
-    ) -> None:
+    async def unregister_hook(self, hook_type: HookType, plugin_name: str) -> None:
         """
         Unregister all hooks for a plugin and hook type
 
@@ -255,18 +248,11 @@ class HookManager:
         """
         async with self._lock:
             original_count = len(self._hooks[hook_type])
-            self._hooks[hook_type] = [
-                reg
-                for reg in self._hooks[hook_type]
-                if reg.plugin_name != plugin_name
-            ]
+            self._hooks[hook_type] = [reg for reg in self._hooks[hook_type] if reg.plugin_name != plugin_name]
             removed_count = original_count - len(self._hooks[hook_type])
 
         if removed_count > 0:
-            logger.info(
-                f"Unregistered {removed_count} hook(s) for plugin '{plugin_name}' "
-                f"on {hook_type.value}"
-            )
+            logger.info(f"Unregistered {removed_count} hook(s) for plugin '{plugin_name}' " f"on {hook_type.value}")
 
     async def execute_hooks(
         self,
@@ -298,9 +284,7 @@ class HookManager:
             logger.debug(f"No hooks registered for {hook_type.value}")
             return []
 
-        logger.debug(
-            f"Executing {len(hooks_snapshot)} hook(s) for {hook_type.value}"
-        )
+        logger.debug(f"Executing {len(hooks_snapshot)} hook(s) for {hook_type.value}")
 
         results = []
 
@@ -309,19 +293,12 @@ class HookManager:
                 continue
 
             # Circuit breaker check
-            breaker_key = self._get_breaker_key(
-                registration.plugin_name, hook_type
-            )
+            breaker_key = self._get_breaker_key(registration.plugin_name, hook_type)
             circuit_breaker = self._circuit_breakers.get(breaker_key)
 
-            if (
-                self.enable_circuit_breaker
-                and circuit_breaker
-                and not circuit_breaker.can_execute()
-            ):
+            if self.enable_circuit_breaker and circuit_breaker and not circuit_breaker.can_execute():
                 logger.warning(
-                    f"Circuit breaker open for {registration.plugin_name} on "
-                    f"{hook_type.value}, skipping"
+                    f"Circuit breaker open for {registration.plugin_name} on " f"{hook_type.value}, skipping"
                 )
                 results.append(
                     PluginResult.fail(
@@ -344,17 +321,12 @@ class HookManager:
 
             # Fail fast if requested
             if fail_fast and not result.success:
-                logger.error(
-                    f"Hook execution failed (fail_fast=True), stopping: "
-                    f"{result.error}"
-                )
+                logger.error(f"Hook execution failed (fail_fast=True), stopping: " f"{result.error}")
                 break
 
         return results
 
-    async def _execute_single_hook(
-        self, registration: HookRegistration, context: HookContext
-    ) -> PluginResult[Any]:
+    async def _execute_single_hook(self, registration: HookRegistration, context: HookContext) -> PluginResult[Any]:
         """
         Execute a single hook with timeout and error handling
 
@@ -365,16 +337,12 @@ class HookManager:
         - Structured logging
         """
         async with self._semaphore:  # Concurrency control
-            exec_context = HookExecutionContext(
-                registration.hook_type, self.default_timeout
-            )
+            exec_context = HookExecutionContext(registration.hook_type, self.default_timeout)
 
             try:
                 async with exec_context:
                     # Execute with timeout
-                    result = await asyncio.wait_for(
-                        registration.callback(context), timeout=self.default_timeout
-                    )
+                    result = await asyncio.wait_for(registration.callback(context), timeout=self.default_timeout)
 
                     # Handle void callbacks (no return value)
                     if result is None:
@@ -388,42 +356,27 @@ class HookManager:
                     result.execution_time_ms = exec_context.elapsed_ms()
 
                     # Update metrics
-                    self._update_metrics(
-                        registration.plugin_name, result, exec_context.elapsed_ms()
-                    )
+                    self._update_metrics(registration.plugin_name, result, exec_context.elapsed_ms())
 
-                    logger.debug(
-                        f"Hook executed: {registration.plugin_name} "
-                        f"({exec_context.elapsed_ms():.2f}ms)"
-                    )
+                    logger.debug(f"Hook executed: {registration.plugin_name} " f"({exec_context.elapsed_ms():.2f}ms)")
 
                     return result
 
             except asyncio.TimeoutError:
-                error_msg = (
-                    f"Hook timeout after {self.default_timeout}s: "
-                    f"{registration.plugin_name}"
-                )
+                error_msg = f"Hook timeout after {self.default_timeout}s: " f"{registration.plugin_name}"
                 logger.error(error_msg)
                 result = PluginResult.fail(error=error_msg)
                 self._update_metrics(registration.plugin_name, result, self.default_timeout * 1000)
                 return result
 
             except Exception as e:
-                error_msg = (
-                    f"Hook execution error in {registration.plugin_name}: "
-                    f"{type(e).__name__}: {str(e)}"
-                )
+                error_msg = f"Hook execution error in {registration.plugin_name}: " f"{type(e).__name__}: {str(e)}"
                 logger.exception(error_msg)
                 result = PluginResult.fail(error=error_msg)
-                self._update_metrics(
-                    registration.plugin_name, result, exec_context.elapsed_ms()
-                )
+                self._update_metrics(registration.plugin_name, result, exec_context.elapsed_ms())
                 return result
 
-    async def _get_hooks_snapshot(
-        self, hook_type: HookType
-    ) -> List[HookRegistration]:
+    async def _get_hooks_snapshot(self, hook_type: HookType) -> List[HookRegistration]:
         """
         Get a snapshot of hooks for a type (lock-free read via copy)
 
@@ -439,9 +392,7 @@ class HookManager:
         """Generate unique key for circuit breaker"""
         return f"{plugin_name}:{hook_type.value}"
 
-    def _update_metrics(
-        self, plugin_name: str, result: PluginResult, execution_time_ms: float
-    ) -> None:
+    def _update_metrics(self, plugin_name: str, result: PluginResult, execution_time_ms: float) -> None:
         """Update plugin metrics"""
         if plugin_name in self._metrics:
             self._metrics[plugin_name].update(result, execution_time_ms)

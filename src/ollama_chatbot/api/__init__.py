@@ -9,4 +9,3 @@ Provides professional RESTful API endpoints for AI chat functionality:
 """
 
 __all__ = ["flask_app", "flask_app_with_plugins"]
-

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
-from typing import AsyncIterator, List, Union
+from typing import AsyncIterator, List, Optional, Union
 
 try:
     import ollama
@@ -83,9 +83,7 @@ class OllamaBackendPlugin(BaseBackendProvider):
             if not models_result.success:
                 return PluginResult.fail(f"Failed to connect: {models_result.error}")
 
-            self._logger.info(
-                f"Connected to Ollama, found {len(self._available_models)} model(s)"
-            )
+            self._logger.info(f"Connected to Ollama, found {len(self._available_models)} model(s)")
 
             return PluginResult.ok(None)
 
@@ -99,9 +97,7 @@ class OllamaBackendPlugin(BaseBackendProvider):
         self._logger.info("Ollama backend shut down")
         return PluginResult.ok(None)
 
-    async def _chat(
-        self, context: ChatContext
-    ) -> PluginResult[Union[Message, AsyncIterator[str]]]:
+    async def _chat(self, context: ChatContext) -> PluginResult[Union[Message, AsyncIterator[str]]]:
         """
         Generate chat response
 
@@ -109,9 +105,7 @@ class OllamaBackendPlugin(BaseBackendProvider):
         """
         try:
             # Prepare messages for Ollama
-            messages = [
-                {"role": msg.role, "content": msg.content} for msg in context.messages
-            ]
+            messages = [{"role": msg.role, "content": msg.content} for msg in context.messages]
 
             model = context.model or self._default_model
 
@@ -123,9 +117,7 @@ class OllamaBackendPlugin(BaseBackendProvider):
 
             if context.stream:
                 # Streaming response
-                return PluginResult.ok(
-                    self._stream_chat(messages, model, options)
-                )
+                return PluginResult.ok(self._stream_chat(messages, model, options))
             else:
                 # Non-streaming response
                 response = await asyncio.to_thread(
@@ -159,9 +151,7 @@ class OllamaBackendPlugin(BaseBackendProvider):
             self._logger.exception("Chat generation failed")
             return PluginResult.fail(f"Chat error: {e}")
 
-    async def _stream_chat(
-        self, messages: List[dict], model: str, options: dict
-    ) -> AsyncIterator[str]:
+    async def _stream_chat(self, messages: List[dict], model: str, options: dict) -> AsyncIterator[str]:
         """
         Stream chat response chunk by chunk
 
@@ -169,9 +159,7 @@ class OllamaBackendPlugin(BaseBackendProvider):
         """
         try:
             # Ollama's stream returns iterator of chunks
-            stream = ollama.chat(
-                model=model, messages=messages, options=options, stream=True
-            )
+            stream = ollama.chat(model=model, messages=messages, options=options, stream=True)
 
             for chunk in stream:
                 content = chunk.get("message", {}).get("content", "")

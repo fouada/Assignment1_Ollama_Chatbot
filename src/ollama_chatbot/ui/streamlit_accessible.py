@@ -214,9 +214,7 @@ def render_accessible_chat_interface():
 
     # Main content area with ARIA role
     st.markdown(
-        '<div id="main-content" role="main" aria-label="{}">'.format(
-            ARIA_LABELS["main_chat"]
-        ),
+        '<div id="main-content" role="main" aria-label="{}">'.format(ARIA_LABELS["main_chat"]),
         unsafe_allow_html=True,
     )
 
@@ -357,9 +355,7 @@ def render_accessible_chat_interface():
                     )
 
                     # Add to messages
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": ai_response}
-                    )
+                    st.session_state.messages.append({"role": "assistant", "content": ai_response})
 
                     # Announce completion to screen readers
                     st.markdown(

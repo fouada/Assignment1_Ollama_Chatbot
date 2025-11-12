@@ -6,4 +6,3 @@ used across the application.
 """
 
 __all__ = ["config", "utils"]
-

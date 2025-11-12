@@ -97,8 +97,7 @@ class AuditPlugin(BaseMiddleware):
                 await self._load_last_hash()
 
             self._logger.info(
-                f"Audit system initialized: {self._audit_file}",
-                extra={"entries_count": self._entries_count}
+                f"Audit system initialized: {self._audit_file}", extra={"entries_count": self._entries_count}
             )
 
             return PluginResult.ok(None)
@@ -109,7 +108,7 @@ class AuditPlugin(BaseMiddleware):
     async def _load_last_hash(self) -> None:
         """Load the last hash from existing audit file"""
         try:
-            with open(self._audit_file, 'r') as f:
+            with open(self._audit_file, "r") as f:
                 lines = f.readlines()
                 if lines:
                     last_entry = json.loads(lines[-1])
@@ -234,8 +233,8 @@ class AuditPlugin(BaseMiddleware):
         """Write audit entry to persistent storage"""
         try:
             # Append to audit log (JSONL format)
-            with open(self._audit_file, 'a') as f:
-                f.write(json.dumps(entry.to_dict()) + '\n')
+            with open(self._audit_file, "a") as f:
+                f.write(json.dumps(entry.to_dict()) + "\n")
 
             self._entries_count += 1
 
@@ -263,15 +262,13 @@ class AuditPlugin(BaseMiddleware):
 
             previous_hash = "0" * 64
 
-            with open(self._audit_file, 'r') as f:
+            with open(self._audit_file, "r") as f:
                 for line_num, line in enumerate(f, 1):
                     entry = json.loads(line)
 
                     # Verify previous hash matches
                     if entry["previous_hash"] != previous_hash:
-                        return PluginResult.fail(
-                            f"Chain broken at entry {line_num}: hash mismatch"
-                        )
+                        return PluginResult.fail(f"Chain broken at entry {line_num}: hash mismatch")
 
                     # Recalculate hash
                     entry_copy = entry.copy()
@@ -280,9 +277,7 @@ class AuditPlugin(BaseMiddleware):
 
                     # Verify hash matches
                     if stored_hash != calculated_hash:
-                        return PluginResult.fail(
-                            f"Tampered entry detected at line {line_num}"
-                        )
+                        return PluginResult.fail(f"Tampered entry detected at line {line_num}")
 
                     previous_hash = stored_hash
 
@@ -295,13 +290,15 @@ class AuditPlugin(BaseMiddleware):
         """Health check with chain verification"""
         verification = await self.verify_audit_chain()
 
-        return PluginResult.ok({
-            "status": "healthy" if verification.success else "unhealthy",
-            "audit_file": str(self._audit_file) if self._audit_file else None,
-            "entries_count": self._entries_count,
-            "chain_verified": verification.success,
-            "last_hash": self._last_hash[:16] + "...",
-        })
+        return PluginResult.ok(
+            {
+                "status": "healthy" if verification.success else "unhealthy",
+                "audit_file": str(self._audit_file) if self._audit_file else None,
+                "entries_count": self._entries_count,
+                "chain_verified": verification.success,
+                "last_hash": self._last_hash[:16] + "...",
+            }
+        )
 
 
 # Export plugin

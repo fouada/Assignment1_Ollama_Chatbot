@@ -6,4 +6,3 @@ Tests that verify compliance with quality standards:
 - WCAG 2.1 Accessibility Standards
 - Security best practices
 """
-

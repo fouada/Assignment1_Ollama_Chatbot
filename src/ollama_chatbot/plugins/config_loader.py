@@ -62,9 +62,7 @@ class ConfigLoader:
             PluginConfigError: If loading fails
         """
         if yaml is None:
-            raise PluginConfigError(
-                "PyYAML not installed. Install with: pip install pyyaml"
-            )
+            raise PluginConfigError("PyYAML not installed. Install with: pip install pyyaml")
 
         if not self.config_path.exists():
             logger.warning(f"Config file not found: {self.config_path}")
@@ -245,9 +243,7 @@ class ConfigLoader:
                 if value is None:
                     if default_value is not None:
                         return default_value
-                    logger.warning(
-                        f"Environment variable {var_name} not set, using empty string"
-                    )
+                    logger.warning(f"Environment variable {var_name} not set, using empty string")
                     return ""
 
                 return value
@@ -279,9 +275,7 @@ class ConfigLoader:
             plugins = self._config.get(section, {})
             for name, config in plugins.items():
                 if config.get("enabled", False) and "plugin_file" not in config:
-                    raise PluginConfigError(
-                        f"Plugin '{name}' is enabled but missing 'plugin_file'"
-                    )
+                    raise PluginConfigError(f"Plugin '{name}' is enabled but missing 'plugin_file'")
 
     def _get_default_config(self) -> Dict[str, Any]:
         """
@@ -353,6 +347,5 @@ def get_config_loader(config_path: Optional[Path] = None) -> ConfigLoader:
 
 def reload_config() -> None:
     """Reload configuration from file"""
-    global _config_loader
     if _config_loader:
         _config_loader.load()

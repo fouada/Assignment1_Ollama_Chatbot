@@ -11,6 +11,7 @@ from plugins.plugin_interface import PluginInterface, PluginResult
 
 try:
     import GPUtil
+
     GPU_AVAILABLE = True
 except ImportError:
     GPU_AVAILABLE = False
@@ -19,6 +20,7 @@ except ImportError:
 @dataclass
 class ResourceSnapshot:
     """System resource usage at a point in time"""
+
     timestamp: float
     cpu_percent: float
     memory_mb: float
@@ -50,8 +52,8 @@ class ResourceMonitorPlugin(PluginInterface):
             metadata={
                 "message": "Resource monitor initialized",
                 "gpu_available": GPU_AVAILABLE,
-                "baseline": asdict(self.baseline_snapshot)
-            }
+                "baseline": asdict(self.baseline_snapshot),
+            },
         )
 
     def _take_snapshot(self) -> ResourceSnapshot:
@@ -83,7 +85,7 @@ class ResourceMonitorPlugin(PluginInterface):
             gpu_memory_mb=gpu_memory,
             gpu_utilization=gpu_util,
             disk_io_read_mb=disk_read_mb,
-            disk_io_write_mb=disk_write_mb
+            disk_io_write_mb=disk_write_mb,
         )
 
     async def before_request(self, context: Dict) -> PluginResult[Dict]:
@@ -105,15 +107,13 @@ class ResourceMonitorPlugin(PluginInterface):
                 "memory_delta_mb": after.memory_mb - before.memory_mb,
                 "memory_current_mb": after.memory_mb,
                 "disk_read_mb": after.disk_io_read_mb - before.disk_io_read_mb,
-                "disk_write_mb": after.disk_io_write_mb - before.disk_io_write_mb
+                "disk_write_mb": after.disk_io_write_mb - before.disk_io_write_mb,
             }
 
             if GPU_AVAILABLE and after.gpu_memory_mb is not None:
                 usage["gpu_memory_mb"] = after.gpu_memory_mb
                 if before.gpu_utilization is not None and after.gpu_utilization is not None:
-                    usage["gpu_utilization_avg"] = (
-                        (before.gpu_utilization + after.gpu_utilization) / 2
-                    )
+                    usage["gpu_utilization_avg"] = (before.gpu_utilization + after.gpu_utilization) / 2
 
             # Accumulate model-specific usage
             if model not in self.model_usage:
@@ -124,7 +124,7 @@ class ResourceMonitorPlugin(PluginInterface):
                     "total_memory_mb": 0,
                     "peak_memory_mb": 0,
                     "total_disk_read_mb": 0,
-                    "total_disk_write_mb": 0
+                    "total_disk_write_mb": 0,
                 }
 
             stats = self.model_usage[model]
@@ -160,7 +160,7 @@ class ResourceMonitorPlugin(PluginInterface):
             "current": asdict(self._take_snapshot()),
             "model_usage": self.model_usage,
             "estimated_costs": self._calculate_costs(),
-            "summary": self._generate_summary()
+            "summary": self._generate_summary(),
         }
 
     def _calculate_costs(self) -> Dict:
@@ -191,7 +191,7 @@ class ResourceMonitorPlugin(PluginInterface):
                 "total_cost": round(model_total, 4),
                 "cost_per_request": round(model_total / max(stats["total_requests"], 1), 6),
                 "requests": stats["total_requests"],
-                "avg_duration_seconds": round(stats["total_duration"] / max(stats["total_requests"], 1), 3)
+                "avg_duration_seconds": round(stats["total_duration"] / max(stats["total_requests"], 1), 3),
             }
 
             total_cost += model_total
@@ -200,7 +200,7 @@ class ResourceMonitorPlugin(PluginInterface):
             "by_model": costs,
             "total_cost": round(total_cost, 4),
             "currency": "USD",
-            "note": "Estimated costs based on standard cloud pricing"
+            "note": "Estimated costs based on standard cloud pricing",
         }
 
     def _generate_summary(self) -> Dict:
@@ -210,17 +210,14 @@ class ResourceMonitorPlugin(PluginInterface):
 
         most_used_model = None
         if self.model_usage:
-            most_used_model = max(
-                self.model_usage.items(),
-                key=lambda x: x[1]["total_requests"]
-            )[0]
+            most_used_model = max(self.model_usage.items(), key=lambda x: x[1]["total_requests"])[0]
 
         return {
             "total_requests": total_requests,
             "total_duration_hours": round(total_duration / 3600, 2),
             "models_tracked": len(self.model_usage),
             "most_used_model": most_used_model,
-            "avg_request_duration": round(total_duration / max(total_requests, 1), 3) if total_requests > 0 else 0
+            "avg_request_duration": round(total_duration / max(total_requests, 1), 3) if total_requests > 0 else 0,
         }
 
     async def health_check(self) -> PluginResult[Dict]:
@@ -246,8 +243,8 @@ class ResourceMonitorPlugin(PluginInterface):
                 "issues": issues,
                 "current_resources": asdict(current),
                 "models_tracked": len(self.model_usage),
-                "total_requests": sum(s["total_requests"] for s in self.model_usage.values())
-            }
+                "total_requests": sum(s["total_requests"] for s in self.model_usage.values()),
+            },
         )
 
     async def cleanup(self) -> PluginResult[None]:
@@ -255,8 +252,5 @@ class ResourceMonitorPlugin(PluginInterface):
         return PluginResult(
             success=True,
             data=None,
-            metadata={
-                "message": "Resource monitor cleaned up",
-                "final_report": await self.get_usage_report()
-            }
+            metadata={"message": "Resource monitor cleaned up", "final_report": await self.get_usage_report()},
         )

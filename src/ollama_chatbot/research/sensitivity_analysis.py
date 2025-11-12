@@ -24,6 +24,7 @@ import ollama
 @dataclass
 class PerformanceMetrics:
     """Structured performance metrics for analysis"""
+
     response_time: float  # seconds
     tokens_generated: int
     tokens_per_second: float
@@ -38,6 +39,7 @@ class PerformanceMetrics:
 @dataclass
 class SensitivityResult:
     """Results from sensitivity analysis"""
+
     parameter_name: str
     parameter_value: Any
     metrics: PerformanceMetrics
@@ -49,7 +51,7 @@ class SensitivityResult:
             "parameter_name": self.parameter_name,
             "parameter_value": self.parameter_value,
             "timestamp": self.timestamp,
-            "response_quality_score": self.response_quality_score
+            "response_quality_score": self.response_quality_score,
         }
         result.update(self.metrics.to_dict())
         return result
@@ -77,14 +79,11 @@ class SensitivityAnalyzer:
             "Write a Python function to calculate fibonacci numbers.",
             "What are the key principles of machine learning?",
             "Describe the process of photosynthesis.",
-            "How does a neural network work?"
+            "How does a neural network work?",
         ]
 
     def temperature_sensitivity(
-        self,
-        temperature_range: Tuple[float, float] = (0.0, 2.0),
-        steps: int = 20,
-        prompt: Optional[str] = None
+        self, temperature_range: Tuple[float, float] = (0.0, 2.0), steps: int = 20, prompt: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Analyzes sensitivity to temperature parameter.
@@ -117,8 +116,7 @@ class SensitivityAnalyzer:
             prompt = self.test_prompts[0]
 
         temps = [
-            temperature_range[0] + i * (temperature_range[1] - temperature_range[0]) / (steps - 1)
-            for i in range(steps)
+            temperature_range[0] + i * (temperature_range[1] - temperature_range[0]) / (steps - 1) for i in range(steps)
         ]
 
         results = []
@@ -130,9 +128,7 @@ class SensitivityAnalyzer:
                 start_time = time.time()
 
                 response = ollama.chat(
-                    model=self.model,
-                    messages=[{"role": "user", "content": prompt}],
-                    options={"temperature": temp}
+                    model=self.model, messages=[{"role": "user", "content": prompt}], options={"temperature": temp}
                 )
 
                 end_time = time.time()
@@ -147,7 +143,7 @@ class SensitivityAnalyzer:
                     tokens_per_second=tokens / response_time if response_time > 0 else 0,
                     memory_delta=None,  # Would require process monitoring
                     response_length=len(response_text),
-                    first_token_latency=None  # Not available in non-streaming mode
+                    first_token_latency=None,  # Not available in non-streaming mode
                 )
 
                 # Simple quality heuristic (can be enhanced)
@@ -158,7 +154,7 @@ class SensitivityAnalyzer:
                     parameter_value=temp,
                     metrics=metrics,
                     response_quality_score=quality_score,
-                    timestamp=datetime.now().isoformat()
+                    timestamp=datetime.now().isoformat(),
                 )
 
                 results.append(result)
@@ -176,10 +172,7 @@ class SensitivityAnalyzer:
         return analysis
 
     def model_comparison_sensitivity(
-        self,
-        models: List[str] = None,
-        prompt: Optional[str] = None,
-        temperature: float = 0.7
+        self, models: List[str] = None, prompt: Optional[str] = None, temperature: float = 0.7
     ) -> Dict[str, Any]:
         """
         Compares performance across different models.
@@ -224,7 +217,7 @@ class SensitivityAnalyzer:
                     response = ollama.chat(
                         model=model,
                         messages=[{"role": "user", "content": prompt}],
-                        options={"temperature": temperature}
+                        options={"temperature": temperature},
                     )
 
                     end_time = time.time()
@@ -239,7 +232,7 @@ class SensitivityAnalyzer:
                         tokens_per_second=tokens / response_time if response_time > 0 else 0,
                         memory_delta=None,
                         response_length=len(response_text),
-                        first_token_latency=None
+                        first_token_latency=None,
                     )
 
                     quality_score = self._calculate_quality_score(response_text, prompt)
@@ -249,7 +242,7 @@ class SensitivityAnalyzer:
                         parameter_value=model,
                         metrics=metrics,
                         response_quality_score=quality_score,
-                        timestamp=datetime.now().isoformat()
+                        timestamp=datetime.now().isoformat(),
                     )
 
                     model_results.append(result)
@@ -268,11 +261,7 @@ class SensitivityAnalyzer:
 
         return analysis
 
-    def streaming_sensitivity(
-        self,
-        prompt: Optional[str] = None,
-        temperature: float = 0.7
-    ) -> Dict[str, Any]:
+    def streaming_sensitivity(self, prompt: Optional[str] = None, temperature: float = 0.7) -> Dict[str, Any]:
         """
         Analyzes performance difference between streaming and non-streaming modes.
 
@@ -304,7 +293,7 @@ class SensitivityAnalyzer:
                     model=self.model,
                     messages=[{"role": "user", "content": prompt}],
                     options={"temperature": temperature},
-                    stream=False
+                    stream=False,
                 )
 
                 end_time = time.time()
@@ -319,7 +308,7 @@ class SensitivityAnalyzer:
                     tokens_per_second=tokens / response_time if response_time > 0 else 0,
                     memory_delta=None,
                     response_length=len(response_text),
-                    first_token_latency=None  # Not applicable
+                    first_token_latency=None,  # Not applicable
                 )
 
                 result = SensitivityResult(
@@ -327,7 +316,7 @@ class SensitivityAnalyzer:
                     parameter_value=False,
                     metrics=metrics,
                     response_quality_score=self._calculate_quality_score(response_text, prompt),
-                    timestamp=datetime.now().isoformat()
+                    timestamp=datetime.now().isoformat(),
                 )
 
                 results["non_streaming"].append(result)
@@ -348,7 +337,7 @@ class SensitivityAnalyzer:
                     model=self.model,
                     messages=[{"role": "user", "content": prompt}],
                     options={"temperature": temperature},
-                    stream=True
+                    stream=True,
                 )
 
                 for chunk in stream:
@@ -369,7 +358,7 @@ class SensitivityAnalyzer:
                     tokens_per_second=tokens / response_time if response_time > 0 else 0,
                     memory_delta=None,
                     response_length=len(response_text),
-                    first_token_latency=first_token_time
+                    first_token_latency=first_token_time,
                 )
 
                 result = SensitivityResult(
@@ -377,7 +366,7 @@ class SensitivityAnalyzer:
                     parameter_value=True,
                     metrics=metrics,
                     response_quality_score=self._calculate_quality_score(response_text, prompt),
-                    timestamp=datetime.now().isoformat()
+                    timestamp=datetime.now().isoformat(),
                 )
 
                 results["streaming"].append(result)
@@ -416,7 +405,7 @@ class SensitivityAnalyzer:
             score += 0.15
 
         # Coherence - sentence structure (25 points)
-        sentences = response.count('.') + response.count('!') + response.count('?')
+        sentences = response.count(".") + response.count("!") + response.count("?")
         if sentences >= 2:
             score += 0.25
 
@@ -427,15 +416,13 @@ class SensitivityAnalyzer:
         score += overlap * 0.25
 
         # Completeness - proper ending (25 points)
-        if response.rstrip().endswith(('.', '!', '?')):
+        if response.rstrip().endswith((".", "!", "?")):
             score += 0.25
 
         return min(score, 1.0)
 
     def _analyze_temperature_results(
-        self,
-        results: List[SensitivityResult],
-        temperatures: List[float]
+        self, results: List[SensitivityResult], temperatures: List[float]
     ) -> Dict[str, Any]:
         """
         Statistical analysis of temperature sensitivity results.
@@ -458,10 +445,7 @@ class SensitivityAnalyzer:
         temp_speed_corr = self._pearson_correlation(temperatures, tokens_per_sec)
 
         # Find optimal temperature (maximize quality / response_time ratio)
-        efficiency_scores = [
-            (q / rt) if rt > 0 else 0
-            for q, rt in zip(quality_scores, response_times)
-        ]
+        efficiency_scores = [(q / rt) if rt > 0 else 0 for q, rt in zip(quality_scores, response_times)]
         optimal_idx = efficiency_scores.index(max(efficiency_scores)) if efficiency_scores else 0
         optimal_temp = temperatures[optimal_idx] if optimal_idx < len(temperatures) else 0.7
 
@@ -469,36 +453,36 @@ class SensitivityAnalyzer:
             "summary": {
                 "total_tests": len(results),
                 "temperature_range": [min(temperatures), max(temperatures)],
-                "optimal_temperature": round(optimal_temp, 3)
+                "optimal_temperature": round(optimal_temp, 3),
             },
             "performance_statistics": {
                 "response_time": {
                     "mean": statistics.mean(response_times),
                     "std": statistics.stdev(response_times) if len(response_times) > 1 else 0,
                     "min": min(response_times),
-                    "max": max(response_times)
+                    "max": max(response_times),
                 },
                 "quality_score": {
                     "mean": statistics.mean(quality_scores),
                     "std": statistics.stdev(quality_scores) if len(quality_scores) > 1 else 0,
                     "min": min(quality_scores),
-                    "max": max(quality_scores)
+                    "max": max(quality_scores),
                 },
                 "throughput": {
                     "mean_tokens_per_sec": statistics.mean(tokens_per_sec),
-                    "std": statistics.stdev(tokens_per_sec) if len(tokens_per_sec) > 1 else 0
-                }
+                    "std": statistics.stdev(tokens_per_sec) if len(tokens_per_sec) > 1 else 0,
+                },
             },
             "correlations": {
                 "temperature_vs_quality": round(temp_quality_corr, 4),
                 "temperature_vs_speed": round(temp_speed_corr, 4),
-                "interpretation": self._interpret_correlation(temp_quality_corr)
+                "interpretation": self._interpret_correlation(temp_quality_corr),
             },
             "recommendations": {
                 "optimal_range": [max(0.0, optimal_temp - 0.2), min(2.0, optimal_temp + 0.2)],
-                "rationale": f"Temperature {optimal_temp:.2f} provides best quality/performance tradeoff"
+                "rationale": f"Temperature {optimal_temp:.2f} provides best quality/performance tradeoff",
             },
-            "raw_data": [r.to_dict() for r in results]
+            "raw_data": [r.to_dict() for r in results],
         }
 
         return analysis
@@ -533,26 +517,22 @@ class SensitivityAnalyzer:
             model_stats[model] = {
                 "response_time": {
                     "mean": statistics.mean(response_times),
-                    "std": statistics.stdev(response_times) if len(response_times) > 1 else 0
+                    "std": statistics.stdev(response_times) if len(response_times) > 1 else 0,
                 },
                 "quality_score": {
                     "mean": statistics.mean(quality_scores) if quality_scores else 0,
-                    "std": statistics.stdev(quality_scores) if len(quality_scores) > 1 else 0
+                    "std": statistics.stdev(quality_scores) if len(quality_scores) > 1 else 0,
                 },
                 "throughput": {
                     "mean": statistics.mean(tokens_per_sec),
-                    "std": statistics.stdev(tokens_per_sec) if len(tokens_per_sec) > 1 else 0
+                    "std": statistics.stdev(tokens_per_sec) if len(tokens_per_sec) > 1 else 0,
                 },
                 "composite_score": composite_score,
-                "trials": len(model_results)
+                "trials": len(model_results),
             }
 
         # Rank models by composite score
-        ranked_models = sorted(
-            model_stats.items(),
-            key=lambda x: x[1]["composite_score"],
-            reverse=True
-        )
+        ranked_models = sorted(model_stats.items(), key=lambda x: x[1]["composite_score"], reverse=True)
 
         analysis = {
             "model_rankings": [
@@ -564,8 +544,8 @@ class SensitivityAnalyzer:
             "performance_summary": {
                 "fastest_model": min(model_stats.items(), key=lambda x: x[1]["response_time"]["mean"])[0],
                 "highest_quality": max(model_stats.items(), key=lambda x: x[1]["quality_score"]["mean"])[0],
-                "highest_throughput": max(model_stats.items(), key=lambda x: x[1]["throughput"]["mean"])[0]
-            }
+                "highest_throughput": max(model_stats.items(), key=lambda x: x[1]["throughput"]["mean"])[0],
+            },
         }
 
         return analysis
@@ -580,15 +560,13 @@ class SensitivityAnalyzer:
 
             response_times = [r.metrics.response_time for r in mode_results]
             first_token_latencies = [
-                r.metrics.first_token_latency
-                for r in mode_results
-                if r.metrics.first_token_latency is not None
+                r.metrics.first_token_latency for r in mode_results if r.metrics.first_token_latency is not None
             ]
 
             analysis[mode] = {
                 "mean_response_time": statistics.mean(response_times),
                 "std_response_time": statistics.stdev(response_times) if len(response_times) > 1 else 0,
-                "mean_first_token_latency": statistics.mean(first_token_latencies) if first_token_latencies else None
+                "mean_first_token_latency": statistics.mean(first_token_latencies) if first_token_latencies else None,
             }
 
         # Calculate improvement
@@ -601,7 +579,9 @@ class SensitivityAnalyzer:
             analysis["comparison"] = {
                 "perceived_performance_improvement": f"{improvement:.1f}%",
                 "first_token_advantage": streaming_ftl < non_streaming_rt,
-                "recommendation": "Use streaming for better user experience" if improvement > 10 else "Minimal difference"
+                "recommendation": (
+                    "Use streaming for better user experience" if improvement > 10 else "Minimal difference"
+                ),
             }
 
         return analysis
@@ -620,10 +600,7 @@ class SensitivityAnalyzer:
         mean_y = statistics.mean(y)
 
         numerator = sum((x[i] - mean_x) * (y[i] - mean_y) for i in range(n))
-        denominator = (
-            sum((x[i] - mean_x) ** 2 for i in range(n)) *
-            sum((y[i] - mean_y) ** 2 for i in range(n))
-        ) ** 0.5
+        denominator = (sum((x[i] - mean_x) ** 2 for i in range(n)) * sum((y[i] - mean_y) ** 2 for i in range(n))) ** 0.5
 
         return numerator / denominator if denominator != 0 else 0.0
 
@@ -649,12 +626,12 @@ class SensitivityAnalyzer:
             "metadata": {
                 "model": self.model,
                 "total_experiments": len(self.results),
-                "export_timestamp": datetime.now().isoformat()
+                "export_timestamp": datetime.now().isoformat(),
             },
-            "results": [r.to_dict() for r in self.results]
+            "results": [r.to_dict() for r in self.results],
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         print(f"\n✓ Results exported to {filename}")

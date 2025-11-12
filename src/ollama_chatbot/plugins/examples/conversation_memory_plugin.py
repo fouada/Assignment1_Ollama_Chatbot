@@ -31,9 +31,7 @@ class ConversationMemoryPlugin(BaseFeatureExtension):
 
     def __init__(self):
         super().__init__()
-        self._memory: Dict[str, Deque[Message]] = defaultdict(
-            lambda: deque(maxlen=self._max_messages)
-        )
+        self._memory: Dict[str, Deque[Message]] = defaultdict(lambda: deque(maxlen=self._max_messages))
         self._max_messages = 50
         self._enable_summarization = False
         self._session_timeout_minutes = 30
@@ -54,13 +52,10 @@ class ConversationMemoryPlugin(BaseFeatureExtension):
         try:
             self._max_messages = config.config.get("max_messages", 50)
             self._enable_summarization = config.config.get("enable_summarization", False)
-            self._session_timeout_minutes = config.config.get(
-                "session_timeout_minutes", 30
-            )
+            self._session_timeout_minutes = config.config.get("session_timeout_minutes", 30)
 
             self._logger.info(
-                f"Memory initialized: max_messages={self._max_messages}, "
-                f"summarization={self._enable_summarization}"
+                f"Memory initialized: max_messages={self._max_messages}, " f"summarization={self._enable_summarization}"
             )
 
             return PluginResult.ok(None)
@@ -127,10 +122,7 @@ class ConversationMemoryPlugin(BaseFeatureExtension):
 
             self._memory[session_id] = history
 
-            self._logger.debug(
-                f"Enhanced context for session '{session_id}' with {len(history)} "
-                f"message(s)"
-            )
+            self._logger.debug(f"Enhanced context for session '{session_id}' with {len(history)} " f"message(s)")
 
             return PluginResult.ok(enhanced_context)
 

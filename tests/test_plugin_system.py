@@ -122,9 +122,7 @@ class MockMessageProcessor(BaseMessageProcessor):
             plugin_type=PluginType.MESSAGE_PROCESSOR,
         )
 
-    async def _process_message(
-        self, message: Message, context: ChatContext
-    ) -> PluginResult[Message]:
+    async def _process_message(self, message: Message, context: ChatContext) -> PluginResult[Message]:
         self.process_count += 1
         modified = Message(
             content=f"[PROCESSED] {message.content}",
@@ -192,9 +190,7 @@ class TestPluginManager:
         await plugin_manager.registry.register("processor1", plugin1, PluginConfig())
         await plugin_manager.registry.register("processor2", plugin2, PluginConfig())
 
-        processors = await plugin_manager.registry.get_by_type(
-            PluginType.MESSAGE_PROCESSOR
-        )
+        processors = await plugin_manager.registry.get_by_type(PluginType.MESSAGE_PROCESSOR)
 
         assert len(processors) == 2
 
@@ -362,9 +358,7 @@ class TestMessageProcessing:
         assert "[PROCESSED]" in result.data.content
 
     @pytest.mark.asyncio
-    async def test_message_processor_pipeline(
-        self, plugin_manager, sample_message, sample_context
-    ):
+    async def test_message_processor_pipeline(self, plugin_manager, sample_message, sample_context):
         """Test multiple message processors in pipeline"""
         # Register multiple processors
         processor1 = MockMessageProcessor("proc1")
@@ -378,9 +372,7 @@ class TestMessageProcessing:
         await processor2.initialize(PluginConfig())
 
         # Execute pipeline
-        result = await plugin_manager.execute_message_processors(
-            sample_message, sample_context
-        )
+        result = await plugin_manager.execute_message_processors(sample_message, sample_context)
 
         assert result.success
         # Should have double processing

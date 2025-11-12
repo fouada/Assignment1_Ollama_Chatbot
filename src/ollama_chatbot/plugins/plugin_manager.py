@@ -82,9 +82,7 @@ class PluginRegistry:
         # Dependency graph (plugin_name -> list of dependencies)
         self._dependencies: Dict[str, List[str]] = {}
 
-    async def register(
-        self, name: str, plugin: Pluggable, config: PluginConfig
-    ) -> None:
+    async def register(self, name: str, plugin: Pluggable, config: PluginConfig) -> None:
         """Register plugin instance"""
         async with self._lock:
             if name in self._plugins:
@@ -170,9 +168,7 @@ class PluginLoader:
     """
 
     @staticmethod
-    async def load_from_file(
-        file_path: Path, class_name: Optional[str] = None
-    ) -> Pluggable:
+    async def load_from_file(file_path: Path, class_name: Optional[str] = None) -> Pluggable:
         """
         Load plugin from Python file
 
@@ -202,9 +198,7 @@ class PluginLoader:
             if class_name:
                 plugin_class = getattr(module, class_name, None)
                 if plugin_class is None:
-                    raise PluginLoadError(
-                        f"Class '{class_name}' not found in {file_path}"
-                    )
+                    raise PluginLoadError(f"Class '{class_name}' not found in {file_path}")
             else:
                 # Auto-detect: find first class implementing Pluggable
                 plugin_class = PluginLoader._find_plugin_class(module)
@@ -358,10 +352,7 @@ class PluginManager:
         self._initialized = False
         self._lock = asyncio.Lock()
 
-        logger.info(
-            f"PluginManager created (directory={plugin_directory}, "
-            f"hot_reload={enable_hot_reload})"
-        )
+        logger.info(f"PluginManager created (directory={plugin_directory}, " f"hot_reload={enable_hot_reload})")
 
     async def initialize(self) -> None:
         """
@@ -420,9 +411,7 @@ class PluginManager:
             self._initialized = False
             logger.info("PluginManager shutdown complete")
 
-    async def load_plugin(
-        self, file_path: Path, config: Optional[PluginConfig] = None
-    ) -> str:
+    async def load_plugin(self, file_path: Path, config: Optional[PluginConfig] = None) -> str:
         """
         Load and initialize a single plugin
 
@@ -464,9 +453,7 @@ class PluginManager:
         # Trigger plugin load hook
         await self.hook_manager.execute_hooks(
             HookType.ON_PLUGIN_LOAD,
-            HookContext(
-                hook_type=HookType.ON_PLUGIN_LOAD, data={"plugin_name": plugin_name}
-            ),
+            HookContext(hook_type=HookType.ON_PLUGIN_LOAD, data={"plugin_name": plugin_name}),
         )
 
         logger.info(f"Plugin loaded successfully: {plugin_name}")
@@ -494,9 +481,7 @@ class PluginManager:
         # Trigger unload hook
         await self.hook_manager.execute_hooks(
             HookType.ON_PLUGIN_UNLOAD,
-            HookContext(
-                hook_type=HookType.ON_PLUGIN_UNLOAD, data={"plugin_name": plugin_name}
-            ),
+            HookContext(hook_type=HookType.ON_PLUGIN_UNLOAD, data={"plugin_name": plugin_name}),
         )
 
         # Unregister from registry
@@ -504,9 +489,7 @@ class PluginManager:
 
         logger.info(f"Plugin unloaded: {plugin_name}")
 
-    async def load_plugins_from_directory(
-        self, directory: Optional[Path] = None
-    ) -> List[str]:
+    async def load_plugins_from_directory(self, directory: Optional[Path] = None) -> List[str]:
         """
         Discover and load all plugins from directory
 
@@ -585,16 +568,11 @@ class PluginManager:
         for dep_name in plugin.metadata.dependencies:
             dep_plugin = await self.registry.get(dep_name)
             if dep_plugin is None:
-                raise PluginDependencyError(
-                    f"Missing dependency '{dep_name}' for plugin "
-                    f"'{plugin.metadata.name}'"
-                )
+                raise PluginDependencyError(f"Missing dependency '{dep_name}' for plugin " f"'{plugin.metadata.name}'")
 
             dep_state = await self.registry.get_state(dep_name)
             if dep_state != PluginState.ACTIVE:
-                raise PluginDependencyError(
-                    f"Dependency '{dep_name}' not active (state={dep_state})"
-                )
+                raise PluginDependencyError(f"Dependency '{dep_name}' not active (state={dep_state})")
 
     async def _register_plugin_hooks(self, plugin: Pluggable) -> None:
         """
@@ -625,9 +603,7 @@ class PluginManager:
                 hook_type = HookType(attr_name)  # Try value match first
             except ValueError:
                 # Try name match
-                hook_type = next(
-                    (ht for ht in HookType if ht.name == hook_type_name), None
-                )
+                hook_type = next((ht for ht in HookType if ht.name == hook_type_name), None)
 
             if hook_type:
                 await self.hook_manager.register_hook(
@@ -641,9 +617,7 @@ class PluginManager:
     # Plugin Execution Methods
     # ========================================================================
 
-    async def execute_message_processors(
-        self, message: Message, context: Any
-    ) -> PluginResult[Message]:
+    async def execute_message_processors(self, message: Message, context: Any) -> PluginResult[Message]:
         """
         Execute all message processing plugins
 
@@ -667,9 +641,7 @@ class PluginManager:
             if result.success and result.data:
                 current_message = result.data
             else:
-                logger.warning(
-                    f"Message processor failed: {processor.metadata.name} - {result.error}"
-                )
+                logger.warning(f"Message processor failed: {processor.metadata.name} - {result.error}")
 
         return PluginResult.ok(current_message)
 

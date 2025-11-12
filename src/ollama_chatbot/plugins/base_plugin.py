@@ -194,9 +194,7 @@ class BaseMessageProcessor(BasePlugin, MessageProcessor):
             plugin_type=PluginType.MESSAGE_PROCESSOR,
         )
 
-    async def process_message(
-        self, message: Message, context: ChatContext
-    ) -> PluginResult[Message]:
+    async def process_message(self, message: Message, context: ChatContext) -> PluginResult[Message]:
         """
         Process message - implements MessageProcessor protocol
 
@@ -217,9 +215,7 @@ class BaseMessageProcessor(BasePlugin, MessageProcessor):
             return PluginResult.fail(f"Processing error: {e}")
 
     @abstractmethod
-    async def _process_message(
-        self, message: Message, context: ChatContext
-    ) -> PluginResult[Message]:
+    async def _process_message(self, message: Message, context: ChatContext) -> PluginResult[Message]:
         """
         Custom message processing logic
 
@@ -269,9 +265,7 @@ class BaseBackendProvider(BasePlugin, BackendProvider):
             plugin_type=PluginType.BACKEND_PROVIDER,
         )
 
-    async def chat(
-        self, context: ChatContext
-    ) -> PluginResult[Union[Message, AsyncIterator[str]]]:
+    async def chat(self, context: ChatContext) -> PluginResult[Union[Message, AsyncIterator[str]]]:
         """
         Generate chat response - implements BackendProvider protocol
 
@@ -307,9 +301,7 @@ class BaseBackendProvider(BasePlugin, BackendProvider):
             return PluginResult.fail(f"Model listing error: {e}")
 
     @abstractmethod
-    async def _chat(
-        self, context: ChatContext
-    ) -> PluginResult[Union[Message, AsyncIterator[str]]]:
+    async def _chat(self, context: ChatContext) -> PluginResult[Union[Message, AsyncIterator[str]]]:
         """
         Custom chat logic
 
@@ -439,9 +431,7 @@ class BaseMiddleware(BasePlugin, Middleware):
             plugin_type=PluginType.MIDDLEWARE,
         )
 
-    async def process_request(
-        self, request: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def process_request(self, request: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """
         Process incoming request
 
@@ -460,9 +450,7 @@ class BaseMiddleware(BasePlugin, Middleware):
             self._logger.exception("Request processing failed")
             return PluginResult.fail(f"Request processing error: {e}")
 
-    async def process_response(
-        self, response: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def process_response(self, response: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """
         Process outgoing response
 
@@ -482,9 +470,7 @@ class BaseMiddleware(BasePlugin, Middleware):
             return PluginResult.fail(f"Response processing error: {e}")
 
     @abstractmethod
-    async def _process_request(
-        self, request: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def _process_request(self, request: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """
         Custom request processing logic
 
@@ -497,9 +483,7 @@ class BaseMiddleware(BasePlugin, Middleware):
         pass
 
     @abstractmethod
-    async def _process_response(
-        self, response: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def _process_response(self, response: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """
         Custom response processing logic
 

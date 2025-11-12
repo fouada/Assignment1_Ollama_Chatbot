@@ -20,6 +20,7 @@ import math
 
 class ProofType(Enum):
     """Types of mathematical proofs"""
+
     CONSTRUCTIVE = "constructive"  # Proves existence by construction
     CONTRADICTION = "contradiction"  # Proves by assuming negation
     INDUCTION = "induction"  # Proves for all n using base + inductive step
@@ -29,6 +30,7 @@ class ProofType(Enum):
 @dataclass
 class TheoremStatement:
     """Formal theorem statement"""
+
     name: str
     statement: str
     assumptions: List[str]
@@ -52,69 +54,79 @@ class MathematicalProofs:
         """Initialize all theorem statements"""
 
         # Theorem 1: Plugin System Completeness
-        self.theorems.append(TheoremStatement(
-            name="Plugin System Completeness",
-            statement="The plugin system can handle all possible hook executions without deadlock or infinite loops",
-            assumptions=[
-                "Each plugin has finite execution time",
-                "Hook dependencies form a DAG (Directed Acyclic Graph)",
-                "No recursive plugin loading"
-            ],
-            conclusion="∀ hook h, execution terminates in finite time T < ∞",
-            proof_type=ProofType.INDUCTION
-        ))
+        self.theorems.append(
+            TheoremStatement(
+                name="Plugin System Completeness",
+                statement="The plugin system can handle all possible hook executions without deadlock or infinite loops",
+                assumptions=[
+                    "Each plugin has finite execution time",
+                    "Hook dependencies form a DAG (Directed Acyclic Graph)",
+                    "No recursive plugin loading",
+                ],
+                conclusion="∀ hook h, execution terminates in finite time T < ∞",
+                proof_type=ProofType.INDUCTION,
+            )
+        )
 
         # Theorem 2: Hook Execution Order
-        self.theorems.append(TheoremStatement(
-            name="Hook Execution Order Correctness",
-            statement="Hooks execute in priority order, and dependencies are resolved correctly",
-            assumptions=[
-                "Priority values are totally ordered (p₁ < p₂ or p₂ < p₁ or p₁ = p₂)",
-                "Priority function is consistent",
-                "No circular dependencies"
-            ],
-            conclusion="∀ plugins p₁, p₂: priority(p₁) < priority(p₂) ⟹ execute(p₁) before execute(p₂)",
-            proof_type=ProofType.DIRECT
-        ))
+        self.theorems.append(
+            TheoremStatement(
+                name="Hook Execution Order Correctness",
+                statement="Hooks execute in priority order, and dependencies are resolved correctly",
+                assumptions=[
+                    "Priority values are totally ordered (p₁ < p₂ or p₂ < p₁ or p₁ = p₂)",
+                    "Priority function is consistent",
+                    "No circular dependencies",
+                ],
+                conclusion="∀ plugins p₁, p₂: priority(p₁) < priority(p₂) ⟹ execute(p₁) before execute(p₂)",
+                proof_type=ProofType.DIRECT,
+            )
+        )
 
         # Theorem 3: Resource Bounds
-        self.theorems.append(TheoremStatement(
-            name="Resource Utilization Bounds",
-            statement="Total resource usage is bounded by sum of individual plugin bounds",
-            assumptions=[
-                "Each plugin has memory bound Mᵢ",
-                "Each plugin has time bound Tᵢ",
-                "Plugins execute sequentially (for hooks) or independently (for services)"
-            ],
-            conclusion="Total_Memory ≤ Σ Mᵢ and Total_Time ≤ Σ Tᵢ",
-            proof_type=ProofType.DIRECT
-        ))
+        self.theorems.append(
+            TheoremStatement(
+                name="Resource Utilization Bounds",
+                statement="Total resource usage is bounded by sum of individual plugin bounds",
+                assumptions=[
+                    "Each plugin has memory bound Mᵢ",
+                    "Each plugin has time bound Tᵢ",
+                    "Plugins execute sequentially (for hooks) or independently (for services)",
+                ],
+                conclusion="Total_Memory ≤ Σ Mᵢ and Total_Time ≤ Σ Tᵢ",
+                proof_type=ProofType.DIRECT,
+            )
+        )
 
         # Theorem 4: Streaming Convergence
-        self.theorems.append(TheoremStatement(
-            name="Streaming Algorithm Convergence",
-            statement="The streaming response generation converges to complete output",
-            assumptions=[
-                "Token generation is monotonic (tokens only added, never removed)",
-                "Model has finite vocabulary V",
-                "Stop condition is eventually reached"
-            ],
-            conclusion="∃ n: after n steps, generation terminates with complete output",
-            proof_type=ProofType.CONSTRUCTIVE
-        ))
+        self.theorems.append(
+            TheoremStatement(
+                name="Streaming Algorithm Convergence",
+                statement="The streaming response generation converges to complete output",
+                assumptions=[
+                    "Token generation is monotonic (tokens only added, never removed)",
+                    "Model has finite vocabulary V",
+                    "Stop condition is eventually reached",
+                ],
+                conclusion="∃ n: after n steps, generation terminates with complete output",
+                proof_type=ProofType.CONSTRUCTIVE,
+            )
+        )
 
         # Theorem 5: Error Recovery Completeness
-        self.theorems.append(TheoremStatement(
-            name="Error Recovery Completeness",
-            statement="All error states are recoverable or lead to safe termination",
-            assumptions=[
-                "Error handlers are exception-complete",
-                "Fallback mechanisms exist for all critical operations",
-                "State is always consistent after error handling"
-            ],
-            conclusion="∀ error e, ∃ recovery path or safe termination",
-            proof_type=ProofType.CONSTRUCTIVE
-        ))
+        self.theorems.append(
+            TheoremStatement(
+                name="Error Recovery Completeness",
+                statement="All error states are recoverable or lead to safe termination",
+                assumptions=[
+                    "Error handlers are exception-complete",
+                    "Fallback mechanisms exist for all critical operations",
+                    "State is always consistent after error handling",
+                ],
+                conclusion="∀ error e, ∃ recovery path or safe termination",
+                proof_type=ProofType.CONSTRUCTIVE,
+            )
+        )
 
     def prove_plugin_completeness(self) -> Dict[str, any]:
         """
@@ -194,21 +206,18 @@ class MathematicalProofs:
             "proof_type": "Mathematical Induction",
             "base_case": {
                 "n=0": "Trivially true (no plugins, no execution)",
-                "n=1": "Single plugin with finite time T₁ terminates"
+                "n=1": "Single plugin with finite time T₁ terminates",
             },
             "inductive_hypothesis": "Assume k plugins terminate in time T_k = Σᵢ₌₁ᵏ Tᵢ",
             "inductive_step": {
                 "case_1": "Independent plugin: T_{k+1} added to T_k",
-                "case_2": "Dependent plugin: Executes after dependencies, still finite"
+                "case_2": "Dependent plugin: Executes after dependencies, still finite",
             },
             "deadlock_proof": "DAG structure prevents circular waiting",
             "infinite_loop_proof": "Finite plugins × finite time = finite total time",
             "conclusion": "System always terminates in finite time T ≤ Σᵢ₌₁ⁿ Tᵢ",
-            "complexity": {
-                "time": "O(n · T_max)",
-                "space": "O(n · M_max)"
-            },
-            "verified": True
+            "complexity": {"time": "O(n · T_max)", "space": "O(n · M_max)"},
+            "verified": True,
         }
 
         return proof
@@ -295,29 +304,29 @@ class MathematicalProofs:
             "definitions": {
                 "hooks": "H = {h₁, h₂, ..., h_n}",
                 "priority": "priority: H → ℝ (totally ordered)",
-                "dependencies": "depends: H → P(H) (forms DAG)"
+                "dependencies": "depends: H → P(H) (forms DAG)",
             },
             "proof_steps": [
                 "1. Construct execution order via topological sort",
                 "2. Within each level, sort by priority",
                 "3. Prove dependencies are satisfied (topological property)",
-                "4. Prove priority order within independent hooks"
+                "4. Prove priority order within independent hooks",
             ],
             "key_insights": [
                 "Topological sort ensures dependency satisfaction",
                 "Priority sort within levels ensures correct ordering",
                 "DAG structure prevents circular dependencies",
-                "Total ordering of priorities eliminates ambiguity"
+                "Total ordering of priorities eliminates ambiguity",
             ],
             "algorithm": {
                 "name": "Topological Sort with Priority",
                 "time_complexity": "O(V + E + V log V)",
                 "space_complexity": "O(V + E)",
-                "correctness": "Proven by induction on topological levels"
+                "correctness": "Proven by induction on topological levels",
             },
             "invariant": "Dependencies satisfied ∧ Priority respected (within constraints)",
             "conclusion": "Hook execution order is provably correct",
-            "verified": True
+            "verified": True,
         }
 
         return proof
@@ -418,39 +427,35 @@ class MathematicalProofs:
                 "sequential": "M_total ≤ max Mᵢ + M_system",
                 "parallel": "M_total ≤ Σ Mᵢ + M_system",
                 "hybrid": "M_total ≤ M_hook + M_service + M_system",
-                "conclusion": "Memory usage is bounded and predictable"
+                "conclusion": "Memory usage is bounded and predictable",
             },
             "time_bounds": {
                 "upper_bound": "T_total ≤ Σ Tᵢ (sequential worst case)",
                 "lower_bound": "T_total ≥ max Tᵢ (parallel best case)",
                 "typical": "T_total = Σ{T_hook} + max{T_backend}",
-                "conclusion": "Execution time is bounded"
+                "conclusion": "Execution time is bounded",
             },
             "corollaries": [
                 {
                     "name": "Memory Safety",
                     "statement": "Proper resource cleanup ⟹ M_final = M_initial",
-                    "importance": "Prevents memory leaks"
+                    "importance": "Prevents memory leaks",
                 },
-                {
-                    "name": "Timeout Guarantee",
-                    "statement": "System timeout = Σ Tᵢ + ε",
-                    "importance": "Prevents hangs"
-                },
+                {"name": "Timeout Guarantee", "statement": "System timeout = Σ Tᵢ + ε", "importance": "Prevents hangs"},
                 {
                     "name": "Linear Scalability",
                     "statement": "Adding plugin increases cost by O(1)",
-                    "importance": "System scales with plugins"
-                }
+                    "importance": "System scales with plugins",
+                },
             ],
             "practical_application": {
                 "our_system": {
                     "memory": "max{M_hook} + Σ{M_backend} + M_base",
                     "time": "Σ{T_hook} + max{T_backend}",
-                    "scalability": "O(n) plugins"
+                    "scalability": "O(n) plugins",
                 }
             },
-            "verified": True
+            "verified": True,
         }
 
         return proof
@@ -573,33 +578,33 @@ class MathematicalProofs:
             "termination_conditions": [
                 "A: Stop token generated (EOS)",
                 "B: Maximum length reached (hard limit)",
-                "C: Repetition detected (safety mechanism)"
+                "C: Repetition detected (safety mechanism)",
             ],
             "proof_steps": [
                 "1. Token generation is monotonic (length increases)",
                 "2. Multiple termination conditions exist",
                 "3. Probabilistic termination analysis: (1-p)ⁿ → 0",
-                "4. Hard limit guarantees: n ≤ max_length"
+                "4. Hard limit guarantees: n ≤ max_length",
             ],
             "convergence_properties": {
                 "monotonicity": "|S(t₁)| ≤ |S(t₂)| for t₁ < t₂",
                 "boundedness": "|S(t)| ≤ max_length",
-                "eventual_consistency": "S(t_stop) = S(∞)"
+                "eventual_consistency": "S(t_stop) = S(∞)",
             },
             "complexity": {
                 "best_case": "O(1) iterations",
                 "average_case": "O(l) iterations, l ≈ 100-500",
                 "worst_case": "O(max_length) iterations",
                 "per_iteration": "O(v) where v = vocabulary size",
-                "total": "O(max_length · v)"
+                "total": "O(max_length · v)",
             },
             "guarantees": [
                 "Finite termination: n ≤ max_length < ∞",
                 "Bounded memory: O(max_length)",
                 "Predictable latency: t ≤ max_length · t_token",
-                "No infinite loops possible"
+                "No infinite loops possible",
             ],
-            "verified": True
+            "verified": True,
         }
 
         return proof
@@ -765,54 +770,54 @@ class MathematicalProofs:
                 "transient": {
                     "examples": ["Network timeout", "Rate limiting"],
                     "recovery": "Retry with exponential backoff",
-                    "complexity": "O(2^max_retries)"
+                    "complexity": "O(2^max_retries)",
                 },
                 "configuration": {
                     "examples": ["Invalid model", "Bad parameters"],
                     "recovery": "Fallback to defaults",
-                    "complexity": "O(1)"
+                    "complexity": "O(1)",
                 },
                 "input": {
                     "examples": ["Malformed request", "Empty prompt"],
                     "recovery": "Error message with suggestions",
-                    "complexity": "O(1)"
+                    "complexity": "O(1)",
                 },
                 "system": {
                     "examples": ["OOM", "Critical failure"],
                     "recovery": "Safe termination",
-                    "complexity": "O(n) for cleanup"
-                }
+                    "complexity": "O(n) for cleanup",
+                },
             },
             "proof_steps": [
                 "1. All errors are detectable (try-except coverage)",
                 "2. All errors are classified (exhaustive categories)",
                 "3. All errors have recovery paths (constructive)",
                 "4. State remains consistent (invariant preservation)",
-                "5. No silent failures (comprehensive logging)"
+                "5. No silent failures (comprehensive logging)",
             ],
             "invariants": [
                 "∀ e ∈ E: ∃ handler h: h(e) ∈ {success, safe_failure}",
                 "∀ s, e: recover(s, e) ⟹ consistent(s')",
-                "∀ op: op succeeds ∨ (op fails ∧ error reported)"
+                "∀ op: op succeeds ∨ (op fails ∧ error reported)",
             ],
             "corollaries": [
                 {
                     "name": "Fault Tolerance",
                     "statement": "System survives k < n plugin failures",
-                    "proof": "Independent error handling per plugin"
+                    "proof": "Independent error handling per plugin",
                 },
                 {
                     "name": "Graceful Degradation",
                     "statement": "Reduced functionality > complete failure",
-                    "proof": "Optional features fail independently"
+                    "proof": "Optional features fail independently",
                 },
                 {
                     "name": "Error Observability",
                     "statement": "All errors are logged and traceable",
-                    "proof": "Comprehensive logging at all layers"
-                }
+                    "proof": "Comprehensive logging at all layers",
+                },
             ],
-            "verified": True
+            "verified": True,
         }
 
         return proof
@@ -858,7 +863,7 @@ TABLE OF CONTENTS:
             self.prove_hook_execution_order(),
             self.prove_resource_bounds(),
             self.prove_streaming_convergence(),
-            self.prove_error_recovery_completeness()
+            self.prove_error_recovery_completeness(),
         ]
 
         for i, proof in enumerate(proofs, 1):
@@ -878,7 +883,7 @@ TABLE OF CONTENTS:
         """Export all proofs to file"""
         document = self.generate_proof_document()
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(document)
 
         print(f"\n✓ Proofs exported to {filename}")
@@ -890,7 +895,7 @@ TABLE OF CONTENTS:
             "hook_execution_order": self.prove_hook_execution_order()["verified"],
             "resource_bounds": self.prove_resource_bounds()["verified"],
             "streaming_convergence": self.prove_streaming_convergence()["verified"],
-            "error_recovery": self.prove_error_recovery_completeness()["verified"]
+            "error_recovery": self.prove_error_recovery_completeness()["verified"],
         }
 
         return results

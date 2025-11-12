@@ -27,6 +27,7 @@ from plugins.types import (
 @dataclass
 class TokenBucket:
     """Token bucket for rate limiting"""
+
     capacity: int
     tokens: float
     refill_rate: float  # tokens per second
@@ -86,7 +87,7 @@ class RateLimitPlugin(BaseMiddleware):
                 extra={
                     "max_requests_per_minute": self._max_requests_per_minute,
                     "max_burst": self._max_burst,
-                }
+                },
             )
 
             return PluginResult.ok(None)
@@ -122,7 +123,7 @@ class RateLimitPlugin(BaseMiddleware):
                         extra={
                             "retry_after": 60,
                             "limit": self._max_requests_per_minute,
-                        }
+                        },
                     )
 
             # Check IP rate limit
@@ -136,7 +137,7 @@ class RateLimitPlugin(BaseMiddleware):
                         extra={
                             "retry_after": 60,
                             "limit": self._max_requests_per_minute,
-                        }
+                        },
                     )
 
             # Add rate limit headers to request
@@ -174,11 +175,13 @@ class RateLimitPlugin(BaseMiddleware):
                 response["headers"] = {}
 
             # Add rate limit headers
-            response["headers"].update({
-                "X-RateLimit-Limit": str(self._max_requests_per_minute),
-                "X-RateLimit-Remaining": str(response.get("rate_limit_remaining", 0)),
-                "X-RateLimit-Reset": str(int(time.time()) + 60),
-            })
+            response["headers"].update(
+                {
+                    "X-RateLimit-Limit": str(self._max_requests_per_minute),
+                    "X-RateLimit-Remaining": str(response.get("rate_limit_remaining", 0)),
+                    "X-RateLimit-Reset": str(int(time.time()) + 60),
+                }
+            )
 
             return PluginResult.ok(response)
 
@@ -187,13 +190,15 @@ class RateLimitPlugin(BaseMiddleware):
 
     async def _do_health_check(self) -> PluginResult[Dict[str, Any]]:
         """Health check with rate limit stats"""
-        return PluginResult.ok({
-            "status": "healthy",
-            "tracked_users": len(self._user_buckets),
-            "tracked_ips": len(self._ip_buckets),
-            "max_requests_per_minute": self._max_requests_per_minute,
-            "max_burst": self._max_burst,
-        })
+        return PluginResult.ok(
+            {
+                "status": "healthy",
+                "tracked_users": len(self._user_buckets),
+                "tracked_ips": len(self._ip_buckets),
+                "max_requests_per_minute": self._max_requests_per_minute,
+                "max_burst": self._max_burst,
+            }
+        )
 
 
 # Export plugin

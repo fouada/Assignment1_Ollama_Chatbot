@@ -233,9 +233,7 @@ async def execute_middleware_request(request_data: Dict[str, Any]) -> Dict[str, 
     # Execute request middleware hooks
     await plugin_manager.hook_manager.execute_hooks(
         HookType.ON_REQUEST_START,
-        HookContext(
-            hook_type=HookType.ON_REQUEST_START, data={"request": request_data}
-        ),
+        HookContext(hook_type=HookType.ON_REQUEST_START, data={"request": request_data}),
     )
 
     # Process through middleware plugins
@@ -251,9 +249,7 @@ async def execute_middleware_response(response_data: Dict[str, Any]) -> Dict[str
     # Execute response hooks
     await plugin_manager.hook_manager.execute_hooks(
         HookType.ON_REQUEST_COMPLETE,
-        HookContext(
-            hook_type=HookType.ON_REQUEST_COMPLETE, data={"response": response_data}
-        ),
+        HookContext(hook_type=HookType.ON_REQUEST_COMPLETE, data={"response": response_data}),
     )
 
     return response_data
@@ -331,9 +327,7 @@ async def health():
             backend = await plugin_manager.get_backend_provider("ollama_backend")
             if backend:
                 backend_health = await backend.health_check()
-                health_data["backend"] = (
-                    backend_health.data if backend_health.success else {}
-                )
+                health_data["backend"] = backend_health.data if backend_health.success else {}
             else:
                 health_data["status"] = "degraded"
                 health_data["warning"] = "No backend provider available"
@@ -426,9 +420,7 @@ async def chat():
     )
 
     # Process message through message processors
-    processed_result = await plugin_manager.execute_message_processors(
-        user_message, context
-    )
+    processed_result = await plugin_manager.execute_message_processors(user_message, context)
 
     if processed_result.success and processed_result.data:
         user_message = processed_result.data

@@ -7,4 +7,3 @@ Provides beautiful web-based interfaces:
 """
 
 __all__ = ["streamlit_app", "streamlit_accessible"]
-

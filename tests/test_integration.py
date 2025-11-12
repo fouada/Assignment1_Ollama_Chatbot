@@ -36,9 +36,7 @@ def check_ollama_running():
         ollama.list()
         return True
     except Exception as e:
-        pytest.skip(
-            f"Ollama not running. Start with: brew services start ollama\nError: {e}"
-        )
+        pytest.skip(f"Ollama not running. Start with: brew services start ollama\nError: {e}")
 
 
 @pytest.fixture(scope="module")
@@ -122,9 +120,7 @@ class TestRealOllamaGeneration:
         Coverage: Tests actual ollama.generate() path
         """
         # REAL API call - not mocked!
-        response = ollama.generate(
-            model=test_model, prompt="Say 'test' and nothing else", stream=False
-        )
+        response = ollama.generate(model=test_model, prompt="Say 'test' and nothing else", stream=False)
 
         assert response is not None
         assert "response" in response
@@ -162,9 +158,7 @@ class TestRealOllamaGeneration:
         """
         # REAL streaming API call
         chunks = []
-        for chunk in ollama.generate(
-            model=test_model, prompt="Count: 1 2 3", stream=True
-        ):
+        for chunk in ollama.generate(model=test_model, prompt="Count: 1 2 3", stream=True):
             chunks.append(chunk)
             if len(chunks) >= 5:  # Get at least 5 chunks
                 break
@@ -204,9 +198,7 @@ class TestRealFlaskIntegration:
         # REAL request to Flask which calls REAL Ollama
         response = flask_client.post(
             "/chat",
-            data=json.dumps(
-                {"message": "Say hello", "model": test_model, "stream": False}
-            ),
+            data=json.dumps({"message": "Say hello", "model": test_model, "stream": False}),
             content_type="application/json",
         )
 
@@ -306,9 +298,7 @@ class TestRealStreamlitIntegration:
 
         # Uses REAL Ollama streaming, not mocked
         chunks = []
-        for chunk in generate_response(
-            prompt="Say OK", model=test_model, temperature=0.7  # Correct parameter name
-        ):
+        for chunk in generate_response(prompt="Say OK", model=test_model, temperature=0.7):  # Correct parameter name
             chunks.append(chunk)
             if len(chunks) >= 3:  # Get a few chunks
                 break
@@ -335,9 +325,7 @@ class TestRealErrorScenarios:
 
         response = flask_client.post(
             "/chat",
-            data=json.dumps(
-                {"message": "Hello", "model": "nonexistent-model-xyz", "stream": False}
-            ),
+            data=json.dumps({"message": "Hello", "model": "nonexistent-model-xyz", "stream": False}),
             content_type="application/json",
         )
 
@@ -362,9 +350,7 @@ class TestRealErrorScenarios:
 
         response = flask_client.post(
             "/chat",
-            data=json.dumps(
-                {"message": long_prompt, "model": test_model, "stream": False}
-            ),
+            data=json.dumps({"message": long_prompt, "model": test_model, "stream": False}),
             content_type="application/json",
         )
 
@@ -417,17 +403,13 @@ class TestRealPerformance:
         # Send two requests
         response1 = flask_client.post(
             "/chat",
-            data=json.dumps(
-                {"message": "Request 1", "model": test_model, "stream": False}
-            ),
+            data=json.dumps({"message": "Request 1", "model": test_model, "stream": False}),
             content_type="application/json",
         )
 
         response2 = flask_client.post(
             "/chat",
-            data=json.dumps(
-                {"message": "Request 2", "model": test_model, "stream": False}
-            ),
+            data=json.dumps({"message": "Request 2", "model": test_model, "stream": False}),
             content_type="application/json",
         )
 

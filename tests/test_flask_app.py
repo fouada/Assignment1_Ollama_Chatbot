@@ -113,9 +113,7 @@ class TestChatEndpoint:
     """Test chat endpoint with streaming and non-streaming"""
 
     @patch("app_flask.ollama.chat")
-    def test_chat_non_streaming_success(
-        self, mock_chat, flask_client, sample_chat_request, mock_ollama_chat
-    ):
+    def test_chat_non_streaming_success(self, mock_chat, flask_client, sample_chat_request, mock_ollama_chat):
         """Test non-streaming chat request"""
         mock_chat.return_value = mock_ollama_chat
         response = flask_client.post(
@@ -144,9 +142,7 @@ class TestChatEndpoint:
 
     def test_chat_empty_request(self, flask_client):
         """Test chat with empty request body"""
-        response = flask_client.post(
-            "/chat", data=json.dumps({}), content_type="application/json"
-        )
+        response = flask_client.post("/chat", data=json.dumps({}), content_type="application/json")
         assert response.status_code == 400
 
     def test_chat_no_json(self, flask_client):
@@ -155,9 +151,7 @@ class TestChatEndpoint:
         assert response.status_code in [400, 500]
 
     @patch("app_flask.ollama.chat")
-    def test_chat_streaming(
-        self, mock_chat, flask_client, sample_chat_request, mock_ollama_chat_stream
-    ):
+    def test_chat_streaming(self, mock_chat, flask_client, sample_chat_request, mock_ollama_chat_stream):
         """Test streaming chat response"""
         sample_chat_request["stream"] = True
         mock_chat.return_value = mock_ollama_chat_stream
@@ -175,18 +169,14 @@ class TestChatEndpoint:
         """Test chat with default model and temperature"""
         mock_chat.return_value = mock_ollama_chat
         request_data = {"message": "Hello"}
-        response = flask_client.post(
-            "/chat", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = flask_client.post("/chat", data=json.dumps(request_data), content_type="application/json")
         assert response.status_code == 200
         # Verify default parameters were used
         call_kwargs = mock_chat.call_args[1]
         assert call_kwargs["options"]["temperature"] == 0.7
 
     @patch("app_flask.ollama.chat")
-    def test_chat_custom_temperature(
-        self, mock_chat, flask_client, sample_chat_request, mock_ollama_chat
-    ):
+    def test_chat_custom_temperature(self, mock_chat, flask_client, sample_chat_request, mock_ollama_chat):
         """Test chat with custom temperature"""
         sample_chat_request["temperature"] = 1.5
         mock_chat.return_value = mock_ollama_chat
@@ -217,9 +207,7 @@ class TestGenerateEndpoint:
     """Test generate endpoint"""
 
     @patch("app_flask.ollama.generate")
-    def test_generate_success(
-        self, mock_generate, flask_client, sample_generate_request, mock_ollama_generate
-    ):
+    def test_generate_success(self, mock_generate, flask_client, sample_generate_request, mock_ollama_generate):
         """Test successful text generation"""
         mock_generate.return_value = mock_ollama_generate
         response = flask_client.post(
@@ -247,24 +235,18 @@ class TestGenerateEndpoint:
         assert "prompt" in data["error"].lower()
 
     @patch("app_flask.ollama.generate")
-    def test_generate_default_model(
-        self, mock_generate, flask_client, mock_ollama_generate
-    ):
+    def test_generate_default_model(self, mock_generate, flask_client, mock_ollama_generate):
         """Test generate with default model"""
         mock_generate.return_value = mock_ollama_generate
         request_data = {"prompt": "test prompt"}
-        response = flask_client.post(
-            "/generate", data=json.dumps(request_data), content_type="application/json"
-        )
+        response = flask_client.post("/generate", data=json.dumps(request_data), content_type="application/json")
         assert response.status_code == 200
         # Verify default model was used
         call_args = mock_generate.call_args
         assert call_args[1]["model"] == "llama3.2"
 
     @patch("app_flask.ollama.generate")
-    def test_generate_error_handling(
-        self, mock_generate, flask_client, sample_generate_request
-    ):
+    def test_generate_error_handling(self, mock_generate, flask_client, sample_generate_request):
         """Test generate error handling"""
         mock_generate.side_effect = Exception("Generation failed")
         response = flask_client.post(
@@ -345,9 +327,7 @@ class TestLogging:
 
     @patch("app_flask.logger")
     @patch("app_flask.ollama.chat")
-    def test_error_logging(
-        self, mock_chat, mock_logger, flask_client, sample_chat_request
-    ):
+    def test_error_logging(self, mock_chat, mock_logger, flask_client, sample_chat_request):
         """Test that errors are logged"""
         mock_chat.side_effect = Exception("Test error")
         flask_client.post(
@@ -364,9 +344,7 @@ class TestValidation:
 
     def test_chat_message_not_string(self, flask_client):
         """Test chat with message as non-string type"""
-        response = flask_client.post(
-            "/chat", data=json.dumps({"message": 123}), content_type="application/json"
-        )
+        response = flask_client.post("/chat", data=json.dumps({"message": 123}), content_type="application/json")
         assert response.status_code == 400
         data = response.get_json()
         assert "error" in data
@@ -488,9 +466,7 @@ class TestErrorHandling:
 
     def test_generate_empty_request_body(self, flask_client):
         """Test generate endpoint with None/null request body"""
-        response = flask_client.post(
-            "/generate", data=None, content_type="application/json"
-        )
+        response = flask_client.post("/generate", data=None, content_type="application/json")
         assert response.status_code in [400, 500]
 
     def test_generate_temperature_type_validation(self, flask_client):
@@ -533,18 +509,14 @@ class TestErrorHandling:
 
     def test_generate_none_request_body(self, flask_client):
         """Test generate with None request body to trigger line 113"""
-        response = flask_client.post(
-            "/generate", data=json.dumps(None), content_type="application/json"
-        )
+        response = flask_client.post("/generate", data=json.dumps(None), content_type="application/json")
         assert response.status_code == 400
         data = response.get_json()
         assert "error" in data
 
     def test_chat_none_request_body(self, flask_client):
         """Test chat with None request body"""
-        response = flask_client.post(
-            "/chat", data=json.dumps(None), content_type="application/json"
-        )
+        response = flask_client.post("/chat", data=json.dumps(None), content_type="application/json")
         assert response.status_code == 400
         data = response.get_json()
         assert "error" in data
@@ -555,9 +527,7 @@ class TestIntegration:
 
     @patch("app_flask.ollama.list")
     @patch("app_flask.ollama.chat")
-    def test_full_workflow(
-        self, mock_chat, mock_list, flask_client, mock_ollama_list, mock_ollama_chat
-    ):
+    def test_full_workflow(self, mock_chat, mock_list, flask_client, mock_ollama_list, mock_ollama_chat):
         """Test complete workflow: health -> models -> chat"""
         mock_list.return_value = mock_ollama_list
         mock_chat.return_value = mock_ollama_chat
@@ -588,9 +558,7 @@ class TestAdvancedScenarios:
     """Advanced production-ready test scenarios"""
 
     @patch("app_flask.ollama.list")
-    def test_multiple_sequential_requests(
-        self, mock_list, flask_client, mock_ollama_list
-    ):
+    def test_multiple_sequential_requests(self, mock_list, flask_client, mock_ollama_list):
         """Test handling of multiple sequential requests"""
         mock_list.return_value = mock_ollama_list
         # Test rapid sequential requests work correctly
@@ -614,9 +582,7 @@ class TestAdvancedScenarios:
         assert response.status_code in [200, 400]
 
     @patch("app_flask.ollama.chat")
-    def test_special_characters_in_message(
-        self, mock_chat, flask_client, mock_ollama_chat
-    ):
+    def test_special_characters_in_message(self, mock_chat, flask_client, mock_ollama_chat):
         """Test with special characters"""
         mock_chat.return_value = mock_ollama_chat
         special_msg = "Hello! @#$%^&*()_+-=[]{}|;':\",./<>?"
@@ -648,9 +614,7 @@ class TestAdvancedScenarios:
             assert response.status_code == 200
 
     @patch("app_flask.ollama.list")
-    def test_response_time_health_check(
-        self, mock_list, flask_client, mock_ollama_list
-    ):
+    def test_response_time_health_check(self, mock_list, flask_client, mock_ollama_list):
         """Test health check response time is reasonable"""
         mock_list.return_value = mock_ollama_list
         import time
@@ -675,9 +639,7 @@ class TestAdvancedScenarios:
 
     def test_json_content_type_validation(self, flask_client):
         """Test that content-type is validated"""
-        response = flask_client.post(
-            "/chat", data='{"message":"test"}', content_type="text/plain"
-        )
+        response = flask_client.post("/chat", data='{"message":"test"}', content_type="text/plain")
         # Flask may return 500 or 400 for content-type mismatch
         assert response.status_code in [200, 400, 415, 500]
 
@@ -687,17 +649,13 @@ class TestEdgeCases:
 
     def test_empty_json_body(self, flask_client):
         """Test with empty JSON body"""
-        response = flask_client.post(
-            "/chat", data="{}", content_type="application/json"
-        )
+        response = flask_client.post("/chat", data="{}", content_type="application/json")
         assert response.status_code == 400
         assert "error" in response.get_json()
 
     def test_malformed_json(self, flask_client):
         """Test with malformed JSON"""
-        response = flask_client.post(
-            "/chat", data="{invalid json}", content_type="application/json"
-        )
+        response = flask_client.post("/chat", data="{invalid json}", content_type="application/json")
         # Malformed JSON returns 400 or 500 depending on Flask version
         assert response.status_code in [400, 500]
         data = response.get_json()
@@ -705,9 +663,7 @@ class TestEdgeCases:
 
     def test_null_message_value(self, flask_client):
         """Test with null message value"""
-        response = flask_client.post(
-            "/chat", data=json.dumps({"message": None}), content_type="application/json"
-        )
+        response = flask_client.post("/chat", data=json.dumps({"message": None}), content_type="application/json")
         assert response.status_code == 400
 
     def test_array_instead_of_string(self, flask_client):

@@ -17,6 +17,7 @@ from datetime import datetime
 from enum import Enum, auto
 from typing import (
     Any,
+    AsyncIterator,
     Callable,
     Dict,
     Generic,
@@ -317,9 +318,7 @@ class Pluggable(Protocol):
 class MessageProcessor(Pluggable, Protocol):
     """Protocol for message processing plugins"""
 
-    async def process_message(
-        self, message: Message, context: ChatContext
-    ) -> PluginResult[Message]:
+    async def process_message(self, message: Message, context: ChatContext) -> PluginResult[Message]:
         """Transform message - pure function where possible"""
         ...
 
@@ -328,9 +327,7 @@ class MessageProcessor(Pluggable, Protocol):
 class BackendProvider(Pluggable, Protocol):
     """Protocol for AI backend implementations"""
 
-    async def chat(
-        self, context: ChatContext
-    ) -> PluginResult[Union[Message, AsyncIterator[str]]]:
+    async def chat(self, context: ChatContext) -> PluginResult[Union[Message, AsyncIterator[str]]]:
         """Generate chat response - supports streaming"""
         ...
 
@@ -356,9 +353,7 @@ class Middleware(Pluggable, Protocol):
         """Transform incoming request"""
         ...
 
-    async def process_response(
-        self, response: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def process_response(self, response: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """Transform outgoing response"""
         ...
 
@@ -436,20 +431,14 @@ class PluginMetrics:
             "invocations": self.invocations,
             "successes": self.successes,
             "failures": self.failures,
-            "success_rate": (
-                self.successes / self.invocations if self.invocations > 0 else 0.0
-            ),
+            "success_rate": (self.successes / self.invocations if self.invocations > 0 else 0.0),
             "avg_execution_time_ms": self.avg_execution_time_ms,
             "min_execution_time_ms": (
-                self.min_execution_time_ms
-                if self.min_execution_time_ms != float("inf")
-                else 0.0
+                self.min_execution_time_ms if self.min_execution_time_ms != float("inf") else 0.0
             ),
             "max_execution_time_ms": self.max_execution_time_ms,
             "last_error": self.last_error,
-            "last_execution": (
-                self.last_execution.isoformat() if self.last_execution else None
-            ),
+            "last_execution": (self.last_execution.isoformat() if self.last_execution else None),
         }
 
 

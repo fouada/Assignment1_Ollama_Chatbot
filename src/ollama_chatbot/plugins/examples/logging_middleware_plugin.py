@@ -73,9 +73,7 @@ class LoggingMiddlewarePlugin(BaseMiddleware):
         self._logger.info("Logging middleware shutdown")
         return PluginResult.ok(None)
 
-    async def _process_request(
-        self, request: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def _process_request(self, request: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """
         Log and process incoming request
 
@@ -112,9 +110,7 @@ class LoggingMiddlewarePlugin(BaseMiddleware):
             self._logger.exception("Request processing failed")
             return PluginResult.fail(f"Request processing error: {e}")
 
-    async def _process_response(
-        self, response: Dict[str, Any]
-    ) -> PluginResult[Dict[str, Any]]:
+    async def _process_response(self, response: Dict[str, Any]) -> PluginResult[Dict[str, Any]]:
         """
         Log and process outgoing response
 
@@ -175,10 +171,7 @@ class LoggingMiddlewarePlugin(BaseMiddleware):
             elif isinstance(value, dict):
                 sanitized[key] = self._sanitize_data(value)
             elif isinstance(value, list):
-                sanitized[key] = [
-                    self._sanitize_data(item) if isinstance(item, dict) else item
-                    for item in value
-                ]
+                sanitized[key] = [self._sanitize_data(item) if isinstance(item, dict) else item for item in value]
             else:
                 sanitized[key] = value
 
