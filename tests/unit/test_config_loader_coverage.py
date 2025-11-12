@@ -271,6 +271,8 @@ middleware:
             (plugin_dir / "processor1.py").write_text("# processor")
 
             config_file = Path(tmpdir) / "test.yaml"
+            # Use forward slashes for cross-platform compatibility in YAML
+            plugin_dir_str = plugin_dir.as_posix()
             config_content = f"""
 plugin_manager:
   plugin_directory: "./plugins"
@@ -278,12 +280,12 @@ plugin_manager:
 backends:
   backend1:
     enabled: true
-    plugin_file: "{plugin_dir}/backend1.py"
+    plugin_file: "{plugin_dir_str}/backend1.py"
 
 message_processors:
   processor1:
     enabled: true
-    plugin_file: "{plugin_dir}/processor1.py"
+    plugin_file: "{plugin_dir_str}/processor1.py"
 
 features: {{}}
 middleware: {{}}
