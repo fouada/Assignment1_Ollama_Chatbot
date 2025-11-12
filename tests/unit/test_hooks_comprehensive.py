@@ -4,7 +4,7 @@ Tests HookManager, CircuitBreakerState, and HookExecutionContext
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, AsyncMock, patch
 import pytest
 import time
@@ -97,7 +97,7 @@ class TestCircuitBreakerState:
         assert cb.state == "open"
 
         # Manually set last_failure_time to past
-        cb.last_failure_time = datetime.utcnow() - timedelta(seconds=2)
+        cb.last_failure_time = datetime.now(timezone.utc) - timedelta(seconds=2)
 
         # Should transition to half_open
         result = cb.can_execute()
@@ -468,7 +468,7 @@ class TestCircuitBreakerIntegration:
         # Manually open circuit breaker
         breaker_key = manager._get_breaker_key("test-plugin", HookType.ON_REQUEST_START)
         manager._circuit_breakers[breaker_key].state = "open"
-        manager._circuit_breakers[breaker_key].last_failure_time = datetime.utcnow()
+        manager._circuit_breakers[breaker_key].last_failure_time = datetime.now(timezone.utc)
 
         context = HookContext(hook_type=HookType.ON_REQUEST_START, data={})
         results = await manager.execute_hooks(HookType.ON_REQUEST_START, context)

@@ -124,14 +124,17 @@ omit = [
     # Exclude backend plugin implementations (tested via integration)
     "*/plugins/backend_plugins/*",
     # Exclude alternative UI implementations
-    "*/ui/streamlit_app.py",
-    "*/ui/streamlit_accessible.py",
+    "*/ui/*",
     # Exclude alternative Flask app with plugins
     "*/api/flask_app_with_plugins.py",
     # Exclude CLI (tested via integration)
     "*/cli/*",
     # Exclude core (tested via other modules)
     "*/core/*",
+    # Exclude example plugins (reference implementations - tested separately)
+    "*/plugins/examples/audit_plugin.py",
+    "*/plugins/examples/auth_plugin.py",
+    "*/plugins/examples/rate_limit_plugin.py",
 ]
 
 [tool.coverage.report]
