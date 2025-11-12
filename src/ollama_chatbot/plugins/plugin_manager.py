@@ -32,14 +32,15 @@ from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 # Unix-specific resource module (not available on Windows)
 try:
     import resource
+
     RESOURCE_AVAILABLE = True
 except ImportError:
     RESOURCE_AVAILABLE = False
     resource = None
 
 try:
+    from watchdog.events import FileModifiedEvent, FileSystemEventHandler
     from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 
     WATCHDOG_AVAILABLE = True
 except ImportError:

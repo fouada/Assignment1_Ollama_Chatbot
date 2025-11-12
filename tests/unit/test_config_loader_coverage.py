@@ -6,11 +6,12 @@ Covers error paths and edge cases to increase coverage
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, mock_open, patch
+
 import pytest
 
 from ollama_chatbot.plugins.config_loader import ConfigLoader, get_config_loader, reload_config
-from ollama_chatbot.plugins.types import PluginConfigError, HookPriority
+from ollama_chatbot.plugins.types import HookPriority, PluginConfigError
 
 
 class TestConfigLoaderCoverage:

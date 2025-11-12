@@ -5,26 +5,26 @@ These tests cover error paths and edge cases to increase coverage to 95%
 
 import asyncio
 from datetime import datetime
-from unittest.mock import Mock, patch, AsyncMock
-import pytest
 from typing import List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from ollama_chatbot.plugins.base_plugin import (
-    BasePlugin,
     BaseBackendProvider,
-    BaseMessageProcessor,
     BaseFeatureExtension,
+    BaseMessageProcessor,
     BaseMiddleware,
+    BasePlugin,
 )
 from ollama_chatbot.plugins.types import (
+    ChatContext,
+    Message,
     PluginConfig,
     PluginMetadata,
-    PluginType,
     PluginResult,
-    Message,
-    ChatContext,
+    PluginType,
 )
-
 
 # ============================================================================
 # Test Plugin Implementations

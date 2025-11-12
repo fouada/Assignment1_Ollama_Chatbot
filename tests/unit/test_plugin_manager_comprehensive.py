@@ -6,29 +6,29 @@ Tests PluginRegistry, PluginLoader, and PluginManager
 import asyncio
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-import pytest
 from typing import List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
+
+from ollama_chatbot.plugins.base_plugin import BasePlugin
 from ollama_chatbot.plugins.plugin_manager import (
+    PluginLoader,
     PluginManager,
     PluginRegistry,
-    PluginLoader,
 )
-from ollama_chatbot.plugins.base_plugin import BasePlugin
 from ollama_chatbot.plugins.types import (
+    HookPriority,
+    HookType,
     PluginConfig,
-    PluginMetadata,
-    PluginType,
-    PluginResult,
-    PluginState,
+    PluginDependencyError,
     PluginError,
     PluginLoadError,
-    PluginDependencyError,
-    HookType,
-    HookPriority,
+    PluginMetadata,
+    PluginResult,
+    PluginState,
+    PluginType,
 )
-
 
 # ============================================================================
 # Mock Plugins for Testing
@@ -657,8 +657,8 @@ class TestPluginManager:
     @pytest.mark.asyncio
     async def test_execute_message_processors(self):
         """Test executing message processors"""
-        from ollama_chatbot.plugins.types import Message, ChatContext
         from ollama_chatbot.plugins.base_plugin import BaseMessageProcessor
+        from ollama_chatbot.plugins.types import ChatContext, Message
 
         class TestProcessor(BaseMessageProcessor):
             def __init__(self):

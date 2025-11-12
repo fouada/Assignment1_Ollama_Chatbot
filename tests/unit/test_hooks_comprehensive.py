@@ -4,20 +4,21 @@ Tests HookManager, CircuitBreakerState, and HookExecutionContext
 """
 
 import asyncio
-from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, AsyncMock, patch
-import pytest
 import time
+from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from ollama_chatbot.plugins.hooks import (
-    HookManager,
-    HookExecutionContext,
     CircuitBreakerState,
+    HookExecutionContext,
+    HookManager,
 )
 from ollama_chatbot.plugins.types import (
-    HookType,
-    HookPriority,
     HookContext,
+    HookPriority,
+    HookType,
     PluginResult,
 )
 
