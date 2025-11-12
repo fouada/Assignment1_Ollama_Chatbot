@@ -18,6 +18,10 @@
 
 ---
 
+> **📁 Quick Reference**: See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for a complete visual guide to the project organization and file structure.
+
+---
+
 ## 📋 Table of Contents
 
 1. [📖 Abstract & Dual-Interface Architecture](#-abstract--dual-interface-architecture) 🎯 **CORE CONCEPT**

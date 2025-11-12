@@ -41,15 +41,16 @@ class TestAccessibilityFeatures:
         """Test: ARIA labels are defined for accessibility"""
         # Import the accessible app module
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
             "app_streamlit_accessible",
-            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py"
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py",
         )
         module = importlib.util.module_from_spec(spec)
 
         # Check ARIA labels dictionary exists
         spec.loader.exec_module(module)
-        assert hasattr(module, 'ARIA_LABELS')
+        assert hasattr(module, "ARIA_LABELS")
         assert isinstance(module.ARIA_LABELS, dict)
 
         # Verify required ARIA labels
@@ -70,28 +71,32 @@ class TestAccessibilityFeatures:
     def test_keyboard_shortcuts_documented(self):
         """Test: Keyboard shortcuts are documented"""
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
             "app_streamlit_accessible",
-            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py"
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py",
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
 
-        assert hasattr(module, 'KEYBOARD_SHORTCUTS')
+        assert hasattr(module, "KEYBOARD_SHORTCUTS")
         assert "Enter" in module.KEYBOARD_SHORTCUTS
         assert "Tab" in module.KEYBOARD_SHORTCUTS
 
     def test_accessibility_css_includes_focus_indicators(self):
         """Test: CSS includes focus indicators for keyboard navigation"""
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
             "app_streamlit_accessible",
-            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py"
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py",
         )
         module = importlib.util.module_from_spec(spec)
 
         # Load module source to check CSS
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify focus indicator styles
@@ -101,7 +106,9 @@ class TestAccessibilityFeatures:
 
     def test_accessibility_css_includes_high_contrast_mode(self):
         """Test: CSS supports high contrast mode"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify high contrast support
@@ -109,7 +116,9 @@ class TestAccessibilityFeatures:
 
     def test_accessibility_css_includes_reduced_motion(self):
         """Test: CSS supports reduced motion for users with vestibular disorders"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify reduced motion support
@@ -117,7 +126,9 @@ class TestAccessibilityFeatures:
 
     def test_minimum_touch_target_size(self):
         """Test: CSS ensures minimum 44x44px touch targets (WCAG requirement)"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify minimum touch target sizes
@@ -126,7 +137,9 @@ class TestAccessibilityFeatures:
 
     def test_minimum_font_size(self):
         """Test: CSS ensures minimum 16px readable fonts (WCAG requirement)"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify minimum font size
@@ -134,7 +147,9 @@ class TestAccessibilityFeatures:
 
     def test_skip_navigation_link(self):
         """Test: Skip navigation link exists for screen readers"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify skip link
@@ -143,7 +158,9 @@ class TestAccessibilityFeatures:
 
     def test_semantic_html_roles(self):
         """Test: Semantic HTML roles are used (ARIA roles)"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify ARIA roles
@@ -162,7 +179,9 @@ class TestAccessibilityFeatures:
 
     def test_aria_live_regions(self):
         """Test: ARIA live regions for dynamic content"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify ARIA live regions
@@ -171,7 +190,9 @@ class TestAccessibilityFeatures:
 
     def test_color_contrast_requirements(self):
         """Test: Color contrast meets WCAG AA (4.5:1 for normal text)"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify color contrast consideration
@@ -180,7 +201,9 @@ class TestAccessibilityFeatures:
 
     def test_screen_reader_only_class(self):
         """Test: Screen reader only class exists for hidden but accessible content"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify sr-only class
@@ -189,7 +212,9 @@ class TestAccessibilityFeatures:
 
     def test_accessibility_statement_present(self):
         """Test: Accessibility statement and WCAG compliance notice"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify accessibility statement
@@ -199,7 +224,9 @@ class TestAccessibilityFeatures:
 
     def test_form_labels_associated(self):
         """Test: Form inputs have associated labels"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify labels are used
@@ -213,7 +240,9 @@ class TestAccessibilityFeatures:
 
     def test_error_messages_accessible(self):
         """Test: Error messages use role='alert' for screen readers"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Verify alert role for errors
@@ -235,11 +264,13 @@ class TestAccessibilityEdgeCases:
     def test_empty_chat_accessibility(self):
         """Test: Edge case - empty chat is accessible"""
         # Empty state should still have ARIA labels
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Should have empty state handling
-        assert 'aria-label' in source
+        assert "aria-label" in source
 
     def test_long_message_accessibility(self):
         """Test: Edge case - very long messages are accessible"""
@@ -250,9 +281,10 @@ class TestAccessibilityEdgeCases:
     def test_special_characters_in_aria_labels(self):
         """Test: Edge case - special characters in ARIA labels"""
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
             "app_streamlit_accessible",
-            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py"
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py",
         )
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -264,7 +296,9 @@ class TestAccessibilityEdgeCases:
 
     def test_focus_management_on_error(self):
         """Test: Edge case - focus is managed properly on errors"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Errors should announce to screen readers
@@ -301,17 +335,21 @@ class TestWCAGCompliance:
 
     def test_wcag_perceivable_principle(self):
         """Test: WCAG Principle 1 - Perceivable"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Check semantic HTML and contrast
-        assert 'aria-label' in source
-        assert 'role=' in source
+        assert "aria-label" in source
+        assert "role=" in source
         assert "color:" in source
 
     def test_wcag_operable_principle(self):
         """Test: WCAG Principle 2 - Operable"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Check keyboard support and focus
@@ -321,7 +359,9 @@ class TestWCAGCompliance:
 
     def test_wcag_understandable_principle(self):
         """Test: WCAG Principle 3 - Understandable"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Check labels and error handling
@@ -330,13 +370,15 @@ class TestWCAGCompliance:
 
     def test_wcag_robust_principle(self):
         """Test: WCAG Principle 4 - Robust"""
-        with open(Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", 'r') as f:
+        with open(
+            Path(__file__).parent.parent / "apps" / "app_streamlit_accessible.py", "r"
+        ) as f:
             source = f.read()
 
         # Check ARIA attributes
-        assert 'role=' in source
-        assert 'aria-live' in source
-        assert 'aria-label' in source
+        assert "role=" in source
+        assert "aria-live" in source
+        assert "aria-label" in source
 
 
 # ============================================================================

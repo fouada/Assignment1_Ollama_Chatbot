@@ -23,6 +23,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 # Import plugin system
 import sys
+
 sys.path.append(str(Path(__file__).parent.parent))
 
 from plugins import (
@@ -188,12 +189,8 @@ class TestPluginManager:
         plugin1 = MockMessageProcessor("processor1")
         plugin2 = MockMessageProcessor("processor2")
 
-        await plugin_manager.registry.register(
-            "processor1", plugin1, PluginConfig()
-        )
-        await plugin_manager.registry.register(
-            "processor2", plugin2, PluginConfig()
-        )
+        await plugin_manager.registry.register("processor1", plugin1, PluginConfig())
+        await plugin_manager.registry.register("processor2", plugin2, PluginConfig())
 
         processors = await plugin_manager.registry.get_by_type(
             PluginType.MESSAGE_PROCESSOR
@@ -205,9 +202,7 @@ class TestPluginManager:
     async def test_plugin_status(self, plugin_manager):
         """Test getting plugin status"""
         plugin = MockMessageProcessor("test_plugin")
-        await plugin_manager.registry.register(
-            "test_plugin", plugin, PluginConfig()
-        )
+        await plugin_manager.registry.register("test_plugin", plugin, PluginConfig())
 
         # Initialize plugin
         await plugin_manager._initialize_plugin("test_plugin")
@@ -228,6 +223,7 @@ class TestHookSystem:
     @pytest.mark.asyncio
     async def test_hook_registration(self, hook_manager):
         """Test hook registration"""
+
         async def test_callback(context: HookContext):
             return PluginResult.ok(None)
 
@@ -299,6 +295,7 @@ class TestHookSystem:
     @pytest.mark.asyncio
     async def test_hook_error_handling(self, hook_manager):
         """Test hook error handling"""
+
         async def failing_hook(context: HookContext):
             raise ValueError("Test error")
 
@@ -451,6 +448,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_plugin_initialization_failure(self):
         """Test handling of plugin initialization failure"""
+
         class FailingPlugin(MockMessageProcessor):
             async def _do_initialize(self, config: PluginConfig):
                 return PluginResult.fail("Initialization failed")
@@ -479,9 +477,7 @@ class TestErrorHandling:
         assert result.data == 20
 
         # Flat_map operation
-        result = PluginResult.ok(5).flat_map(
-            lambda x: PluginResult.ok(x + 5)
-        )
+        result = PluginResult.ok(5).flat_map(lambda x: PluginResult.ok(x + 5))
         assert result.data == 10
 
 
@@ -496,6 +492,7 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_hook_execution_metrics(self, hook_manager):
         """Test metrics are collected for hook execution"""
+
         async def test_hook(context: HookContext):
             await asyncio.sleep(0.01)  # Simulate work
             return PluginResult.ok(None)
@@ -556,9 +553,7 @@ class TestIntegration:
 
         # Create and register plugin
         plugin = MockMessageProcessor("lifecycle_test")
-        await manager.registry.register(
-            "lifecycle_test", plugin, PluginConfig()
-        )
+        await manager.registry.register("lifecycle_test", plugin, PluginConfig())
 
         # Initialize
         await manager._initialize_plugin("lifecycle_test")

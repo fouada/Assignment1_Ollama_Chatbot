@@ -26,6 +26,7 @@ from typing import Dict, Any
 
 # Import plugins
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from plugins.examples.audit_plugin import AuditPlugin, AuditEntry
@@ -37,6 +38,7 @@ from plugins.types import PluginConfig, PluginResult
 # ============================================================================
 # AUDIT PLUGIN TESTS - Non-repudiation & Accountability
 # ============================================================================
+
 
 class TestAuditPlugin:
     """
@@ -57,8 +59,7 @@ class TestAuditPlugin:
         """Create audit plugin with temporary directory"""
         plugin = AuditPlugin()
         config = PluginConfig(
-            enabled=True,
-            config={"audit_directory": str(tmp_path / "audit")}
+            enabled=True, config={"audit_directory": str(tmp_path / "audit")}
         )
         await plugin.initialize(config)
         return plugin
@@ -68,8 +69,7 @@ class TestAuditPlugin:
         """Test: Plugin initializes correctly"""
         plugin = AuditPlugin()
         config = PluginConfig(
-            enabled=True,
-            config={"audit_directory": str(tmp_path / "audit")}
+            enabled=True, config={"audit_directory": str(tmp_path / "audit")}
         )
 
         result = await plugin.initialize(config)
@@ -82,8 +82,7 @@ class TestAuditPlugin:
         """Test: Edge case - initialization with invalid directory"""
         plugin = AuditPlugin()
         config = PluginConfig(
-            enabled=True,
-            config={"audit_directory": "/invalid/read/only/path"}
+            enabled=True, config={"audit_directory": "/invalid/read/only/path"}
         )
 
         result = await plugin.initialize(config)
@@ -141,7 +140,7 @@ class TestAuditPlugin:
             "data": {
                 "username": "admin",
                 "password": "secret123",  # Should be redacted
-                "api_key": "sk_12345",    # Should be redacted
+                "api_key": "sk_12345",  # Should be redacted
             },
             "user_id": "user123",
             "session_id": "sess456",
@@ -199,27 +198,30 @@ class TestAuditPlugin:
         audit_files = list((tmp_path / "audit").glob("*.jsonl"))
         if audit_files:
             audit_file = audit_files[0]
-            with open(audit_file, 'r') as f:
+            with open(audit_file, "r") as f:
                 lines = f.readlines()
 
             if len(lines) > 1:
                 # Modify second entry
                 entry = json.loads(lines[1])
                 entry["user_id"] = "TAMPERED"
-                lines[1] = json.dumps(entry) + '\n'
+                lines[1] = json.dumps(entry) + "\n"
 
-                with open(audit_file, 'w') as f:
+                with open(audit_file, "w") as f:
                     f.writelines(lines)
 
                 # Verify chain detects tampering
                 verification = await audit_plugin.verify_audit_chain()
 
                 assert not verification.success
-                assert "Tampered" in verification.error or "broken" in verification.error
+                assert (
+                    "Tampered" in verification.error or "broken" in verification.error
+                )
 
     @pytest.mark.asyncio
     async def test_concurrent_audit_writes(self, audit_plugin):
         """Test: Edge case - handles concurrent writes correctly"""
+
         async def write_audit(i):
             request = {
                 "endpoint": f"/concurrent{i}",
@@ -288,6 +290,7 @@ class TestAuditPlugin:
 # AUTHENTICATION PLUGIN TESTS - Authenticity & Authorization
 # ============================================================================
 
+
 class TestAuthPlugin:
     """
     Comprehensive tests for Authentication Plugin
@@ -316,7 +319,7 @@ class TestAuthPlugin:
                 "token_expiry_hours": 24,
                 "create_default_admin": False,
                 "public_endpoints": ["/api", "/health"],
-            }
+            },
         )
         await plugin.initialize(config)
         return plugin
@@ -325,10 +328,7 @@ class TestAuthPlugin:
     async def test_auth_plugin_initialization(self):
         """Test: Plugin initializes correctly"""
         plugin = AuthPlugin()
-        config = PluginConfig(
-            enabled=True,
-            config={"require_auth": False}
-        )
+        config = PluginConfig(enabled=True, config={"require_auth": False})
 
         result = await plugin.initialize(config)
 
@@ -341,7 +341,7 @@ class TestAuthPlugin:
             username="testuser",
             email="test@example.com",
             password="password123",
-            roles=["user"]
+            roles=["user"],
         )
 
         assert result.success
@@ -354,16 +354,12 @@ class TestAuthPlugin:
         """Test: Edge case - cannot register duplicate username"""
         # Register first user
         await auth_plugin.register_user(
-            username="duplicate",
-            email="user1@example.com",
-            password="pass1"
+            username="duplicate", email="user1@example.com", password="pass1"
         )
 
         # Try to register same username
         result = await auth_plugin.register_user(
-            username="duplicate",
-            email="user2@example.com",
-            password="pass2"
+            username="duplicate", email="user2@example.com", password="pass2"
         )
 
         assert not result.success
@@ -372,11 +368,7 @@ class TestAuthPlugin:
     @pytest.mark.asyncio
     async def test_user_registration_empty_fields(self, auth_plugin):
         """Test: Edge case - registration with empty fields"""
-        result = await auth_plugin.register_user(
-            username="",
-            email="",
-            password=""
-        )
+        result = await auth_plugin.register_user(username="", email="", password="")
 
         assert not result.success
         assert "required" in result.error.lower()
@@ -386,9 +378,7 @@ class TestAuthPlugin:
         """Test: User can login with correct credentials"""
         # Register user
         await auth_plugin.register_user(
-            username="logintest",
-            email="login@example.com",
-            password="correctpassword"
+            username="logintest", email="login@example.com", password="correctpassword"
         )
 
         # Login
@@ -404,9 +394,7 @@ class TestAuthPlugin:
         """Test: Edge case - login fails with wrong password"""
         # Register user
         await auth_plugin.register_user(
-            username="pwdtest",
-            email="pwd@example.com",
-            password="correctpassword"
+            username="pwdtest", email="pwd@example.com", password="correctpassword"
         )
 
         # Try wrong password
@@ -428,9 +416,7 @@ class TestAuthPlugin:
         """Test: Token is generated correctly"""
         # Register and login
         await auth_plugin.register_user(
-            username="tokentest",
-            email="token@example.com",
-            password="password"
+            username="tokentest", email="token@example.com", password="password"
         )
         login_result = await auth_plugin.login("tokentest", "password")
 
@@ -448,9 +434,7 @@ class TestAuthPlugin:
         """Test: Valid token is accepted"""
         # Register, login, and get token
         await auth_plugin.register_user(
-            username="validtoken",
-            email="valid@example.com",
-            password="password"
+            username="validtoken", email="valid@example.com", password="password"
         )
         login_result = await auth_plugin.login("validtoken", "password")
         token_str = login_result.data.token
@@ -474,9 +458,7 @@ class TestAuthPlugin:
         """Test: Edge case - tampered token is rejected"""
         # Register, login, and get token
         await auth_plugin.register_user(
-            username="tamperedtest",
-            email="tampered@example.com",
-            password="password"
+            username="tamperedtest", email="tampered@example.com", password="password"
         )
         login_result = await auth_plugin.login("tamperedtest", "password")
         token_str = login_result.data.token
@@ -489,7 +471,10 @@ class TestAuthPlugin:
         validation = await auth_plugin._validate_token(tampered_token)
 
         assert not result.success
-        assert "signature" in validation.error.lower() or "format" in validation.error.lower()
+        assert (
+            "signature" in validation.error.lower()
+            or "format" in validation.error.lower()
+        )
 
     @pytest.mark.asyncio
     async def test_api_key_generation(self, auth_plugin):
@@ -610,6 +595,7 @@ class TestAuthPlugin:
 # RATE LIMITING PLUGIN TESTS - Security & Performance
 # ============================================================================
 
+
 class TestRateLimitPlugin:
     """
     Comprehensive tests for Rate Limiting Plugin
@@ -636,7 +622,7 @@ class TestRateLimitPlugin:
                 "max_burst": 10,
                 "enable_user_limiting": True,
                 "enable_ip_limiting": True,
-            }
+            },
         )
         await plugin.initialize(config)
         return plugin
@@ -645,10 +631,7 @@ class TestRateLimitPlugin:
     async def test_rate_limit_plugin_initialization(self):
         """Test: Plugin initializes correctly"""
         plugin = RateLimitPlugin()
-        config = PluginConfig(
-            enabled=True,
-            config={"max_requests_per_minute": 60}
-        )
+        config = PluginConfig(enabled=True, config={"max_requests_per_minute": 60})
 
         result = await plugin.initialize(config)
 
@@ -777,6 +760,7 @@ class TestRateLimitPlugin:
     @pytest.mark.asyncio
     async def test_concurrent_requests_from_same_user(self, rate_limit_plugin):
         """Test: Edge case - concurrent requests handled correctly"""
+
         async def make_request():
             request = {
                 "user_id": "concurrent_user",
@@ -836,6 +820,7 @@ class TestRateLimitPlugin:
 # INTEGRATION TESTS - All Compliance Plugins Together
 # ============================================================================
 
+
 class TestISO25010Integration:
     """
     Integration tests for all ISO/IEC 25010 compliance plugins working together
@@ -854,24 +839,19 @@ class TestISO25010Integration:
         # Audit plugin
         audit = AuditPlugin()
         audit_config = PluginConfig(
-            enabled=True,
-            config={"audit_directory": str(tmp_path / "audit")}
+            enabled=True, config={"audit_directory": str(tmp_path / "audit")}
         )
         await audit.initialize(audit_config)
 
         # Auth plugin
         auth = AuthPlugin()
-        auth_config = PluginConfig(
-            enabled=True,
-            config={"require_auth": False}
-        )
+        auth_config = PluginConfig(enabled=True, config={"require_auth": False})
         await auth.initialize(auth_config)
 
         # Rate limit plugin
         rate_limit = RateLimitPlugin()
         rate_limit_config = PluginConfig(
-            enabled=True,
-            config={"max_requests_per_minute": 60}
+            enabled=True, config={"max_requests_per_minute": 60}
         )
         await rate_limit.initialize(rate_limit_config)
 
@@ -911,7 +891,9 @@ class TestISO25010Integration:
     async def test_authenticated_rate_limited_audited(self, all_plugins):
         """Test: Integration - authenticated user is rate limited and audited"""
         # Register and login user
-        await all_plugins["auth"].register_user("testuser", "test@example.com", "password")
+        await all_plugins["auth"].register_user(
+            "testuser", "test@example.com", "password"
+        )
         login = await all_plugins["auth"].login("testuser", "password")
         token = login.data.token
 

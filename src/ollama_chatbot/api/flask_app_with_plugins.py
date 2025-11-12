@@ -331,7 +331,9 @@ async def health():
             backend = await plugin_manager.get_backend_provider("ollama_backend")
             if backend:
                 backend_health = await backend.health_check()
-                health_data["backend"] = backend_health.data if backend_health.success else {}
+                health_data["backend"] = (
+                    backend_health.data if backend_health.success else {}
+                )
             else:
                 health_data["status"] = "degraded"
                 health_data["warning"] = "No backend provider available"

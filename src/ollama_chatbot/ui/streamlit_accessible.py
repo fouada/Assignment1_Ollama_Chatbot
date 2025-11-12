@@ -175,7 +175,9 @@ def render_accessibility_notice():
             #### 📞 Accessibility Support
             For accessibility issues, please report at:
             https://github.com/your-repo/issues
-            """.format(KEYBOARD_SHORTCUTS)
+            """.format(
+                KEYBOARD_SHORTCUTS
+            )
         )
 
 
@@ -278,7 +280,10 @@ def render_accessible_chat_interface():
         )
 
     # Display chat messages with accessibility
-    st.markdown('<div role="log" aria-live="polite" aria-atomic="false">', unsafe_allow_html=True)
+    st.markdown(
+        '<div role="log" aria-live="polite" aria-atomic="false">',
+        unsafe_allow_html=True,
+    )
 
     for idx, message in enumerate(st.session_state.messages):
         role = message["role"]
@@ -312,7 +317,10 @@ def render_accessible_chat_interface():
 
         # Display user message
         with st.chat_message("user"):
-            st.markdown(f'<div role="article" aria-label="Your message">', unsafe_allow_html=True)
+            st.markdown(
+                f'<div role="article" aria-label="Your message">',
+                unsafe_allow_html=True,
+            )
             st.markdown(prompt)
             st.markdown("</div>", unsafe_allow_html=True)
 
