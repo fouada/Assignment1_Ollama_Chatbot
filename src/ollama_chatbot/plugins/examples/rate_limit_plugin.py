@@ -71,7 +71,6 @@ class RateLimitPlugin(BaseMiddleware):
             plugin_type=PluginType.MIDDLEWARE,
             dependencies=(),
             tags=("security", "rate-limiting", "performance", "iso25010"),
-            priority=HookPriority.CRITICAL,
         )
 
     async def _do_initialize(self, config: PluginConfig) -> PluginResult[None]:
@@ -188,17 +187,24 @@ class RateLimitPlugin(BaseMiddleware):
         except Exception as e:
             return PluginResult.ok(response)
 
-    async def _do_health_check(self) -> PluginResult[Dict[str, Any]]:
+    async def health_check(self) -> PluginResult[Dict[str, Any]]:
         """Health check with rate limit stats"""
-        return PluginResult.ok(
-            {
-                "status": "healthy",
-                "tracked_users": len(self._user_buckets),
-                "tracked_ips": len(self._ip_buckets),
-                "max_requests_per_minute": self._max_requests_per_minute,
-                "max_burst": self._max_burst,
-            }
-        )
+        # First get base health data
+        base_health = await super().health_check()
+        
+        if not base_health.success or not self._initialized:
+            return base_health
+        
+        # Add custom health check data
+        health_data = {
+            **base_health.data,
+            "tracked_users": len(self._user_buckets),
+            "tracked_ips": len(self._ip_buckets),
+            "max_requests_per_minute": self._max_requests_per_minute,
+            "max_burst": self._max_burst,
+        }
+
+        return PluginResult.ok(health_data)
 
 
 # Export plugin

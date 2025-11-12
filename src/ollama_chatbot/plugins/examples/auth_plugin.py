@@ -89,7 +89,6 @@ class AuthPlugin(BaseMiddleware):
             plugin_type=PluginType.MIDDLEWARE,
             dependencies=(),
             tags=("security", "auth", "jwt", "rbac", "iso25010"),
-            priority=HookPriority.CRITICAL,
         )
 
     async def _do_initialize(self, config: PluginConfig) -> PluginResult[None]:
@@ -270,10 +269,13 @@ class AuthPlugin(BaseMiddleware):
 
         # Create signature
         payload_str = json.dumps(payload, sort_keys=True)
+        # Base64 encode the payload to avoid issues with special characters
+        import base64
+        payload_encoded = base64.urlsafe_b64encode(payload_str.encode()).decode()
         signature = hmac.new(self._secret_key.encode(), payload_str.encode(), hashlib.sha256).hexdigest()
 
-        # Combine payload and signature
-        token_str = f"{payload_str}.{signature}"
+        # Combine payload and signature (using . as separator since payload is now base64)
+        token_str = f"{payload_encoded}.{signature}"
 
         # Store token
         token = Token(
@@ -290,12 +292,20 @@ class AuthPlugin(BaseMiddleware):
     async def _validate_token(self, token_str: str) -> PluginResult[Dict[str, Any]]:
         """Validate JWT-like token"""
         try:
+            import base64
+            
             # Split token
             parts = token_str.split(".")
             if len(parts) != 2:
                 return PluginResult.fail("Invalid token format")
 
-            payload_str, signature = parts
+            payload_encoded, signature = parts
+
+            # Decode the base64 payload
+            try:
+                payload_str = base64.urlsafe_b64decode(payload_encoded.encode()).decode()
+            except Exception:
+                return PluginResult.fail("Invalid token format")
 
             # Verify signature
             expected_signature = hmac.new(self._secret_key.encode(), payload_str.encode(), hashlib.sha256).hexdigest()
@@ -348,17 +358,24 @@ class AuthPlugin(BaseMiddleware):
         except Exception:
             return False
 
-    async def _do_health_check(self) -> PluginResult[Dict[str, Any]]:
-        """Health check"""
-        return PluginResult.ok(
-            {
-                "status": "healthy",
-                "users_count": len(self._users),
-                "active_tokens": len(self._tokens),
-                "api_keys_count": len(self._api_keys),
-                "auth_enabled": self._require_auth,
-            }
-        )
+    async def health_check(self) -> PluginResult[Dict[str, Any]]:
+        """Health check with auth-specific data"""
+        # First get base health data
+        base_health = await super().health_check()
+        
+        if not base_health.success or not self._initialized:
+            return base_health
+        
+        # Add custom health check data
+        health_data = {
+            **base_health.data,
+            "users_count": len(self._users),
+            "active_tokens": len(self._tokens),
+            "api_keys_count": len(self._api_keys),
+            "auth_enabled": self._require_auth,
+        }
+
+        return PluginResult.ok(health_data)
 
 
 # Export plugin

@@ -256,6 +256,8 @@ class PluginResult(Generic[T]):
     error: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     execution_time_ms: Optional[float] = None
+    error_code: Optional[str] = None
+    status_code: Optional[int] = None
 
     @classmethod
     def ok(cls, data: T, **metadata) -> PluginResult[T]:
@@ -263,9 +265,9 @@ class PluginResult(Generic[T]):
         return cls(success=True, data=data, metadata=metadata)
 
     @classmethod
-    def fail(cls, error: str, **metadata) -> PluginResult[T]:
+    def fail(cls, error: str, error_code: Optional[str] = None, status_code: Optional[int] = None, **metadata) -> PluginResult[T]:
         """Create failure result"""
-        return cls(success=False, error=error, metadata=metadata)
+        return cls(success=False, error=error, error_code=error_code, status_code=status_code, metadata=metadata)
 
     def map(self, func: Callable[[T], Any]) -> PluginResult:
         """Transform success data - functor pattern"""

@@ -285,19 +285,29 @@ class AuditPlugin(BaseMiddleware):
         except Exception as e:
             return PluginResult.fail(f"Verification failed: {e}")
 
-    async def _do_health_check(self) -> PluginResult[Dict[str, Any]]:
+    async def health_check(self) -> PluginResult[Dict[str, Any]]:
         """Health check with chain verification"""
+        # First get base health data
+        base_health = await super().health_check()
+        
+        if not base_health.success or not self._initialized:
+            return base_health
+        
+        # Add custom health check data
         verification = await self.verify_audit_chain()
 
-        return PluginResult.ok(
-            {
-                "status": "healthy" if verification.success else "unhealthy",
-                "audit_file": str(self._audit_file) if self._audit_file else None,
-                "entries_count": self._entries_count,
-                "chain_verified": verification.success,
-                "last_hash": self._last_hash[:16] + "...",
-            }
-        )
+        health_data = {
+            **base_health.data,
+            "entries_count": self._entries_count,
+            "chain_verified": verification.success,
+            "audit_file": str(self._audit_file) if self._audit_file else None,
+            "last_hash": self._last_hash[:16] + "...",
+        }
+        
+        if not verification.success:
+            health_data["status"] = "unhealthy"
+
+        return PluginResult.ok(health_data)
 
 
 # Export plugin

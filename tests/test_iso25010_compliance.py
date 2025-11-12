@@ -449,7 +449,7 @@ class TestAuthPlugin:
         # Try to validate
         validation = await auth_plugin._validate_token(tampered_token)
 
-        assert not result.success
+        assert not validation.success
         assert "signature" in validation.error.lower() or "format" in validation.error.lower()
 
     @pytest.mark.asyncio
