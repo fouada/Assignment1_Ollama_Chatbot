@@ -181,6 +181,75 @@ class BaseMessageProcessor(BasePlugin, MessageProcessor):
     - Formatting (markdown, code highlighting)
     - Sentiment analysis
     - Token counting
+
+    Example Implementation:
+        ```python
+        from ollama_chatbot.plugins import BaseMessageProcessor
+        from ollama_chatbot.plugins.types import (
+            Message, ChatContext, PluginMetadata,
+            PluginConfig, PluginResult, PluginType
+        )
+
+        class ProfanityFilterPlugin(BaseMessageProcessor):
+            '''Filter profanity from messages'''
+
+            def __init__(self):
+                super().__init__()
+                self._bad_words = set()
+
+            @property
+            def metadata(self) -> PluginMetadata:
+                return PluginMetadata(
+                    name="profanity-filter",
+                    version="1.0.0",
+                    author="YourName",
+                    description="Filters profanity from messages",
+                    plugin_type=PluginType.MESSAGE_PROCESSOR,
+                )
+
+            async def _do_initialize(self, config: PluginConfig) -> PluginResult[None]:
+                # Load bad words list
+                self._bad_words = set(config.config.get("bad_words", []))
+                return PluginResult.ok(None)
+
+            async def _do_shutdown(self) -> PluginResult[None]:
+                self._bad_words.clear()
+                return PluginResult.ok(None)
+
+            async def _process_message(
+                self, message: Message, context: ChatContext
+            ) -> PluginResult[Message]:
+                # Filter profanity
+                content = message.content
+                for word in self._bad_words:
+                    content = content.replace(word, "*" * len(word))
+
+                return PluginResult.ok(Message(
+                    content=content,
+                    role=message.role,
+                    metadata=message.metadata
+                ))
+        ```
+
+    Usage:
+        ```python
+        # In your application
+        from plugins import PluginManager
+
+        manager = PluginManager()
+        await manager.initialize()
+
+        # Load your plugin
+        await manager.load_plugin(Path("profanity_filter_plugin.py"))
+
+        # Process messages
+        user_message = Message(content="Hello world", role="user")
+        context = ChatContext(messages=[user_message], model="llama3.2")
+
+        result = await manager.execute_message_processors(user_message, context)
+        if result.success:
+            filtered_message = result.data
+        ```
     """
 
     @property

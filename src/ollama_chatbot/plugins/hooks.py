@@ -23,7 +23,8 @@ from collections import defaultdict
 from contextlib import asynccontextmanager
 from copy import copy
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from threading import Lock
 from typing import Any, Dict, List, Optional, Set
 
 from .types import (
@@ -45,50 +46,65 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 
 
-@dataclass
 class CircuitBreakerState:
     """
-    Circuit breaker state machine
+    Thread-safe circuit breaker state machine
     Prevents cascading failures from misbehaving plugins
+
+    Thread Safety:
+        All state modifications are protected by a threading.Lock
+        to prevent race conditions in concurrent environments.
     """
 
-    failure_threshold: int = 5
-    timeout_seconds: int = 60
-    failure_count: int = 0
-    last_failure_time: Optional[datetime] = None
-    state: str = "closed"  # closed, open, half_open
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        timeout_seconds: int = 60,
+        failure_count: int = 0,
+        last_failure_time: Optional[datetime] = None,
+        state: str = "closed"
+    ):
+        self.failure_threshold = failure_threshold
+        self.timeout_seconds = timeout_seconds
+        self.failure_count = failure_count
+        self.last_failure_time = last_failure_time
+        self.state = state  # closed, open, half_open
+        self._lock = Lock()  # Thread safety
 
     def record_success(self) -> None:
-        """Reset on successful execution"""
-        self.failure_count = 0
-        self.state = "closed"
+        """Reset on successful execution (thread-safe)"""
+        with self._lock:
+            self.failure_count = 0
+            self.state = "closed"
 
     def record_failure(self) -> None:
-        """Track failures and potentially open circuit"""
-        self.failure_count += 1
-        self.last_failure_time = datetime.utcnow()
+        """Track failures and potentially open circuit (thread-safe)"""
+        with self._lock:
+            self.failure_count += 1
+            self.last_failure_time = datetime.now(timezone.utc)
 
-        if self.failure_count >= self.failure_threshold:
-            self.state = "open"
-            logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
+            if self.failure_count >= self.failure_threshold:
+                self.state = "open"
+                logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
 
     def can_execute(self) -> bool:
-        """Check if execution is allowed"""
-        if self.state == "closed":
+        """Check if execution is allowed (thread-safe)"""
+        with self._lock:
+            if self.state == "closed":
+                return True
+
+            if self.state == "open":
+                # Check if timeout has elapsed
+                if self.last_failure_time:
+                    elapsed = datetime.now(timezone.utc) - self.last_failure_time
+                    if elapsed.total_seconds() > self.timeout_seconds:
+                        self.state = "half_open"
+                        logger.info("Circuit breaker entering half-open state")
+                        return True
+                return False
+
+            # half_open state - allow one attempt
             return True
-
-        if self.state == "open":
-            # Check if timeout has elapsed
-            if self.last_failure_time:
-                elapsed = datetime.utcnow() - self.last_failure_time
-                if elapsed.total_seconds() > self.timeout_seconds:
-                    self.state = "half_open"
-                    logger.info("Circuit breaker entering half-open state")
-                    return True
-            return False
-
-        # half_open state - allow one attempt
-        return True
 
 
 # ============================================================================
@@ -172,6 +188,7 @@ class HookManager:
 
         # Thread safety
         self._lock = asyncio.Lock()
+        self._metrics_lock = Lock()  # Synchronous lock for metrics updates
 
         # Circuit breakers per hook registration
         self._circuit_breakers: Dict[str, CircuitBreakerState] = {}
@@ -393,9 +410,10 @@ class HookManager:
         return f"{plugin_name}:{hook_type.value}"
 
     def _update_metrics(self, plugin_name: str, result: PluginResult, execution_time_ms: float) -> None:
-        """Update plugin metrics"""
-        if plugin_name in self._metrics:
-            self._metrics[plugin_name].update(result, execution_time_ms)
+        """Update plugin metrics (thread-safe)"""
+        with self._metrics_lock:
+            if plugin_name in self._metrics:
+                self._metrics[plugin_name].update(result, execution_time_ms)
 
     async def get_metrics(self, plugin_name: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -468,10 +486,17 @@ class HookManager:
 # Hook Decorators - Convenience Methods
 # ============================================================================
 
+# Global task tracking for decorator-registered hooks (prevents memory leaks)
+_decorator_tasks: Set[asyncio.Task] = set()
+
 
 def create_hook_decorator(hook_manager: HookManager):
     """
-    Factory for creating hook decorators
+    Factory for creating hook decorators with proper task management
+
+    Memory Safety:
+        Tracks all registration tasks to prevent memory leaks.
+        Tasks are automatically cleaned up when completed.
 
     Example:
         >>> hook = create_hook_decorator(manager)
@@ -490,8 +515,8 @@ def create_hook_decorator(hook_manager: HookManager):
             async def wrapper(*args, **kwargs):
                 return await func(*args, **kwargs)
 
-            # Register on decoration
-            asyncio.create_task(
+            # Register on decoration with proper task management
+            task = asyncio.create_task(
                 hook_manager.register_hook(
                     hook_type=hook_type,
                     callback=wrapper,
@@ -499,6 +524,10 @@ def create_hook_decorator(hook_manager: HookManager):
                     plugin_name=plugin_name,
                 )
             )
+
+            # Track task and add cleanup callback
+            _decorator_tasks.add(task)
+            task.add_done_callback(_decorator_tasks.discard)
 
             return wrapper
 

@@ -117,6 +117,15 @@ class PluginMetadata:
     """
     Plugin metadata - immutable descriptor
     Follows semantic versioning (semver.org)
+
+    API Version Compatibility:
+        api_version: Specifies which plugin API version this plugin uses
+        This ensures plugins built for older APIs don't break with new changes
+
+    Dependency Management:
+        dependencies: List of required plugin names
+        dependency_versions: Version constraints for each dependency
+        Format: ">=1.0.0,<2.0.0" or "~=1.5.0" or "==1.2.3"
     """
 
     name: str
@@ -124,7 +133,9 @@ class PluginMetadata:
     author: str
     description: str
     plugin_type: PluginType
+    api_version: str = "1.0.0"  # Plugin API version compatibility
     dependencies: tuple[str, ...] = field(default_factory=tuple)
+    dependency_versions: Dict[str, str] = field(default_factory=dict)  # Version constraints
     tags: tuple[str, ...] = field(default_factory=tuple)
     homepage: Optional[str] = None
     license: str = "MIT"
@@ -135,12 +146,94 @@ class PluginMetadata:
             raise ValueError(f"Invalid plugin name: {self.name}")
         if not self._is_valid_semver(self.version):
             raise ValueError(f"Invalid version format: {self.version}")
+        if not self._is_valid_semver(self.api_version):
+            raise ValueError(f"Invalid API version format: {self.api_version}")
+        # Validate dependency versions format
+        for dep_name, version_spec in self.dependency_versions.items():
+            if not self._is_valid_version_spec(version_spec):
+                raise ValueError(f"Invalid version specification for {dep_name}: {version_spec}")
 
     @staticmethod
     def _is_valid_semver(version: str) -> bool:
         """Validate semantic version format"""
         parts = version.split(".")
         return len(parts) == 3 and all(p.isdigit() for p in parts)
+
+    @staticmethod
+    def _is_valid_version_spec(spec: str) -> bool:
+        """Validate version specification format (e.g., '>=1.0.0,<2.0.0')"""
+        if not spec:
+            return False
+        # Allow simple patterns: ==, >=, <=, >, <, ~=
+        import re
+        pattern = r"^(==|>=|<=|>|<|~=)\s*\d+\.\d+\.\d+(,\s*(==|>=|<=|>|<|~=)\s*\d+\.\d+\.\d+)*$"
+        return bool(re.match(pattern, spec))
+
+    def is_compatible_with_api(self, current_api_version: str) -> bool:
+        """Check if plugin is compatible with current API version"""
+        # Simple major version compatibility check
+        plugin_major = int(self.api_version.split(".")[0])
+        current_major = int(current_api_version.split(".")[0])
+        return plugin_major == current_major
+
+    def check_dependency_version(self, dep_name: str, dep_version: str) -> bool:
+        """
+        Check if a dependency version satisfies the constraint
+
+        Args:
+            dep_name: Dependency plugin name
+            dep_version: Version of installed dependency
+
+        Returns:
+            True if version satisfies constraint
+        """
+        if dep_name not in self.dependency_versions:
+            return True  # No constraint specified
+
+        spec = self.dependency_versions[dep_name]
+        return self._version_satisfies(dep_version, spec)
+
+    @staticmethod
+    def _version_satisfies(version: str, spec: str) -> bool:
+        """Check if version satisfies specification"""
+        from packaging import version as pkg_version
+        try:
+            ver = pkg_version.parse(version)
+            # Parse constraints
+            for constraint in spec.split(","):
+                constraint = constraint.strip()
+                if constraint.startswith("=="):
+                    required = pkg_version.parse(constraint[2:].strip())
+                    if ver != required:
+                        return False
+                elif constraint.startswith(">="):
+                    required = pkg_version.parse(constraint[2:].strip())
+                    if ver < required:
+                        return False
+                elif constraint.startswith("<="):
+                    required = pkg_version.parse(constraint[2:].strip())
+                    if ver > required:
+                        return False
+                elif constraint.startswith(">"):
+                    required = pkg_version.parse(constraint[1:].strip())
+                    if ver <= required:
+                        return False
+                elif constraint.startswith("<"):
+                    required = pkg_version.parse(constraint[1:].strip())
+                    if ver >= required:
+                        return False
+                elif constraint.startswith("~="):
+                    # Compatible release: ~=1.5.0 matches >=1.5.0,<1.6.0
+                    required = pkg_version.parse(constraint[2:].strip())
+                    parts = constraint[2:].strip().split(".")
+                    if len(parts) >= 2:
+                        next_minor = f"{parts[0]}.{int(parts[1])+1}.0"
+                        if not (ver >= required and ver < pkg_version.parse(next_minor)):
+                            return False
+            return True
+        except Exception:
+            # If packaging not available or parse fails, allow it
+            return True
 
 
 @dataclass
@@ -374,7 +467,14 @@ AsyncHookCallback = Callable[[HookContext], Any]  # Returns awaitable
 class HookRegistration:
     """
     Hook registration record - for event subscribers
-    Supports priority-based ordering
+    Supports priority-based ordering with timestamp tiebreaking
+
+    Ordering:
+        1. Primary: by priority (lower value = higher priority)
+        2. Secondary: by registration time (earlier = higher priority)
+        3. Tertiary: by plugin name (alphabetical)
+
+    This ensures deterministic, reproducible hook execution order.
     """
 
     hook_type: HookType
@@ -382,10 +482,20 @@ class HookRegistration:
     priority: HookPriority
     plugin_name: str
     enabled: bool = True
+    registration_time: float = field(default_factory=lambda: __import__('time').time())
 
     def __lt__(self, other: HookRegistration) -> bool:
-        """Enable sorting by priority"""
-        return self.priority.value < other.priority.value
+        """
+        Enable sorting by priority, then registration time, then name
+
+        This provides stable, deterministic ordering even when
+        multiple hooks have the same priority level.
+        """
+        if self.priority.value != other.priority.value:
+            return self.priority.value < other.priority.value
+        if self.registration_time != other.registration_time:
+            return self.registration_time < other.registration_time
+        return self.plugin_name < other.plugin_name
 
 
 # ============================================================================

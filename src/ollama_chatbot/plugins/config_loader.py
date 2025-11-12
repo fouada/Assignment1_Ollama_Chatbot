@@ -225,57 +225,116 @@ class ConfigLoader:
         """
         Recursively substitute environment variables in configuration
 
-        Supports ${VAR_NAME} or ${VAR_NAME:default_value} syntax
+        Supports:
+        - ${VAR_NAME} - Replace with environment variable
+        - ${VAR_NAME:default} - Use default if variable not set
+        - \\${VAR_NAME} - Escaped literal (becomes ${VAR_NAME})
+
+        Examples:
+            "path": "${HOME}/config"  -> "/home/user/config"
+            "port": "${PORT:8080}"    -> "8080" (if PORT not set)
+            "literal": "\\${NOT_VAR}" -> "${NOT_VAR}"
         """
         if isinstance(config, dict):
             return {k: self._substitute_env_vars(v) for k, v in config.items()}
         elif isinstance(config, list):
             return [self._substitute_env_vars(item) for item in config]
         elif isinstance(config, str):
+            # First, handle escaped literals: \${...} -> ${...}
+            # Use a placeholder to protect escaped sequences
+            ESCAPE_MARKER = "\x00ESCAPED_VAR\x00"
+            config = config.replace("\\${", ESCAPE_MARKER)
+
             # Match ${VAR_NAME} or ${VAR_NAME:default}
+            # Pattern breakdown:
+            # \$\{ - literal ${
+            # ([^}:]+) - variable name (no } or :)
+            # (?::([^}]+))? - optional :default_value
+            # \} - literal }
             pattern = r"\$\{([^}:]+)(?::([^}]+))?\}"
 
             def replace_var(match):
-                var_name = match.group(1)
+                var_name = match.group(1).strip()
                 default_value = match.group(2)
                 value = os.getenv(var_name)
 
                 if value is None:
                     if default_value is not None:
                         return default_value
-                    logger.warning(f"Environment variable {var_name} not set, using empty string")
+                    logger.warning(
+                        f"Environment variable '{var_name}' not set and no default provided, "
+                        f"using empty string"
+                    )
                     return ""
 
                 return value
 
-            return re.sub(pattern, replace_var, config)
+            result = re.sub(pattern, replace_var, config)
+
+            # Restore escaped literals
+            result = result.replace(ESCAPE_MARKER, "${")
+
+            return result
         else:
             return config
 
     def _validate_config(self) -> None:
         """
-        Validate configuration structure
+        Validate configuration structure with strict requirements
 
         Raises:
-            PluginConfigError: If configuration is invalid
+            PluginConfigError: If configuration is invalid or missing critical sections
         """
-        # Check required top-level keys
+        # Check required top-level keys (strict - raise errors)
         required_keys = ["plugin_manager"]
         for key in required_keys:
             if key not in self._config:
-                logger.warning(f"Missing configuration section: {key}")
+                raise PluginConfigError(
+                    f"Missing required configuration section: '{key}'. "
+                    f"Configuration must include '{key}' section."
+                )
 
-        # Validate plugin manager config
+        # Validate plugin manager config (strict validation)
         pm_config = self._config.get("plugin_manager", {})
-        if "enable_hot_reload" not in pm_config:
-            logger.warning("enable_hot_reload not set, using default: false")
+
+        # Critical settings that should be explicitly set
+        critical_settings = {
+            "enable_hot_reload": (bool, False),
+            "enable_circuit_breaker": (bool, True),
+            "plugin_directory": (str, None)
+        }
+
+        for setting, (expected_type, default) in critical_settings.items():
+            if setting not in pm_config:
+                if default is not None:
+                    logger.info(f"'{setting}' not configured, using default: {default}")
+                    pm_config[setting] = default
+                else:
+                    raise PluginConfigError(
+                        f"Missing required plugin_manager setting: '{setting}'. "
+                        f"Please explicitly configure this in your config file."
+                    )
+            else:
+                # Validate type
+                value = pm_config[setting]
+                if not isinstance(value, expected_type):
+                    raise PluginConfigError(
+                        f"Invalid type for '{setting}': expected {expected_type.__name__}, "
+                        f"got {type(value).__name__}"
+                    )
 
         # Validate enabled plugins have plugin_file
         for section in ["backends", "message_processors", "features", "middleware"]:
             plugins = self._config.get(section, {})
             for name, config in plugins.items():
+                if not isinstance(config, dict):
+                    raise PluginConfigError(
+                        f"Plugin '{name}' in section '{section}' must be a dictionary/object"
+                    )
                 if config.get("enabled", False) and "plugin_file" not in config:
-                    raise PluginConfigError(f"Plugin '{name}' is enabled but missing 'plugin_file'")
+                    raise PluginConfigError(
+                        f"Plugin '{name}' is enabled but missing 'plugin_file' setting"
+                    )
 
     def _get_default_config(self) -> Dict[str, Any]:
         """

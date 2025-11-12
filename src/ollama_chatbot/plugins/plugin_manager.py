@@ -23,9 +23,21 @@ import importlib
 import importlib.util
 import inspect
 import logging
+import resource
+import signal
 import sys
+from collections import deque
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+    Observer = None
+    FileSystemEventHandler = None
 
 from .hooks import HookManager
 from .types import (
@@ -52,6 +64,114 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=Pluggable)
+
+# Plugin API version - for compatibility checking
+CURRENT_API_VERSION = "1.0.0"
+
+
+# ============================================================================
+# Plugin Sandboxing - Security Features
+# ============================================================================
+
+
+class PluginSandbox:
+    """
+    Security sandbox for plugin execution
+
+    Features:
+    - Resource limits (CPU, memory)
+    - Execution timeouts
+    - File system restrictions (via documentation)
+
+    Note: Full isolation requires OS-level features (containers, VMs).
+    This provides basic resource limiting.
+
+    Production Deployment:
+    For true isolation, deploy plugins in separate processes/containers
+    with tools like Docker, systemd, or subprocess with restricted permissions.
+    """
+
+    def __init__(
+        self,
+        max_memory_mb: int = 512,
+        max_cpu_seconds: int = 30,
+        enabled: bool = True
+    ):
+        self.max_memory_mb = max_memory_mb
+        self.max_cpu_seconds = max_cpu_seconds
+        self.enabled = enabled
+        self._original_limits = {}
+
+    def apply_limits(self) -> None:
+        """Apply resource limits (Unix-like systems only)"""
+        if not self.enabled:
+            return
+
+        try:
+            # Memory limit
+            mem_bytes = self.max_memory_mb * 1024 * 1024
+            soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+            self._original_limits['memory'] = (soft, hard)
+            resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
+
+            # CPU time limit
+            soft, hard = resource.getrlimit(resource.RLIMIT_CPU)
+            self._original_limits['cpu'] = (soft, hard)
+            resource.setrlimit(resource.RLIMIT_CPU, (self.max_cpu_seconds, self.max_cpu_seconds))
+
+            logger.info(f"Applied sandbox limits: {self.max_memory_mb}MB RAM, {self.max_cpu_seconds}s CPU")
+        except (ValueError, OSError, AttributeError) as e:
+            logger.warning(f"Could not apply sandbox limits (may not be supported on this OS): {e}")
+
+    def restore_limits(self) -> None:
+        """Restore original resource limits"""
+        if not self.enabled or not self._original_limits:
+            return
+
+        try:
+            if 'memory' in self._original_limits:
+                resource.setrlimit(resource.RLIMIT_AS, self._original_limits['memory'])
+            if 'cpu' in self._original_limits:
+                resource.setrlimit(resource.RLIMIT_CPU, self._original_limits['cpu'])
+            logger.debug("Restored original resource limits")
+        except (ValueError, OSError) as e:
+            logger.warning(f"Could not restore limits: {e}")
+
+
+# ============================================================================
+# Hot Reload - File Watching
+# ============================================================================
+
+
+if WATCHDOG_AVAILABLE:
+    class PluginFileHandler(FileSystemEventHandler):
+        """Watches plugin files for changes and triggers reload"""
+
+        def __init__(self, plugin_manager, callback):
+            self.plugin_manager = plugin_manager
+            self.callback = callback
+            self._debounce = {}  # Debounce file events
+            self._debounce_seconds = 1.0
+
+        def on_modified(self, event):
+            if event.is_directory:
+                return
+
+            path = Path(event.src_path)
+            if not path.suffix == '.py':
+                return
+
+            # Debounce rapid file changes
+            import time
+            now = time.time()
+            last_time = self._debounce.get(str(path), 0)
+            if now - last_time < self._debounce_seconds:
+                return
+
+            self._debounce[str(path)] = now
+
+            logger.info(f"Plugin file modified: {path}")
+            asyncio.create_task(self.callback(path))
 
 
 # ============================================================================
@@ -192,7 +312,17 @@ class PluginLoader:
 
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module
-            spec.loader.exec_module(module)
+            try:
+                spec.loader.exec_module(module)
+            except ImportError as e:
+                # Provide helpful error message for missing dependencies
+                missing_module = e.name if hasattr(e, 'name') else str(e)
+                raise PluginLoadError(
+                    f"Plugin '{file_path.name}' has missing dependencies: {missing_module}\n"
+                    f"Install with: pip install {missing_module}"
+                ) from e
+            except Exception as e:
+                raise PluginLoadError(f"Failed to execute module {file_path.name}: {e}") from e
 
             # Find plugin class
             if class_name:
@@ -251,7 +381,7 @@ class PluginLoader:
     @staticmethod
     def _validate_plugin(plugin: Pluggable) -> None:
         """
-        Validate plugin structure
+        Validate plugin structure and API compatibility
 
         Raises:
             PluginLoadError: If validation fails
@@ -259,6 +389,14 @@ class PluginLoader:
         # Check metadata
         if not isinstance(plugin.metadata, PluginMetadata):
             raise PluginLoadError("Invalid plugin metadata")
+
+        # Check API version compatibility
+        if not plugin.metadata.is_compatible_with_api(CURRENT_API_VERSION):
+            raise PluginLoadError(
+                f"Plugin '{plugin.metadata.name}' requires API version {plugin.metadata.api_version}, "
+                f"but current API version is {CURRENT_API_VERSION}. "
+                f"Major version mismatch - plugin may not work correctly."
+            )
 
         # Check required methods are callable
         if not callable(getattr(plugin, "initialize", None)):
@@ -269,6 +407,8 @@ class PluginLoader:
 
         if not callable(getattr(plugin, "health_check", None)):
             raise PluginLoadError("Plugin missing health_check() method")
+
+        logger.debug(f"Plugin '{plugin.metadata.name}' validated successfully (API v{plugin.metadata.api_version})")
 
     @staticmethod
     async def discover_plugins(directory: Path) -> List[Path]:
@@ -299,6 +439,70 @@ class PluginLoader:
 
         logger.info(f"Discovered {len(plugin_files)} plugin file(s) in {directory}")
         return plugin_files
+
+
+# ============================================================================
+# Dependency Resolution - Topological Sort
+# ============================================================================
+
+
+def topological_sort_plugins(plugin_graph: Dict[str, List[str]]) -> List[str]:
+    """
+    Sort plugins by dependencies using topological sort (Kahn's algorithm)
+
+    This ensures plugins are loaded in the correct order, with
+    dependencies loaded before dependents.
+
+    Args:
+        plugin_graph: Dictionary mapping plugin names to their dependencies
+
+    Returns:
+        List of plugin names in dependency order
+
+    Raises:
+        PluginDependencyError: If circular dependency detected
+
+    Example:
+        >>> graph = {
+        ...     "plugin_a": [],
+        ...     "plugin_b": ["plugin_a"],
+        ...     "plugin_c": ["plugin_a", "plugin_b"]
+        ... }
+        >>> topological_sort_plugins(graph)
+        ['plugin_a', 'plugin_b', 'plugin_c']
+    """
+    # Build in-degree map
+    in_degree = {plugin: 0 for plugin in plugin_graph}
+    for plugin, deps in plugin_graph.items():
+        for dep in deps:
+            if dep in in_degree:
+                in_degree[plugin] += 1
+
+    # Find all nodes with no dependencies
+    queue = deque([plugin for plugin, degree in in_degree.items() if degree == 0])
+    sorted_order = []
+
+    while queue:
+        current = queue.popleft()
+        sorted_order.append(current)
+
+        # For each plugin that depends on current
+        for plugin, deps in plugin_graph.items():
+            if current in deps:
+                in_degree[plugin] -= 1
+                if in_degree[plugin] == 0:
+                    queue.append(plugin)
+
+    # Check for circular dependencies
+    if len(sorted_order) != len(plugin_graph):
+        remaining = set(plugin_graph.keys()) - set(sorted_order)
+        raise PluginDependencyError(
+            f"Circular dependency detected among plugins: {remaining}. "
+            f"Cannot determine load order."
+        )
+
+    logger.debug(f"Plugin load order: {' -> '.join(sorted_order)}")
+    return sorted_order
 
 
 # ============================================================================
@@ -560,19 +764,34 @@ class PluginManager:
 
     async def _check_dependencies(self, plugin: Pluggable) -> None:
         """
-        Check if plugin dependencies are satisfied
+        Check if plugin dependencies are satisfied (existence, state, and version)
 
         Raises:
-            PluginDependencyError: If dependencies missing
+            PluginDependencyError: If dependencies missing, inactive, or version incompatible
         """
         for dep_name in plugin.metadata.dependencies:
             dep_plugin = await self.registry.get(dep_name)
             if dep_plugin is None:
-                raise PluginDependencyError(f"Missing dependency '{dep_name}' for plugin " f"'{plugin.metadata.name}'")
+                raise PluginDependencyError(
+                    f"Missing dependency '{dep_name}' for plugin '{plugin.metadata.name}'"
+                )
 
             dep_state = await self.registry.get_state(dep_name)
             if dep_state != PluginState.ACTIVE:
-                raise PluginDependencyError(f"Dependency '{dep_name}' not active (state={dep_state})")
+                raise PluginDependencyError(
+                    f"Dependency '{dep_name}' not active (state={dep_state})"
+                )
+
+            # Check version compatibility
+            if dep_name in plugin.metadata.dependency_versions:
+                dep_version = dep_plugin.metadata.version
+                if not plugin.metadata.check_dependency_version(dep_name, dep_version):
+                    required_version = plugin.metadata.dependency_versions[dep_name]
+                    raise PluginDependencyError(
+                        f"Plugin '{plugin.metadata.name}' requires '{dep_name}' version "
+                        f"{required_version}, but found version {dep_version}"
+                    )
+                logger.debug(f"Dependency '{dep_name}' version {dep_version} satisfies constraint")
 
     async def _register_plugin_hooks(self, plugin: Pluggable) -> None:
         """
