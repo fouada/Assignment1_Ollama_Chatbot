@@ -17,7 +17,6 @@ ENV PATH="/root/.local/bin:$PATH"
 
 # Copy requirements and setup files
 COPY requirements.txt .
-COPY requirements-dev.txt .
 COPY setup.py .
 COPY pyproject.toml .
 COPY README.md .

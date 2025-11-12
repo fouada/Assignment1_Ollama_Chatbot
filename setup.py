@@ -14,7 +14,13 @@ long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 # Read requirements
 requirements = (this_directory / "requirements.txt").read_text().strip().split("\n")
-dev_requirements = (this_directory / "requirements-dev.txt").read_text().strip().split("\n")
+
+# Read dev requirements (may not exist in production Docker builds)
+dev_requirements_file = this_directory / "requirements-dev.txt"
+if dev_requirements_file.exists():
+    dev_requirements = dev_requirements_file.read_text().strip().split("\n")
+else:
+    dev_requirements = []
 
 setup(
     name="ollama-chatbot",
