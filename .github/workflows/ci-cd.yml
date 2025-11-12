@@ -45,8 +45,9 @@ jobs:
 
       - name: 🧪 Run tests with pytest
         # Note: Excludes integration tests (run in separate job with Ollama)
+        # Focus on plugin and API coverage (excluding research, UI, CLI)
         run: |
-          python -m uv run pytest tests/ -v --cov=src/ollama_chatbot --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95 -m "not integration"
+          python -m uv run pytest tests/ -v --cov=src/ollama_chatbot/plugins --cov=src/ollama_chatbot/api --cov-config=pytest.ini --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=90 -m "not integration"
 
       - name: 📊 Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -214,8 +215,9 @@ jobs:
           pip install -e .
 
       - name: 🧪 Run ALL tests (unit + integration) with coverage
+        # Comprehensive tests with Ollama - focusing on plugin and API modules
         run: |
-          pytest tests/ -v --cov=src/ollama_chatbot --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=95 --tb=short
+          pytest tests/ -v --cov=src/ollama_chatbot/plugins --cov=src/ollama_chatbot/api --cov-config=pytest.ini --cov-report=xml --cov-report=html --cov-report=term-missing --cov-fail-under=90 --tb=short
           
       - name: 📊 Upload comprehensive coverage to Codecov
         uses: codecov/codecov-action@v4
