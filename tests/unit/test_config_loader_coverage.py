@@ -355,6 +355,9 @@ backends:
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "test.yaml"
             config_content = """
+plugin_manager:
+  plugin_directory: "./plugins"
+
 backends:
   test:
     enabled: true
@@ -378,6 +381,9 @@ backends:
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "test.yaml"
             config_content = """
+plugin_manager:
+  plugin_directory: "./plugins"
+
 backends:
   test:
     enabled: true
@@ -408,6 +414,9 @@ backends:
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "test.yaml"
             config_content = """
+plugin_manager:
+  plugin_directory: "./plugins"
+
 backends:
   test:
     enabled: true
@@ -433,6 +442,7 @@ backends:
             config_content = """
 plugin_manager:
   enable_hot_reload: false
+  plugin_directory: "./plugins"
 
 backends:
   bad_backend:
@@ -447,7 +457,7 @@ backends:
                 loader.load()
 
     def test_validate_config_warnings(self):
-        """Test validation warnings for missing sections"""
+        """Test validation that plugin_manager is required"""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "test.yaml"
             config_content = """
@@ -457,9 +467,10 @@ backends: {}
             config_file.write_text(config_content)
 
             loader = ConfigLoader(config_path=config_file)
-            config = loader.load()  # Should not raise, just warn
 
-            assert config is not None
+            # Should raise error because plugin_manager is required
+            with pytest.raises(PluginConfigError, match="plugin_manager"):
+                loader.load()
 
     def test_get_observability_config(self):
         """Test getting observability configuration"""
@@ -468,6 +479,7 @@ backends: {}
             config_content = """
 plugin_manager:
   enable_hot_reload: false
+  plugin_directory: "./plugins"
 
 observability:
   metrics:
@@ -490,6 +502,7 @@ observability:
             config_content = """
 plugin_manager:
   enable_hot_reload: false
+  plugin_directory: "./plugins"
 
 security:
   auth_required: true
@@ -510,6 +523,7 @@ security:
             config_content = """
 plugin_manager:
   enable_hot_reload: true
+  plugin_directory: "./plugins"
 """
             config_file.write_text(config_content)
 
@@ -534,6 +548,7 @@ plugin_manager:
             config_content = """
 plugin_manager:
   enable_hot_reload: false
+  plugin_directory: "./plugins"
 """
             config_file.write_text(config_content)
 
@@ -555,6 +570,9 @@ plugin_manager:
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "test.yaml"
             config_content = """
+plugin_manager:
+  plugin_directory: "./plugins"
+
 backends: {}
 """
             config_file.write_text(config_content)
