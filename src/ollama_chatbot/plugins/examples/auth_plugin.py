@@ -271,6 +271,7 @@ class AuthPlugin(BaseMiddleware):
         payload_str = json.dumps(payload, sort_keys=True)
         # Base64 encode the payload to avoid issues with special characters
         import base64
+
         payload_encoded = base64.urlsafe_b64encode(payload_str.encode()).decode()
         signature = hmac.new(self._secret_key.encode(), payload_str.encode(), hashlib.sha256).hexdigest()
 
@@ -293,7 +294,7 @@ class AuthPlugin(BaseMiddleware):
         """Validate JWT-like token"""
         try:
             import base64
-            
+
             # Split token
             parts = token_str.split(".")
             if len(parts) != 2:
@@ -362,10 +363,10 @@ class AuthPlugin(BaseMiddleware):
         """Health check with auth-specific data"""
         # First get base health data
         base_health = await super().health_check()
-        
+
         if not base_health.success or not self._initialized:
             return base_health
-        
+
         # Add custom health check data
         health_data = {
             **base_health.data,

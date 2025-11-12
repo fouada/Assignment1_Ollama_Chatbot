@@ -289,10 +289,10 @@ class AuditPlugin(BaseMiddleware):
         """Health check with chain verification"""
         # First get base health data
         base_health = await super().health_check()
-        
+
         if not base_health.success or not self._initialized:
             return base_health
-        
+
         # Add custom health check data
         verification = await self.verify_audit_chain()
 
@@ -303,7 +303,7 @@ class AuditPlugin(BaseMiddleware):
             "audit_file": str(self._audit_file) if self._audit_file else None,
             "last_hash": self._last_hash[:16] + "...",
         }
-        
+
         if not verification.success:
             health_data["status"] = "unhealthy"
 

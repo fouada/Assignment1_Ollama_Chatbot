@@ -191,10 +191,10 @@ class RateLimitPlugin(BaseMiddleware):
         """Health check with rate limit stats"""
         # First get base health data
         base_health = await super().health_check()
-        
+
         if not base_health.success or not self._initialized:
             return base_health
-        
+
         # Add custom health check data
         health_data = {
             **base_health.data,

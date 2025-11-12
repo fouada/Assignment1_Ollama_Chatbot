@@ -265,7 +265,9 @@ class PluginResult(Generic[T]):
         return cls(success=True, data=data, metadata=metadata)
 
     @classmethod
-    def fail(cls, error: str, error_code: Optional[str] = None, status_code: Optional[int] = None, **metadata) -> PluginResult[T]:
+    def fail(
+        cls, error: str, error_code: Optional[str] = None, status_code: Optional[int] = None, **metadata
+    ) -> PluginResult[T]:
         """Create failure result"""
         return cls(success=False, error=error, error_code=error_code, status_code=status_code, metadata=metadata)
 
