@@ -62,7 +62,7 @@ class CircuitBreakerState:
         timeout_seconds: int = 60,
         failure_count: int = 0,
         last_failure_time: Optional[datetime] = None,
-        state: str = "closed"
+        state: str = "closed",
     ):
         self.failure_threshold = failure_threshold
         self.timeout_seconds = timeout_seconds

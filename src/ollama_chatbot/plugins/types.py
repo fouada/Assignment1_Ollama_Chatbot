@@ -166,6 +166,7 @@ class PluginMetadata:
             return False
         # Allow simple patterns: ==, >=, <=, >, <, ~=
         import re
+
         pattern = r"^(==|>=|<=|>|<|~=)\s*\d+\.\d+\.\d+(,\s*(==|>=|<=|>|<|~=)\s*\d+\.\d+\.\d+)*$"
         return bool(re.match(pattern, spec))
 
@@ -197,6 +198,7 @@ class PluginMetadata:
     def _version_satisfies(version: str, spec: str) -> bool:
         """Check if version satisfies specification"""
         from packaging import version as pkg_version
+
         try:
             ver = pkg_version.parse(version)
             # Parse constraints
@@ -482,7 +484,7 @@ class HookRegistration:
     priority: HookPriority
     plugin_name: str
     enabled: bool = True
-    registration_time: float = field(default_factory=lambda: __import__('time').time())
+    registration_time: float = field(default_factory=lambda: __import__("time").time())
 
     def __lt__(self, other: HookRegistration) -> bool:
         """

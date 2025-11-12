@@ -403,7 +403,10 @@ class TestConfiguration:
         except Exception as e:
             # If YAML not installed or config validation fails, should get appropriate error
             error_msg = str(e).lower()
-            assert any(keyword in error_msg for keyword in ["yaml", "not installed", "plugin_directory", "plugin_manager", "configuration"])
+            assert any(
+                keyword in error_msg
+                for keyword in ["yaml", "not installed", "plugin_directory", "plugin_manager", "configuration"]
+            )
 
     def test_plugin_config_creation(self):
         """Test PluginConfig creation"""

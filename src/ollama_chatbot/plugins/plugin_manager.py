@@ -33,6 +33,7 @@ from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 try:
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+
     WATCHDOG_AVAILABLE = True
 except ImportError:
     WATCHDOG_AVAILABLE = False
@@ -91,12 +92,7 @@ class PluginSandbox:
     with tools like Docker, systemd, or subprocess with restricted permissions.
     """
 
-    def __init__(
-        self,
-        max_memory_mb: int = 512,
-        max_cpu_seconds: int = 30,
-        enabled: bool = True
-    ):
+    def __init__(self, max_memory_mb: int = 512, max_cpu_seconds: int = 30, enabled: bool = True):
         self.max_memory_mb = max_memory_mb
         self.max_cpu_seconds = max_cpu_seconds
         self.enabled = enabled
@@ -111,12 +107,12 @@ class PluginSandbox:
             # Memory limit
             mem_bytes = self.max_memory_mb * 1024 * 1024
             soft, hard = resource.getrlimit(resource.RLIMIT_AS)
-            self._original_limits['memory'] = (soft, hard)
+            self._original_limits["memory"] = (soft, hard)
             resource.setrlimit(resource.RLIMIT_AS, (mem_bytes, mem_bytes))
 
             # CPU time limit
             soft, hard = resource.getrlimit(resource.RLIMIT_CPU)
-            self._original_limits['cpu'] = (soft, hard)
+            self._original_limits["cpu"] = (soft, hard)
             resource.setrlimit(resource.RLIMIT_CPU, (self.max_cpu_seconds, self.max_cpu_seconds))
 
             logger.info(f"Applied sandbox limits: {self.max_memory_mb}MB RAM, {self.max_cpu_seconds}s CPU")
@@ -129,10 +125,10 @@ class PluginSandbox:
             return
 
         try:
-            if 'memory' in self._original_limits:
-                resource.setrlimit(resource.RLIMIT_AS, self._original_limits['memory'])
-            if 'cpu' in self._original_limits:
-                resource.setrlimit(resource.RLIMIT_CPU, self._original_limits['cpu'])
+            if "memory" in self._original_limits:
+                resource.setrlimit(resource.RLIMIT_AS, self._original_limits["memory"])
+            if "cpu" in self._original_limits:
+                resource.setrlimit(resource.RLIMIT_CPU, self._original_limits["cpu"])
             logger.debug("Restored original resource limits")
         except (ValueError, OSError) as e:
             logger.warning(f"Could not restore limits: {e}")
@@ -144,6 +140,7 @@ class PluginSandbox:
 
 
 if WATCHDOG_AVAILABLE:
+
     class PluginFileHandler(FileSystemEventHandler):
         """Watches plugin files for changes and triggers reload"""
 
@@ -158,11 +155,12 @@ if WATCHDOG_AVAILABLE:
                 return
 
             path = Path(event.src_path)
-            if not path.suffix == '.py':
+            if not path.suffix == ".py":
                 return
 
             # Debounce rapid file changes
             import time
+
             now = time.time()
             last_time = self._debounce.get(str(path), 0)
             if now - last_time < self._debounce_seconds:
@@ -316,7 +314,7 @@ class PluginLoader:
                 spec.loader.exec_module(module)
             except ImportError as e:
                 # Provide helpful error message for missing dependencies
-                missing_module = e.name if hasattr(e, 'name') else str(e)
+                missing_module = e.name if hasattr(e, "name") else str(e)
                 raise PluginLoadError(
                     f"Plugin '{file_path.name}' has missing dependencies: {missing_module}\n"
                     f"Install with: pip install {missing_module}"
@@ -497,8 +495,7 @@ def topological_sort_plugins(plugin_graph: Dict[str, List[str]]) -> List[str]:
     if len(sorted_order) != len(plugin_graph):
         remaining = set(plugin_graph.keys()) - set(sorted_order)
         raise PluginDependencyError(
-            f"Circular dependency detected among plugins: {remaining}. "
-            f"Cannot determine load order."
+            f"Circular dependency detected among plugins: {remaining}. " f"Cannot determine load order."
         )
 
     logger.debug(f"Plugin load order: {' -> '.join(sorted_order)}")
@@ -772,15 +769,11 @@ class PluginManager:
         for dep_name in plugin.metadata.dependencies:
             dep_plugin = await self.registry.get(dep_name)
             if dep_plugin is None:
-                raise PluginDependencyError(
-                    f"Missing dependency '{dep_name}' for plugin '{plugin.metadata.name}'"
-                )
+                raise PluginDependencyError(f"Missing dependency '{dep_name}' for plugin '{plugin.metadata.name}'")
 
             dep_state = await self.registry.get_state(dep_name)
             if dep_state != PluginState.ACTIVE:
-                raise PluginDependencyError(
-                    f"Dependency '{dep_name}' not active (state={dep_state})"
-                )
+                raise PluginDependencyError(f"Dependency '{dep_name}' not active (state={dep_state})")
 
             # Check version compatibility
             if dep_name in plugin.metadata.dependency_versions:

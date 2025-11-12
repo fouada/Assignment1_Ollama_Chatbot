@@ -262,8 +262,7 @@ class ConfigLoader:
                     if default_value is not None:
                         return default_value
                     logger.warning(
-                        f"Environment variable '{var_name}' not set and no default provided, "
-                        f"using empty string"
+                        f"Environment variable '{var_name}' not set and no default provided, " f"using empty string"
                     )
                     return ""
 
@@ -290,8 +289,7 @@ class ConfigLoader:
         for key in required_keys:
             if key not in self._config:
                 raise PluginConfigError(
-                    f"Missing required configuration section: '{key}'. "
-                    f"Configuration must include '{key}' section."
+                    f"Missing required configuration section: '{key}'. " f"Configuration must include '{key}' section."
                 )
 
         # Validate plugin manager config (strict validation)
@@ -301,7 +299,7 @@ class ConfigLoader:
         critical_settings = {
             "enable_hot_reload": (bool, False),
             "enable_circuit_breaker": (bool, True),
-            "plugin_directory": (str, None)
+            "plugin_directory": (str, None),
         }
 
         for setting, (expected_type, default) in critical_settings.items():
@@ -328,13 +326,9 @@ class ConfigLoader:
             plugins = self._config.get(section, {})
             for name, config in plugins.items():
                 if not isinstance(config, dict):
-                    raise PluginConfigError(
-                        f"Plugin '{name}' in section '{section}' must be a dictionary/object"
-                    )
+                    raise PluginConfigError(f"Plugin '{name}' in section '{section}' must be a dictionary/object")
                 if config.get("enabled", False) and "plugin_file" not in config:
-                    raise PluginConfigError(
-                        f"Plugin '{name}' is enabled but missing 'plugin_file' setting"
-                    )
+                    raise PluginConfigError(f"Plugin '{name}' is enabled but missing 'plugin_file' setting")
 
     def _get_default_config(self) -> Dict[str, Any]:
         """
