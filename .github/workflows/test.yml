@@ -27,9 +27,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     
     - name: Install uv
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
     
     - name: Install dependencies
       run: |
@@ -66,4 +66,5 @@ jobs:
         name: coverage-report-${{ matrix.os }}-py${{ matrix.python-version }}
         path: htmlcov/
         retention-days: 30
+        if-no-files-found: ignore
 

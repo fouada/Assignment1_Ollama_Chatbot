@@ -58,11 +58,13 @@ jobs:
           fail_ci_if_error: false
 
       - name: 📈 Upload coverage artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-${{ matrix.os }}-py${{ matrix.python-version }}
           path: htmlcov/
           retention-days: 30
+          if-no-files-found: ignore
 
   # ============================================
   # CODE QUALITY JOB
@@ -228,11 +230,13 @@ jobs:
           fail_ci_if_error: false
 
       - name: 📈 Upload comprehensive coverage report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-full-suite
           path: htmlcov/
           retention-days: 30
+          if-no-files-found: ignore
           
       - name: 📊 Display test summary
         if: always()
