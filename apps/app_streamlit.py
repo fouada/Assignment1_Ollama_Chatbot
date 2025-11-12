@@ -183,7 +183,7 @@ def load_messages_from_localstorage():
                     logger.info(
                         f"💾 Loaded {len(st.session_state.messages)} messages from cache"
                     )
-        except (json.JSONDecodeError, IOError) as e:
+        except Exception as e:
             logger.error(f"Error loading cache: {e}")
             # Clear corrupted cache file
             try:
@@ -192,6 +192,44 @@ def load_messages_from_localstorage():
                 pass
 
         st.session_state.history_loaded = True
+
+
+def save_messages_to_localstorage():
+    """Save messages to browser's localStorage using Streamlit components"""
+    import json
+    
+    # Return early if no messages to save
+    if not hasattr(st.session_state, 'messages') or not st.session_state.messages:
+        return
+    
+    try:
+        # Prepare data to save
+        data = {
+            "messages": st.session_state.messages,
+            "totalMessages": getattr(st.session_state, 'total_messages', len(st.session_state.messages)),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Convert to JSON string and escape for JavaScript
+        json_data = json.dumps(data).replace("'", "\\'")
+        
+        # Use components.html to execute JavaScript that saves to localStorage
+        js_code = f"""
+        <script>
+        try {{
+            localStorage.setItem('ollama_chat_history', '{json_data}');
+            console.log('Saved chat history to localStorage');
+        }} catch (e) {{
+            console.error('Error saving to localStorage:', e);
+        }}
+        </script>
+        """
+        
+        components.html(js_code, height=0)
+        logger.debug("💾 Saved messages to localStorage via components.html")
+        
+    except Exception as e:
+        logger.error(f"Error saving to localStorage: {e}")
 
 
 def save_messages_to_cache():
