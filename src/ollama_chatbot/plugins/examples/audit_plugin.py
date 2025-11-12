@@ -12,18 +12,18 @@ import asyncio
 import hashlib
 import json
 import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any, Optional
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, Optional
 
 from plugins.base_plugin import BaseMiddleware
 from plugins.types import (
-    PluginMetadata,
-    PluginType,
-    PluginConfig,
-    PluginResult,
     HookPriority,
+    PluginConfig,
+    PluginMetadata,
+    PluginResult,
+    PluginType,
 )
 
 

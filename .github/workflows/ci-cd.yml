@@ -36,6 +36,7 @@ jobs:
           python -m uv venv
           python -m uv pip install -r requirements.txt
           python -m uv pip install -r requirements-dev.txt
+          python -m uv pip install -e .
 
       - name: 🔍 Lint with flake8
         run: |
@@ -82,6 +83,7 @@ jobs:
         run: |
           pip install black flake8 pylint mypy isort
           pip install -r requirements.txt
+          pip install -e .
 
       - name: 🎨 Check code formatting with Black
         run: black --check src/ tests/
@@ -209,6 +211,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
+          pip install -e .
 
       - name: 🧪 Run ALL tests (unit + integration) with coverage
         run: |
@@ -258,6 +261,7 @@ jobs:
           pip install coverage-badge
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
+          pip install -e .
 
       - name: 🧪 Run all tests for badge generation
         run: |

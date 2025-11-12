@@ -15,12 +15,13 @@ Visualization Types:
 """
 
 import json
-from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
-import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
+from typing import Any, Dict, List, Optional, Tuple
+
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 
 class ResearchVisualizer:

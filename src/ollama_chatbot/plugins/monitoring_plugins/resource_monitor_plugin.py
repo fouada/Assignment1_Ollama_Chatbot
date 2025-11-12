@@ -3,10 +3,11 @@ Resource Monitoring Plugin
 Tracks CPU, RAM, GPU, and disk usage per model for cost analysis
 """
 
-import psutil
 import time
-from dataclasses import dataclass, asdict
-from typing import Dict, Optional, Any
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, Optional
+
+import psutil
 from plugins.plugin_interface import PluginInterface, PluginResult
 
 try:

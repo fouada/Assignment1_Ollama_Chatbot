@@ -12,14 +12,15 @@ Comparison Categories:
 5. Resource Utilization Profiling
 """
 
-import time
 import json
-import statistics
 import math
-from typing import Dict, List, Tuple, Any, Optional
-from dataclasses import dataclass, asdict, field
-from datetime import datetime
+import statistics
+import time
 from collections import defaultdict
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 import ollama
 
 

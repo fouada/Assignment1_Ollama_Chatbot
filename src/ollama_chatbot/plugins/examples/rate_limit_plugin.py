@@ -10,17 +10,17 @@ Version: 1.0.0
 import asyncio
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
 
 from plugins.base_plugin import BaseMiddleware
 from plugins.types import (
-    PluginMetadata,
-    PluginType,
-    PluginConfig,
-    PluginResult,
     HookPriority,
+    PluginConfig,
+    PluginMetadata,
+    PluginResult,
+    PluginType,
 )
 
 

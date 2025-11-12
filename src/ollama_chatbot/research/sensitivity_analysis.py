@@ -12,12 +12,13 @@ Key Parameters Analyzed:
 5. Plugin Configurations
 """
 
-import time
 import json
 import statistics
-from typing import Dict, List, Tuple, Any, Optional
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
+
 import ollama
 
 

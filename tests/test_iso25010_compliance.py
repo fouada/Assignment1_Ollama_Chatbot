@@ -13,27 +13,27 @@ Author: ISO/IEC 25010 Compliance Team
 Version: 1.0.0
 """
 
-import pytest
 import asyncio
-import json
 import hashlib
 import hmac
-import tempfile
-import time
-from pathlib import Path
-from datetime import datetime, timezone
-from typing import Dict, Any
+import json
 
 # Import plugins
 import sys
+import tempfile
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ollama_chatbot.plugins.examples.audit_plugin import AuditPlugin, AuditEntry
-from ollama_chatbot.plugins.examples.auth_plugin import AuthPlugin, User, Token
+from ollama_chatbot.plugins.examples.audit_plugin import AuditEntry, AuditPlugin
+from ollama_chatbot.plugins.examples.auth_plugin import AuthPlugin, Token, User
 from ollama_chatbot.plugins.examples.rate_limit_plugin import RateLimitPlugin, TokenBucket
 from ollama_chatbot.plugins.types import PluginConfig, PluginResult
-
 
 # ============================================================================
 # AUDIT PLUGIN TESTS - Non-repudiation & Accountability

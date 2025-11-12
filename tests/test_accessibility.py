@@ -10,9 +10,10 @@ Author: ISO/IEC 25010 Compliance Team
 Version: 1.0.0
 """
 
-import pytest
-from pathlib import Path
 import sys
+from pathlib import Path
+
+import pytest
 
 # Note: These are integration tests that verify the accessible UI components
 # Full WCAG testing requires browser automation tools like Selenium + axe-core

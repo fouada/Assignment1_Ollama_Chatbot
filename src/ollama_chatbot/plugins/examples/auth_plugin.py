@@ -13,17 +13,17 @@ import hashlib
 import hmac
 import json
 import secrets
-from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 
 from plugins.base_plugin import BaseMiddleware
 from plugins.types import (
-    PluginMetadata,
-    PluginType,
-    PluginConfig,
-    PluginResult,
     HookPriority,
+    PluginConfig,
+    PluginMetadata,
+    PluginResult,
+    PluginType,
 )
 
 

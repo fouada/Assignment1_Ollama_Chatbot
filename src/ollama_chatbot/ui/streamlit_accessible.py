@@ -18,10 +18,11 @@ Author: ISO Compliance Team
 Version: 1.0.0
 """
 
-import streamlit as st
-import requests
 import json
 from datetime import datetime
+
+import requests
+import streamlit as st
 
 # ========================================
 # ACCESSIBILITY CONFIGURATION

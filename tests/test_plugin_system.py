@@ -16,32 +16,32 @@ Test Categories:
 """
 
 import asyncio
-import pytest
+
+# Import plugin system
+import sys
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
-# Import plugin system
-import sys
+import pytest
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 from ollama_chatbot.plugins import (
-    PluginManager,
+    ChatContext,
+    HookContext,
     HookManager,
+    HookPriority,
+    HookType,
+    Message,
     PluginConfig,
+    PluginManager,
     PluginMetadata,
     PluginResult,
     PluginType,
-    HookType,
-    HookPriority,
-    HookContext,
-    Message,
-    ChatContext,
 )
-from ollama_chatbot.plugins.base_plugin import BaseMessageProcessor, BaseBackendProvider
+from ollama_chatbot.plugins.base_plugin import BaseBackendProvider, BaseMessageProcessor
 from ollama_chatbot.plugins.config_loader import ConfigLoader
-
 
 # ============================================================================
 # Test Fixtures

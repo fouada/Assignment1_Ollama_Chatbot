@@ -12,10 +12,10 @@ Proof Categories:
 5. Error Handling Completeness
 """
 
-from typing import Dict, List, Set, Tuple, Optional
+import math
 from dataclasses import dataclass
 from enum import Enum
-import math
+from typing import Dict, List, Optional, Set, Tuple
 
 
 class ProofType(Enum):

@@ -37,6 +37,7 @@ from .types import (
     Message,
     MessageProcessor,
     Middleware,
+    Pluggable,
     PluginConfig,
     PluginConfigError,
     PluginDependencyError,
@@ -46,7 +47,6 @@ from .types import (
     PluginResult,
     PluginState,
     PluginType,
-    Pluggable,
 )
 
 logger = logging.getLogger(__name__)

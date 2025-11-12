@@ -44,6 +44,7 @@ from .types import (
     Message,
     MessageProcessor,
     Middleware,
+    Pluggable,
     PluginConfig,
     PluginError,
     PluginMetadata,
@@ -51,7 +52,6 @@ from .types import (
     PluginResult,
     PluginState,
     PluginType,
-    Pluggable,
 )
 
 __version__ = "1.0.0"

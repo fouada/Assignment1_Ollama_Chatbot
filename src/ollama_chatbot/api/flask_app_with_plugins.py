@@ -23,6 +23,9 @@ import asyncio
 import json
 import logging
 import os
+
+# Import plugin system
+import sys
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
@@ -36,9 +39,6 @@ from flask import (
     request,
     stream_with_context,
 )
-
-# Import plugin system
-import sys
 
 sys.path.append(str(Path(__file__).parent.parent))
 

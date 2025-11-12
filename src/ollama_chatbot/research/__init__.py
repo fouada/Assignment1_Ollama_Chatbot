@@ -11,9 +11,9 @@ This module provides comprehensive research capabilities including:
 __version__ = "1.0.0"
 __author__ = "Research Team"
 
-from .sensitivity_analysis import SensitivityAnalyzer
-from .mathematical_proofs import MathematicalProofs
 from .data_comparison import DataComparator
+from .mathematical_proofs import MathematicalProofs
+from .sensitivity_analysis import SensitivityAnalyzer
 from .visualizations import ResearchVisualizer
 
 __all__ = [
