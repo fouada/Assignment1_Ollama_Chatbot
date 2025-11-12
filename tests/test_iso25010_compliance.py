@@ -29,10 +29,10 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from plugins.examples.audit_plugin import AuditPlugin, AuditEntry
-from plugins.examples.auth_plugin import AuthPlugin, User, Token
-from plugins.examples.rate_limit_plugin import RateLimitPlugin, TokenBucket
-from plugins.types import PluginConfig, PluginResult
+from ollama_chatbot.plugins.examples.audit_plugin import AuditPlugin, AuditEntry
+from ollama_chatbot.plugins.examples.auth_plugin import AuthPlugin, User, Token
+from ollama_chatbot.plugins.examples.rate_limit_plugin import RateLimitPlugin, TokenBucket
+from ollama_chatbot.plugins.types import PluginConfig, PluginResult
 
 
 # ============================================================================

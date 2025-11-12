@@ -26,7 +26,7 @@ import sys
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from plugins import (
+from ollama_chatbot.plugins import (
     PluginManager,
     HookManager,
     PluginConfig,
@@ -39,8 +39,8 @@ from plugins import (
     Message,
     ChatContext,
 )
-from plugins.base_plugin import BaseMessageProcessor, BaseBackendProvider
-from plugins.config_loader import ConfigLoader
+from ollama_chatbot.plugins.base_plugin import BaseMessageProcessor, BaseBackendProvider
+from ollama_chatbot.plugins.config_loader import ConfigLoader
 
 
 # ============================================================================
@@ -60,7 +60,7 @@ def event_loop():
 async def plugin_manager():
     """Create plugin manager instance"""
     manager = PluginManager(
-        plugin_directory=Path("plugins"),
+        plugin_directory=Path("src/ollama_chatbot/plugins"),
         enable_hot_reload=False,
         enable_circuit_breaker=True,
     )
