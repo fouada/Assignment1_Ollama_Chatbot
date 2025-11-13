@@ -307,7 +307,7 @@ class TestDeploymentPortability:
             if not file_path.exists():
                 continue
 
-            content = file_path.read_text()
+            content = file_path.read_text(encoding="utf-8")
 
             # Check for suspicious absolute paths (not exhaustive)
             suspicious_patterns = [
