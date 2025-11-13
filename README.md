@@ -11,7 +11,7 @@
 [![CI/CD Pipeline](https://github.com/fouada/Assignment1_Ollama_Chatbot/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
 [![CodeQL](https://github.com/fouada/Assignment1_Ollama_Chatbot/workflows/CodeQL/badge.svg)](https://github.com/fouada/Assignment1_Ollama_Chatbot/security/code-scanning)
 [![Coverage](https://img.shields.io/badge/coverage-92.35%25-brightgreen)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
-[![Tests](https://img.shields.io/badge/tests-414-success)](./docs/TESTING.md)
+[![Tests](https://img.shields.io/badge/tests-457-success)](./docs/TESTING.md)
 [![Code Quality](https://img.shields.io/badge/code%20quality-A-success)](https://github.com/fouada/Assignment1_Ollama_Chatbot/actions)
 [![Security](https://img.shields.io/badge/security-audited-blue)](https://github.com/fouada/Assignment1_Ollama_Chatbot/security)
 [![Maintained](https://img.shields.io/badge/maintained-yes-green)](https://github.com/fouada/Assignment1_Ollama_Chatbot/graphs/commit-activity)
@@ -126,7 +126,7 @@ This project delivers something exceptional: **TWO COMPLETE, INDEPENDENT INTERFA
 | 🏆 [**Project Achievements**](#-project-achievements--hard-work-summary) | **185+ hours** of quantified work |
 | ✨ [**Advanced Features**](#-features) | Clickable history, Docker, CI/CD, auto-save |
 | 📸 [**Visual Showcase**](#-visual-showcase) | **26 professional screenshots** proving all features |
-| 🧪 [**Testing Details**](#-testing) | **414 tests** with detailed breakdown |
+| 🧪 [**Testing Details**](#-testing) | **457 tests** with detailed breakdown |
 | 🐳 [**Docker Deployment**](#-docker--production-deployment) | Production containerization guide |
 | 🚀 [**CI/CD Pipeline**](#cicd--automation) | GitHub Actions with automated checks |
 | 📖 [**Installation Guide**](#-installation) | Complete setup instructions |
@@ -143,7 +143,7 @@ This project represents **significant engineering effort** and professional-leve
 | Metric | Value | Achievement |
 |--------|-------|-------------|
 | **Code Written** | 3,500+ lines | 2 complete applications |
-| **Tests Written** | 414 comprehensive tests | Unit + Integration |
+| **Tests Written** | 457 comprehensive tests | Unit + Integration |
 | **Test Coverage** | 92.35% | Industry-leading (1219/1320 lines) |
 | **Documentation** | 5,600+ lines | README + PRD + guides |
 | **Screenshots** | 26 professional images | Visual proof |
@@ -164,7 +164,7 @@ This project represents **significant engineering effort** and professional-leve
   - **Smooth scroll animations** - Visual feedback when navigating history
   - **Session statistics** - Real-time metrics tracking
 
-✅ **Comprehensive Testing** - 414 tests covering:
+✅ **Comprehensive Testing** - 457 tests covering:
   - Unit tests (mocked, fast)
   - Integration tests (real AI responses)
   - 92.35% code coverage achieved (1219/1320 lines)
@@ -327,12 +327,12 @@ This project represents **significant engineering effort** and professional-leve
 <td width="50%">
 <h4>🧪 Comprehensive Test Suite</h4>
 <img src="docs/screenshots/testing/pytest-running-all-tests_1.png" alt="Pytest Tests Part 1" width="100%"/>
-<p><em>414 tests passing - Unit + Integration</em></p>
+<p><em>457 tests passing - Unit + Integration</em></p>
 </td>
 <td width="50%">
 <h4>📊 92.35% Coverage Achievement</h4>
 <img src="docs/screenshots/testing/pytest-running-all-tests_2.png" alt="Pytest Tests Part 2" width="100%"/>
-<p><em>All 414 tests passed with 92.35% code coverage (1219/1320 lines)</em></p>
+<p><em>All 457 tests passed with 92.35% code coverage (1219/1320 lines)</em></p>
 </td>
 </tr>
 <tr>
@@ -399,7 +399,7 @@ This project represents **significant engineering effort** and professional-leve
 <ul>
 <li>✅ Multi-platform testing (Ubuntu, macOS, Windows)</li>
 <li>✅ Multi-version Python (3.10, 3.11, 3.12, 3.13)</li>
-<li>✅ 414 tests with 92.35% coverage (1219/1320 lines)</li>
+<li>✅ 457 tests with 92.35% coverage (1219/1320 lines)</li>
 <li>✅ Security scanning (Bandit, CodeQL, Safety)</li>
 <li>✅ Code quality (flake8, pylint, black, isort)</li>
 <li>✅ Docker image build and deployment</li>
@@ -409,7 +409,7 @@ This project represents **significant engineering effort** and professional-leve
 <td width="50%">
 <h4>🧪 Comprehensive Test Execution - Part 1</h4>
 <img src="docs/screenshots/testing/pytest-running-all-tests_1.png" alt="Pytest Execution Part 1" width="100%"/>
-<p><em>All 414 tests executing with detailed output</em></p>
+<p><em>All 457 tests executing with detailed output</em></p>
 </td>
 </tr>
 <tr>
@@ -485,7 +485,7 @@ This project maintains **professional-grade quality standards** with comprehensi
 
 #### **📊 Test Coverage: 92.35%**
 
-- ✅ **414 Comprehensive Tests** - Unit + Integration covering 1219/1320 lines
+- ✅ **457 Comprehensive Tests** - Unit + Integration covering 1219/1320 lines
 - ✅ **92.35% Code Coverage** - Industry-leading (standard is 70-80%)
 - ✅ **Automated Testing** - CI/CD pipeline runs on every commit
 - ✅ **Multi-Platform Testing** - Ubuntu, macOS, Windows validation
@@ -710,7 +710,7 @@ Professional launcher and shutdown scripts that handle:
 ### 🔧 Technical Features
 - ✅ **Python 3.13** - Latest Python with performance improvements
 - ✅ **Virtual Environment** - Isolated Python environment
-- ✅ **92.35% Test Coverage** - 414 tests, comprehensive validation (1219/1320 lines)
+- ✅ **92.35% Test Coverage** - 457 tests, comprehensive validation (1219/1320 lines)
 - ✅ **Comprehensive Logging** - Full operation tracking and debugging
 - ✅ **Input Validation** - Type-safe API with parameter validation
 - ✅ **Professional Structure** - Clean, organized codebase
@@ -4320,18 +4320,21 @@ A:
 
 | Document | Description | Pages | Use Case |
 |----------|-------------|-------|----------|
+| **[System Architecture](docs/architecture/system-architecture.md)** | Complete system design with C4 diagrams, data flows, ADRs | 65+ | Understand overall system |
+| **[Security Architecture](docs/architecture/security-architecture.md)** | STRIDE threat model, security controls, compliance | 30+ | Security & compliance |
 | **[Plugin System Architecture](docs/architecture/plugin-system.md)** | Enterprise-grade plugin system (PEP 544) | 54 | Understand design |
 | **[PRD](docs/specs/PRD.md)** | Product Requirements Document (IEEE/ISO compliant) | 80+ | Full specifications |
 | **[Plugin System PRD](docs/specs/plugin-system-prd.md)** | Plugin requirements & specs | 35 | Plugin details |
 
 **Key Architecture Features:**
-- 🔌 **Protocol-based design** (PEP 544 duck typing)
+- 🏗️ **Dual-interface design** (Streamlit UI + Flask API)
+- 🔌 **Protocol-based plugins** (PEP 544 duck typing)
 - ♻️ **Hot-reload capabilities** (zero downtime)
 - 🔄 **Lifecycle management** (initialize → execute → cleanup)
-- 🔒 **Security & sandboxing**
+- 🔒 **STRIDE threat modeling** with comprehensive security controls
 - ⚡ **Performance optimization**
 
-**Total Architecture Docs:** 169+ pages
+**Total Architecture Docs:** 264+ pages
 
 ---
 
@@ -4404,7 +4407,7 @@ What makes this project exceptional:
 
 **Top Innovations (VERY RARE):**
 1. 🔌 **Enterprise Plugin System** - PEP 544 protocol-based with hot-reload
-2. ✅ **ISO 25010 Quality Testing** - All 8 characteristics tested (1,009 lines)
+2. ✅ **ISO 25010 Quality Testing** - All 8 characteristics tested (2,038 lines, 100% compliance)
 3. ♿ **WCAG 2.1 Accessibility** - Level AA compliant (398 lines)
 4. 🔒 **Cryptographic Audit Trail** - SHA-256 hash chain for tamper detection
 5. 🔬 **Research Framework** - Sensitivity analysis with mathematical proofs
@@ -4454,26 +4457,30 @@ What makes this project exceptional:
 
 #### **🧪 Testing & Quality Assurance**
 
-**100% test coverage** with industry-leading quality:
+**92.35% test coverage** with industry-leading quality:
 
 | File | Description | Lines | Tests | Coverage |
 |------|-------------|-------|-------|----------|
-| **[tests/test_iso25010_compliance.py](tests/test_iso25010_compliance.py)** | ISO 25010 quality tests (8 characteristics) | 1,009 | 35+ | 100% |
+| **[tests/test_iso25010_compliance.py](tests/test_iso25010_compliance.py)** | ISO 25010 core quality tests (6 characteristics) | 1,009 | 35+ | 100% |
+| **[tests/test_compatibility.py](tests/test_compatibility.py)** | ISO 25010 Compatibility tests | 470 | 40+ | 100% |
+| **[tests/test_portability.py](tests/test_portability.py)** | ISO 25010 Portability tests | 559 | 35+ | 100% |
 | **[tests/test_accessibility.py](tests/test_accessibility.py)** | WCAG 2.1 accessibility tests | 398 | 20+ | 100% |
 | **[tests/test_plugin_system.py](tests/test_plugin_system.py)** | Plugin system tests | 250+ | 25+ | 100% |
 | **[tests/test_integration.py](tests/test_integration.py)** | End-to-end integration tests | 300+ | 17 | 100% |
 
 **Quality Standards:**
-- ✅ **ISO/IEC 25010**: All 8 characteristics tested
+- ✅ **ISO/IEC 25010**: All 8 characteristics tested (100% compliance)
 - ✅ **WCAG 2.1 Level AA**: Full accessibility compliance
-- ✅ **92.35% Test Coverage**: 414 tests, 1219/1320 lines covered
+- ✅ **92.35% Test Coverage**: 457 tests, 1219/1320 lines covered
 - ✅ **Security Compliant**: GDPR, HIPAA, SOC 2, ADA
 
 **Run Tests:**
 ```bash
-pytest                           # All tests (119 total)
-pytest --cov=. --cov-report=html # With coverage report (100%)
-pytest tests/test_iso25010_compliance.py -v  # ISO 25010 tests
+pytest                           # All tests (457 total)
+pytest --cov=. --cov-report=html # With coverage report (92.35%)
+pytest tests/test_iso25010_compliance.py -v  # ISO 25010 core tests
+pytest tests/test_compatibility.py -v        # Compatibility tests
+pytest tests/test_portability.py -v          # Portability tests
 pytest tests/test_accessibility.py -v        # Accessibility tests
 ```
 
