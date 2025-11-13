@@ -20,7 +20,6 @@ from pathlib import Path
 
 import pytest
 
-
 # ============================================================================
 # COMPATIBILITY TESTS - ISO/IEC 25010
 # ============================================================================
@@ -39,9 +38,7 @@ class TestPythonCompatibility:
         version_info = sys.version_info
         supported_versions = [(3, 10), (3, 11), (3, 12), (3, 13), (3, 14)]
 
-        is_supported = any(
-            version_info[:2] == supported for supported in supported_versions
-        )
+        is_supported = any(version_info[:2] == supported for supported in supported_versions)
 
         assert is_supported, f"Python version {version_info[:2]} not in supported list"
 
@@ -447,6 +444,7 @@ class TestEncodingCompatibility:
 # ============================================================================
 # TEST SUMMARY
 # ============================================================================
+
 
 def test_compatibility_summary():
     """Test: Generate compatibility test summary"""
